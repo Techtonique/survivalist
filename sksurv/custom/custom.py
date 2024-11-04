@@ -131,7 +131,7 @@ class SurvivalCustom(BaseEstimator, SurvivalAnalysisMixin):
         random_state=None,
         low_memory=False,
     ):
-        self.regr = regr 
+        self.custom_ = regr 
         self.random_state = random_state
         self.low_memory = low_memory
 
@@ -220,7 +220,6 @@ class SurvivalCustom(BaseEstimator, SurvivalAnalysisMixin):
             event, time = check_array_survival(X, y)
             time = time.astype(np.float64)
             self.unique_times_, self.is_event_time_ = get_unique_times(time, event)
-            missing_values_in_feature_mask = self._compute_missing_values_in_feature_mask(X)
             if issparse(X):
                 X.sort_indices()
 
@@ -242,48 +241,9 @@ class SurvivalCustom(BaseEstimator, SurvivalAnalysisMixin):
             # one "class" for CHF, one for survival function
             self.n_classes_ = np.ones(self.n_outputs_, dtype=np.intp) * 2
 
-        # Build tree
-        criterion = LogrankCriterion(self.n_outputs_, n_samples, self.unique_times_, self.is_event_time_)
-
-        builder.build(self.custom_, X, y_numeric, sample_weight, missing_values_in_feature_mask)
+        self.custom_.fit(X, y_numeric, sample_weight)
 
         return self
-
-    def _check_params(self, n_samples):
-        self._validate_params()
-
-        # Check parameters
-        max_depth = (2**31) - 1 if self.max_depth is None else self.max_depth
-
-        max_leaf_nodes = -1 if self.max_leaf_nodes is None else self.max_leaf_nodes
-
-        if isinstance(self.min_samples_leaf, (Integral, np.integer)):
-            min_samples_leaf = self.min_samples_leaf
-        else:  # float
-            min_samples_leaf = int(ceil(self.min_samples_leaf * n_samples))
-
-        if isinstance(self.min_samples_split, Integral):
-            min_samples_split = self.min_samples_split
-        else:  # float
-            min_samples_split = int(ceil(self.min_samples_split * n_samples))
-            min_samples_split = max(2, min_samples_split)
-
-        min_samples_split = max(min_samples_split, 2 * min_samples_leaf)
-
-        self._check_max_features()
-
-        if not 0 <= self.min_weight_fraction_leaf <= 0.5:
-            raise ValueError("min_weight_fraction_leaf must in [0, 0.5]")
-
-        min_weight_leaf = self.min_weight_fraction_leaf * n_samples
-
-        return {
-            "max_depth": max_depth,
-            "max_leaf_nodes": max_leaf_nodes,
-            "min_samples_leaf": min_samples_leaf,
-            "min_samples_split": min_samples_split,
-            "min_weight_leaf": min_weight_leaf,
-        }
 
     def _check_max_features(self):
         if isinstance(self.max_features, str):
@@ -517,57 +477,3 @@ class SurvivalCustom(BaseEstimator, SurvivalAnalysisMixin):
             return arr
         return _array_to_step_function(self.unique_times_, arr)
 
-    def apply(self, X, check_input=True):
-        """Return the index of the leaf that each sample is predicted as.
-
-        Parameters
-        ----------
-        X : array-like or sparse matrix, shape = (n_samples, n_features)
-            The input samples. Internally, it will be converted to
-            ``dtype=np.float32`` and if a sparse matrix is provided
-            to a sparse ``csr_matrix``.
-            If ``splitter='best'``, `X` is allowed to contain missing
-            values and decisions are made as described in
-            :ref:`custom_missing_value_support`.
-
-        check_input : bool, default: True
-            Allow to bypass several input checking.
-            Don't use this parameter unless you know what you do.
-
-        Returns
-        -------
-        X_leaves : array-like, shape = (n_samples,)
-            For each datapoint x in X, return the index of the leaf x
-            ends up in. Leaves are numbered within
-            ``[0; self.custom_.node_count)``, possibly with gaps in the
-            numbering.
-        """
-        check_is_fitted(self, "custom_")
-        self._validate_X_predict(X, check_input)
-        return self.custom_.apply(X)
-
-    def decision_path(self, X, check_input=True):
-        """Return the decision path in the tree.
-
-        Parameters
-        ----------
-        X : array-like or sparse matrix, shape = (n_samples, n_features)
-            The input samples. Internally, it will be converted to
-            ``dtype=np.float32`` and if a sparse matrix is provided
-            to a sparse ``csr_matrix``.
-            If ``splitter='best'``, `X` is allowed to contain missing
-            values and decisions are made as described in
-            :ref:`custom_missing_value_support`.
-
-        check_input : bool, default=True
-            Allow to bypass several input checking.
-            Don't use this parameter unless you know what you do.
-
-        Returns
-        -------
-        indicator : sparse matrix, shape = (n_samples, n_nodes)
-            Return a node indicator CSR matrix where non zero elements
-            indicates that the samples goes through the nodes.
-        """
-        X = self._validate_X_predict(X, check_input)
-        return self.custom_.decision_path(X)
