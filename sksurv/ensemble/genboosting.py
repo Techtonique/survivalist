@@ -314,7 +314,7 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
 
         # perform boosting iterations
         i = begin_at_stage
-        for i in range(begin_at_stage, int(self.n_estimators)):
+        for i in tqdm(range(begin_at_stage, int(self.n_estimators))):
             # subsampling
             if do_oob:
                 sample_mask = _random_sample_mask(n_samples, n_inbag, random_state)
