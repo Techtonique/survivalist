@@ -367,7 +367,7 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
 
         return i + 1
 
-    def fit(self, regr, X, y, sample_weight=None):
+    def fit(self, X, y, sample_weight=None):
         """Fit estimator.
 
         Parameters
@@ -430,7 +430,7 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
                 # pylint: disable-next=access-member-before-definition
                 self._update_with_dropout(self.n_estimators_ - 1, Xi, y_pred, self._scale, self._rng)
 
-        self.n_estimators_ = self._fit(regr, Xi, event, time, y_pred, sample_weight, self._rng, begin_at_stage)
+        self.n_estimators_ = self._fit(Xi, event, time, y_pred, sample_weight, self._rng, begin_at_stage)
 
         self._set_baseline_model(X, event, time)
         return self
@@ -475,7 +475,7 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
         check_is_fitted(self, "estimators_")
         X = self._validate_data(X, reset=False)
 
-        return self.regr._predict(X)
+        return self._predict(X)
 
     def _get_baseline_model(self):
         if self._baseline_model is None:
