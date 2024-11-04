@@ -1,1 +1,1 @@
-from .custom import ExtraSurvivalCustom, SurvivalCustom  # noqa: F401
+from .custom import SurvivalCustom  # noqa: F401

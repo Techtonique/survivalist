@@ -571,30 +571,3 @@ class SurvivalCustom(BaseEstimator, SurvivalAnalysisMixin):
         """
         X = self._validate_X_predict(X, check_input)
         return self.custom_.decision_path(X)
-
-
-class ExtraSurvivalCustom(SurvivalCustom):
-    def __init__(
-        self,
-        *,
-        splitter="random",
-        max_depth=None,
-        min_samples_split=6,
-        min_samples_leaf=3,
-        min_weight_fraction_leaf=0.0,
-        max_features=None,
-        random_state=None,
-        max_leaf_nodes=None,
-        low_memory=False,
-    ):
-        super().__init__(
-            splitter=splitter,
-            max_depth=max_depth,
-            min_samples_split=min_samples_split,
-            min_samples_leaf=min_samples_leaf,
-            min_weight_fraction_leaf=min_weight_fraction_leaf,
-            max_features=max_features,
-            random_state=random_state,
-            max_leaf_nodes=max_leaf_nodes,
-            low_memory=low_memory,
-        )
