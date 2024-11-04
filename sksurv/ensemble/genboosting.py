@@ -69,7 +69,7 @@ def _fit_stage_componentwise(X, residuals, sample_weight, regr,
 
     base_learners = []
     error = np.empty(n_features)
-    for component in tqdm(range(n_features)):
+    for component in range(n_features):
         learner = _ComponentwiseBaseLearner(component, regr=regr).fit(X, residuals, sample_weight)
         l_pred = learner.predict(X)
         error[component] = squared_norm(residuals - l_pred)
