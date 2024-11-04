@@ -58,8 +58,8 @@ class _ComponentwiseBaseLearner(BaseEstimator):
             self.regr.fit(X, y)
         return self.regr
 
-    def predict(self, X):
-        return self.regr.predict(X[:, self.component])
+    def predict(self, X, **kwargs):
+        return self.regr.predict(X[:, self.component], **kwargs)
 
 
 def _fit_stage_componentwise(X, residuals, sample_weight, regr, 
@@ -137,10 +137,6 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
 
     Attributes
     ----------
-    coef_ : array, shape = (n_features + 1,)
-        The aggregated coefficients. The first element `coef\_[0]` corresponds
-        to the intercept. If loss is `coxph`, the intercept will always be zero.
-
     estimators_ : list of base learners
         The collection of fitted sub-estimators.
 
@@ -442,19 +438,19 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
         else:
             self._baseline_model = None
 
-    def _raw_predict(self, X):
+    def _raw_predict(self, X, **kwargs):
         pred = np.zeros(X.shape[0], dtype=float)
         for estimator in self.estimators_:
-            pred += self.learning_rate * estimator.predict(X)
+            pred += self.learning_rate * estimator.predict(X, **kwargs)
         return pred
 
-    def _predict(self, X):
+    def _predict(self, X, **kwargs):
         # account for intercept
         Xi = np.column_stack((np.ones(X.shape[0]), X))
-        pred = self._raw_predict(Xi)
+        pred = self._raw_predict(Xi, **kwargs)
         return self._loss._scale_raw_prediction(pred)
 
-    def predict(self, X):
+    def predict(self, X, **kwargs):
         """Predict risk scores.
 
         If `loss='coxph'`, predictions can be interpreted as log hazard ratio
@@ -475,14 +471,14 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
         check_is_fitted(self, "estimators_")
         X = self._validate_data(X, reset=False)
 
-        return self._predict(X)
+        return self._predict(X, **kwargs)
 
     def _get_baseline_model(self):
         if self._baseline_model is None:
             raise ValueError("`fit` must be called with the loss option set to 'coxph'.")
         return self._baseline_model
 
-    def predict_cumulative_hazard_function(self, X, return_array=False):
+    def predict_cumulative_hazard_function(self, X, return_array=False, **kwargs):
         """Predict cumulative hazard function.
 
         Only available if :meth:`fit` has been called with `loss = "coxph"`.
@@ -542,9 +538,9 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
         >>> plt.ylim(0, 1)
         >>> plt.show()
         """
-        return self._predict_cumulative_hazard_function(self._get_baseline_model(), self.predict(X), return_array)
+        return self._predict_cumulative_hazard_function(self._get_baseline_model(), self.predict(X, **kwargs), return_array)
 
-    def predict_survival_function(self, X, return_array=False):
+    def predict_survival_function(self, X, return_array=False, **kwargs):
         """Predict survival function.
 
         Only available if :meth:`fit` has been called with `loss = "coxph"`.
@@ -605,16 +601,9 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
         >>> plt.ylim(0, 1)
         >>> plt.show()
         """
-        return self._predict_survival_function(self._get_baseline_model(), self.predict(X), return_array)
-
-    @property
-    def coef_(self):
-        coef = np.zeros(self.n_features_in_ + 1, dtype=float)
-
-        for estimator in self.estimators_:
-            coef[estimator.component] += self.learning_rate * estimator.coef_
-
-        return coef
+        return self._predict_survival_function(self._get_baseline_model(), 
+                                               self.predict(X, **kwargs), 
+                                               return_array, **kwargs)
 
     @property
     def unique_times_(self):

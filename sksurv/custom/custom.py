@@ -20,8 +20,6 @@ from ._criterion import LogrankCriterion, get_unique_times
 
 __all__ = ["ExtraSurvivalCustom", "SurvivalCustom"]
 
-DTYPE = _tree.DTYPE
-
 
 def _array_to_step_function(x, array):
     n_samples = array.shape[0]

@@ -14,7 +14,7 @@ import numpy as np
 
 
 class SurvivalAnalysisMixin:
-    def _predict_function(self, func_name, baseline_model, prediction, return_array):
+    def _predict_function(self, func_name, baseline_model, prediction, return_array, **kwargs):
         fns = getattr(baseline_model, func_name)(prediction)
 
         if not return_array:
@@ -26,7 +26,7 @@ class SurvivalAnalysisMixin:
             arr[i, :] = fn(times)
         return arr
 
-    def _predict_survival_function(self, baseline_model, prediction, return_array):
+    def _predict_survival_function(self, baseline_model, prediction, return_array, **kwargs):
         """Return survival functions.
 
         Parameters
@@ -46,9 +46,11 @@ class SurvivalAnalysisMixin:
         -------
         survival : ndarray
         """
-        return self._predict_function("get_survival_function", baseline_model, prediction, return_array)
+        return self._predict_function("get_survival_function", baseline_model, 
+                                      prediction, return_array, **kwargs)
 
-    def _predict_cumulative_hazard_function(self, baseline_model, prediction, return_array):
+    def _predict_cumulative_hazard_function(self, baseline_model, prediction, 
+                                            return_array, **kwargs):
         """Return cumulative hazard functions.
 
         Parameters
@@ -68,7 +70,9 @@ class SurvivalAnalysisMixin:
         -------
         cum_hazard : ndarray
         """
-        return self._predict_function("get_cumulative_hazard_function", baseline_model, prediction, return_array)
+        return self._predict_function("get_cumulative_hazard_function", 
+                                      baseline_model, prediction, 
+                                      return_array, **kwargs)
 
     def score(self, X, y):
         """Returns the concordance index of the prediction.
