@@ -33,13 +33,6 @@ class SurvivalCustom(ComponentwiseGenGradientBoostingSurvivalAnalysis):
         model at iteration ``i`` on the in-bag sample.
         If ``subsample == 1`` this is the loss on the training data.
 
-    oob_improvement_ : ndarray, shape = (n_estimators,)
-        The improvement in loss on the out-of-bag samples
-        relative to the previous iteration.
-        ``oob_improvement_[0]`` is the improvement in
-        loss of the first stage over the ``init`` estimator.
-        Only available if ``subsample < 1.0``.
-
     oob_scores_ : ndarray of shape (n_estimators,)
         The full history of the loss values on the out-of-bag
         samples. Only available if ``subsample < 1.0``.
@@ -58,10 +51,6 @@ class SurvivalCustom(ComponentwiseGenGradientBoostingSurvivalAnalysis):
     unique_times_ : array of shape = (n_unique_times,)
         Unique time points.
 
-    References
-    ----------
-    .. [1] Hothorn, T., Bühlmann, P., Dudoit, S., Molinaro, A., van der Laan, M. J.,
-           "Survival ensembles", Biostatistics, 7(3), 355-73, 2006
     """
 
     def __init__(
@@ -74,8 +63,8 @@ class SurvivalCustom(ComponentwiseGenGradientBoostingSurvivalAnalysis):
     ):
         self.regr = regr 
         self.loss = loss
-        self.n_estimators = 1
-        self.learning_rate = 1.0
+        self.n_estimators = 1 # this
+        self.learning_rate = 1.0 # this to 
         self.subsample = 1.0
         self.random_state = random_state
         self.verbose = verbose
