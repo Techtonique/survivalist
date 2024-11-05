@@ -13,10 +13,9 @@ estimator2 = SurvivalTree()
 estimator.fit(X, y)
 estimator2.fit(X, y)
 
-surv_funcs2 = estimator2.predict_survival_function(X.iloc[:2])
-print(surv_funcs2[1])
-surv_funcs = estimator.predict_survival_function(X.iloc[:2])
-print(surv_funcs[1])
+X_people = X.iloc[:1]
+surv_funcs2 = estimator2.predict_survival_function(X_people)
+surv_funcs = estimator.predict_survival_function(X_people)
 
 
 for fn in surv_funcs:

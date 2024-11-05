@@ -13,19 +13,15 @@
 import numbers
 
 import numpy as np
-from scipy.sparse import csc_matrix, csr_matrix, issparse
 from sklearn.base import BaseEstimator
 from sklearn.ensemble._base import BaseEnsemble
-from sklearn.ensemble._gb import BaseGradientBoosting, VerboseReporter
+from sklearn.ensemble._gb import VerboseReporter
 from sklearn.ensemble._gradient_boosting import _random_sample_mask
 from sklearn.linear_model import LinearRegression
-from sklearn.model_selection import train_test_split
-from sklearn.tree import DecisionTreeRegressor
-from sklearn.tree._tree import DTYPE
 from sklearn.utils import check_random_state
 from sklearn.utils._param_validation import Interval, StrOptions
 from sklearn.utils.extmath import squared_norm
-from sklearn.utils.validation import _check_sample_weight, check_array, check_is_fitted
+from sklearn.utils.validation import _check_sample_weight, check_is_fitted
 from tqdm import tqdm 
 
 from ..base import SurvivalAnalysisMixin
@@ -76,16 +72,12 @@ def _fit_stage_componentwise(X, residuals, sample_weight, regr,
         base_learners.append(learner)
 
     # TODO: could use bottleneck.nanargmin for speed
-    best_component = np.nanargmin(error)
-    best_learner = base_learners[best_component]
-    return best_learner
+    return base_learners[np.nanargmin(error)]
 
 
 class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAnalysisMixin):
     """Generic Gradient boosting with any base learner.
-
-    See the :ref:`User Guide </user_guide/boosting.ipynb>` and [1]_ for further description.
-
+    
     Parameters
     ----------
     loss : {'coxph', 'squared', 'ipcwls'}, optional, default: 'coxph'
@@ -134,6 +126,9 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
         Enable verbose output. If 1 then it prints progress and performance
         once in a while.
         Values must be in the range `[0, inf)`.
+    
+    show_progress : bool, default: True
+        If set, show a progress bar for the fitting process.
 
     Attributes
     ----------
@@ -199,6 +194,7 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
         dropout_rate=0,
         random_state=None,
         verbose=0,
+        show_progress=True,
     ):
         self.regr = regr 
         self.loss = loss
@@ -209,6 +205,7 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
         self.dropout_rate = dropout_rate
         self.random_state = random_state
         self.verbose = verbose
+        self.show_progress = show_progress
 
     @property
     def _predict_risk_score(self):
@@ -310,7 +307,11 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
 
         # perform boosting iterations
         i = begin_at_stage
-        for i in tqdm(range(begin_at_stage, int(self.n_estimators))):
+        if self.show_progress:
+            iterator = tqdm(range(begin_at_stage, int(self.n_estimators)))
+        else:
+            iterator = range(begin_at_stage, int(self.n_estimators))
+        for i in iterator:
             # subsampling
             if do_oob:
                 sample_mask = _random_sample_mask(n_samples, n_inbag, random_state)
@@ -629,3 +630,5 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
     def _make_estimator(self, append=True, random_state=None):
         # we don't need _make_estimator
         raise NotImplementedError()
+
+
