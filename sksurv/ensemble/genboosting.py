@@ -82,7 +82,7 @@ def _fit_stage_componentwise(X, residuals, sample_weight, regr,
 
 
 class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAnalysisMixin):
-    r"""Generic Gradient boosting with any base learner.
+    """Generic Gradient boosting with any base learner.
 
     See the :ref:`User Guide </user_guide/boosting.ipynb>` and [1]_ for further description.
 

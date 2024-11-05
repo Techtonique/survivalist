@@ -615,7 +615,9 @@ class SurvivalTree(BaseEstimator, SurvivalAnalysisMixin):
         X = self._validate_X_predict(X, check_input, accept_sparse="csr")
 
         pred = self.tree_.predict(X)
+        print(f"\n\n pred: {pred} \n\n")
         arr = pred[..., 1]
+        print(f"\n\n arr: {arr} \n\n")
         if return_array:
             return arr
         return _array_to_step_function(self.unique_times_, arr)
