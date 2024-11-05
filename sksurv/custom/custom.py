@@ -62,6 +62,7 @@ class SurvivalCustom(ComponentwiseGenGradientBoostingSurvivalAnalysis):
         verbose=0,
     ):
         self.regr = regr 
+        self._baseline_model = self.regr
         self.loss = loss
         self.n_estimators = 1 # this
         self.learning_rate = 1.0 # this to 
