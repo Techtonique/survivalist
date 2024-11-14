@@ -3,6 +3,8 @@ import warnings
 import numpy as np
 import pandas as pd
 from pandas.api.types import CategoricalDtype
+from sklearn.utils import Bunch
+from sklearn.preprocessing import OneHotEncoder
 
 from ..column import categorical_to_numeric, standardize
 from ..io import loadarff
@@ -49,6 +51,21 @@ def _get_x_y_other(dataset, col_label):
         x_frame = dataset.drop(col_label, axis=1)
 
     return x_frame, y
+
+def _create_event_time_df(data):
+    # Convert the list of tuples into a structured NumPy array
+    structured_data = np.array(data, dtype=[('event', '?'), ('time', 'f8')])
+    
+    # Convert the structured array to a DataFrame
+    df = pd.DataFrame(structured_data)
+    
+    # Change 'event' column to integer64, mapping False to 0 and True to 1
+    df['event'] = df['event'].astype('int64')
+    
+    # Ensure 'time' column is float64
+    df['time'] = df['time'].astype('float64')
+    
+    return df
 
 
 def get_x_y(data_frame, attr_labels, pos_label=None, survival=True):
@@ -213,13 +230,26 @@ def _load_arff_testing(path_testing, attr_labels, pos_label, survival):
     return get_x_y(test_dataset, attr_labels, pos_label, survival)
 
 
-def load_whas500():
+def load_whas500(*, return_X_y=True, as_frame=False):
     """Load and return the Worcester Heart Attack Study dataset
 
     The dataset has 500 samples and 14 features.
     The endpoint is death, which occurred for 215 patients (43.0%).
 
     See [1]_, [2]_ for further description.
+
+    Parameters
+    ----------
+    return_X_y : bool, default=False
+        If True, returns ``(data, target)`` instead of a Bunch object. See
+        below for more information about the `data` and `target` object.
+
+    as_frame : bool, default=False
+        If True, the data is a pandas DataFrame including columns with
+        appropriate dtypes (numeric). The target is
+        a pandas DataFrame or Series depending on the number of target columns.
+        If `return_X_y` is True, then (`data`, `target`) will be pandas
+        DataFrames or Series as described below.
 
     Returns
     -------
@@ -242,16 +272,47 @@ def load_whas500():
         John Wiley & Sons, Inc. (2008)
     """
     fn = _get_data_path("whas500.arff")
-    return get_x_y(loadarff(fn), attr_labels=["fstat", "lenfol"], pos_label="1")
+    X, y = get_x_y(loadarff(fn), attr_labels=["fstat", "lenfol"], pos_label="1")
+    if as_frame:
+        return_X_y = False
+    if return_X_y:
+        return X, y
+    y = _create_event_time_df(y)
+    enc = OneHotEncoder()
+    #X = pd.DataFrame(enc.fit_transform(X))
+    frame = pd.concat([X, y], axis=1)
+    target_names = ["event", "time"]
+    fdescr = "The Worcester Heart Attack Study dataset"
+    feature_names = X.columns
+    return Bunch(data=X, 
+                 target=y, 
+                 frame=frame,
+                 target_names=target_names,
+                 DESCR=fdescr,
+                 feature_names=feature_names, 
+                 filename=fn)
 
 
-def load_gbsg2():
+def load_gbsg2(*, return_X_y=True, as_frame=False):
     """Load and return the German Breast Cancer Study Group 2 dataset
 
     The dataset has 686 samples and 8 features.
     The endpoint is recurrence free survival, which occurred for 299 patients (43.6%).
 
     See [1]_, [2]_ for further description.
+
+    Parameters
+    ----------
+    return_X_y : bool, default=False
+        If True, returns ``(data, target)`` instead of a Bunch object. See
+        below for more information about the `data` and `target` object.
+
+    as_frame : bool, default=False
+        If True, the data is a pandas DataFrame including columns with
+        appropriate dtypes (numeric). The target is
+        a pandas DataFrame or Series depending on the number of target columns.
+        If `return_X_y` is True, then (`data`, `target`) will be pandas
+        DataFrames or Series as described below.    
 
     Returns
     -------
@@ -262,7 +323,7 @@ def load_gbsg2():
         *cens*: boolean indicating whether the endpoint has been reached
         or the event time is right censored.
 
-        *time*: total length of follow-up
+        *time*: total length of follow-up    
 
     References
     ----------
@@ -274,10 +335,28 @@ def load_gbsg2():
         Journal of Clinical Oncology 12, 2086–2093. (1994)
     """
     fn = _get_data_path("GBSG2.arff")
-    return get_x_y(loadarff(fn), attr_labels=["cens", "time"], pos_label="1")
+    X, y = get_x_y(loadarff(fn), attr_labels=["cens", "time"], pos_label="1")
+    if as_frame:
+        return_X_y = False
+    if return_X_y:
+        return X, y
+    y = _create_event_time_df(y)    
+    enc = OneHotEncoder()
+    #X = pd.DataFrame(enc.fit_transform(X))
+    frame = pd.concat([X, y], axis=1)
+    target_names = ["event", "time"]
+    fdescr = "The German Breast Cancer Study Group 2 dataset"
+    feature_names = X.columns
+    return Bunch(data=X, 
+                 target=y, 
+                 frame=frame,
+                 target_names=target_names,
+                 DESCR=fdescr,
+                 feature_names=feature_names,
+                 filename=fn)
 
 
-def load_veterans_lung_cancer():
+def load_veterans_lung_cancer(*, return_X_y=True, as_frame=False):
     """Load and return data from the Veterans' Administration
     Lung Cancer Trial
 
@@ -285,6 +364,19 @@ def load_veterans_lung_cancer():
     The endpoint is death, which occurred for 128 patients (93.4%).
 
     See [1]_ for further description.
+
+    Parameters
+    ----------
+    return_X_y : bool, default=False
+        If True, returns ``(data, target)`` instead of a Bunch object. See
+        below for more information about the `data` and `target` object.
+
+    as_frame : bool, default=False
+        If True, the data is a pandas DataFrame including columns with
+        appropriate dtypes (numeric). The target is
+        a pandas DataFrame or Series depending on the number of target columns.
+        If `return_X_y` is True, then (`data`, `target`) will be pandas
+        DataFrames or Series as described below.    
 
     Returns
     -------
@@ -303,10 +395,28 @@ def load_veterans_lung_cancer():
         "The Statistical Analysis of Failure Time Data." John Wiley & Sons, Inc. (2002)
     """
     fn = _get_data_path("veteran.arff")
-    return get_x_y(loadarff(fn), attr_labels=["Status", "Survival_in_days"], pos_label="dead")
+    X, y = get_x_y(loadarff(fn), attr_labels=["Status", "Survival_in_days"], pos_label="dead")
+    if as_frame:
+        return_X_y = False
+    if return_X_y:
+        return X, y
+    y = _create_event_time_df(y)
+    enc = OneHotEncoder()
+    #X = pd.DataFrame(enc.fit_transform(X))
+    frame = pd.concat([X, y], axis=1)
+    target_names = ["event", "time"]
+    fdescr = "The Veterans' Administration Lung Cancer Trial dataset"
+    feature_names = X.columns
+    return Bunch(data=X,
+                    target=y,
+                    frame=frame,
+                    target_names=target_names,
+                    DESCR=fdescr,
+                    feature_names=feature_names,
+                    filename=fn)
 
 
-def load_aids(endpoint="aids"):
+def load_aids(endpoint="aids", return_X_y=True, as_frame=False):
     """Load and return the AIDS Clinical Trial dataset
 
     The dataset has 1,151 samples and 11 features.
@@ -321,6 +431,17 @@ def load_aids(endpoint="aids"):
     ----------
     endpoint : aids|death
         The endpoint
+
+    return_X_y : bool, default=False
+        If True, returns ``(data, target)`` instead of a Bunch object. See
+        below for more information about the `data` and `target` object.
+
+    as_frame : bool, default=False
+        If True, the data is a pandas DataFrame including columns with
+        appropriate dtypes (numeric). The target is
+        a pandas DataFrame or Series depending on the number of target columns.
+        If `return_X_y` is True, then (`data`, `target`) will be pandas
+        DataFrames or Series as described below.
 
     Returns
     -------
@@ -357,16 +478,46 @@ def load_aids(endpoint="aids"):
     fn = _get_data_path("actg320.arff")
     x, y = get_x_y(loadarff(fn), attr_labels=attr_labels, pos_label="1")
     x.drop(drop_columns, axis=1, inplace=True)
-    return x, y
+    if as_frame:
+        return_X_y = False
+    if return_X_y:
+        return x, y
+    y = _create_event_time_df(y)
+    enc = OneHotEncoder()
+    X = pd.DataFrame(enc.fit_transform(x))
+    frame = pd.concat([x, y], axis=1)
+    target_names = ["event", "time"]
+    fdescr = "The AIDS Clinical Trial dataset"
+    feature_names = x.columns
+    return Bunch(data=x,
+                    target=y,
+                    frame=frame,
+                    target_names=target_names,
+                    DESCR=fdescr,
+                    feature_names=feature_names,
+                    filename=fn)
 
 
-def load_breast_cancer():
+def load_breast_cancer(*, return_X_y=True, as_frame=False):
     """Load and return the breast cancer dataset
 
     The dataset has 198 samples and 80 features.
     The endpoint is the presence of distance metastases, which occurred for 51 patients (25.8%).
 
     See [1]_, [2]_ for further description.
+
+    Parameters
+    ----------
+    return_X_y : bool, default=False
+        If True, returns ``(data, target)`` instead of a Bunch object. See
+        below for more information about the `data` and `target` object.
+
+    as_frame : bool, default=False
+        If True, the data is a pandas DataFrame including columns with
+        appropriate dtypes (numeric). The target is
+        a pandas DataFrame or Series depending on the number of target columns.
+        If `return_X_y` is True, then (`data`, `target`) will be pandas
+        DataFrames or Series as described below.    
 
     Returns
     -------
@@ -389,10 +540,28 @@ def load_breast_cancer():
         Clin. Cancer Res. 13(11), 3207–14 (2007)
     """
     fn = _get_data_path("breast_cancer_GSE7390-metastasis.arff")
-    return get_x_y(loadarff(fn), attr_labels=["e.tdm", "t.tdm"], pos_label="1")
+    X, y = get_x_y(loadarff(fn), attr_labels=["e.tdm", "t.tdm"], pos_label="1")
+    if as_frame:
+        return_X_y = False
+    if return_X_y:
+        return X, y
+    y = _create_event_time_df(y)
+    enc = OneHotEncoder()
+    #X = pd.DataFrame(enc.fit_transform(X))
+    frame = pd.concat([X, y], axis=1)
+    target_names = ["event", "time"]
+    fdescr = "The breast cancer dataset"
+    feature_names = X.columns
+    return Bunch(data=X,
+                    target=y,
+                    frame=frame,
+                    target_names=target_names,
+                    DESCR=fdescr,
+                    feature_names=feature_names,
+                    filename=fn)
 
 
-def load_flchain():
+def load_flchain(*, return_X_y=True, as_frame=False):
     """Load and return assay of serum free light chain for 7874 subjects.
 
     The dataset has 7874 samples and 9 features:
@@ -411,6 +580,19 @@ def load_flchain():
     The endpoint is death, which occurred for 2169 subjects (27.5%).
 
     See [1]_, [2]_ for further description.
+
+    Parameters
+    ----------
+    return_X_y : bool, default=False
+        If True, returns ``(data, target)`` instead of a Bunch object. See
+        below for more information about the `data` and `target` object.
+
+    as_frame : bool, default=False
+        If True, the data is a pandas DataFrame including columns with
+        appropriate dtypes (numeric). The target is
+        a pandas DataFrame or Series depending on the number of target columns.
+        If `return_X_y` is True, then (`data`, `target`) will be pandas
+        DataFrames or Series as described below.    
 
     Returns
     -------
@@ -433,4 +615,23 @@ def load_flchain():
            the general population, Mayo Clinic Proceedings 87:512-523. (2012)
     """
     fn = _get_data_path("flchain.arff")
-    return get_x_y(loadarff(fn), attr_labels=["death", "futime"], pos_label="dead")
+    X, y = get_x_y(loadarff(fn), attr_labels=["death", "futime"], pos_label="dead")
+    if as_frame:
+        return_X_y = False
+    if return_X_y:
+        return X, y
+    y = _create_event_time_df(y)
+    enc = OneHotEncoder()
+    #X = pd.DataFrame(enc.fit_transform(X))
+    frame = pd.concat([X, y], axis=1)
+    target_names = ["event", "time"]
+    fdescr = "The assay of serum free light chain dataset"
+    feature_names = X.columns
+    return Bunch(data=X,
+                    target=y,
+                    frame=frame,
+                    target_names=target_names,
+                    DESCR=fdescr,
+                    feature_names=feature_names,
+                    filename=fn)
+
