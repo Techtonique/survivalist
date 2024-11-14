@@ -539,7 +539,9 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
         >>> plt.ylim(0, 1)
         >>> plt.show()
         """
-        return self._predict_cumulative_hazard_function(self._get_baseline_model(), self.predict(X, **kwargs), return_array)
+        return self._predict_cumulative_hazard_function(self._get_baseline_model(), 
+                                                        self.predict(X, **kwargs), 
+                                                        return_array)
 
     def predict_survival_function(self, X, return_array=False, **kwargs):
         """Predict survival function.

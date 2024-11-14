@@ -121,7 +121,9 @@ class BreslowEstimator:
         n_samples = risk_score.shape[0]
         funcs = np.empty(n_samples, dtype=object)
         for i in range(n_samples):
-            funcs[i] = StepFunction(x=self.baseline_survival_.x, y=np.power(self.baseline_survival_.y, risk_score[i]))
+            funcs[i] = StepFunction(x=self.baseline_survival_.x, 
+                                    y=np.power(self.baseline_survival_.y, 
+                                               risk_score[i]))
         return funcs
 
 
