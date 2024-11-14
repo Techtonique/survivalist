@@ -67,6 +67,30 @@ def _create_event_time_df(data):
     
     return df
 
+def _encode_categorical_columns(df, categorical_columns=None):
+    """
+    Automatically identifies categorical columns and applies one-hot encoding.
+    
+    Parameters:
+    - df (pd.DataFrame): The input DataFrame with mixed continuous and categorical variables.
+    - categorical_columns (list): Optional list of column names to treat as categorical.
+    
+    Returns:
+    - pd.DataFrame: A new DataFrame with one-hot encoded categorical columns.
+    """
+    # Automatically identify categorical columns if not provided
+    if categorical_columns is None:
+        categorical_columns = df.select_dtypes(include=['object', 'category']).columns.tolist()
+            
+    # Apply one-hot encoding to the identified categorical columns
+    df_encoded = pd.get_dummies(df, columns=categorical_columns)
+
+    # Convert boolean columns to integer (0 and 1)
+    bool_columns = df_encoded.select_dtypes(include=['bool']).columns.tolist()
+    df_encoded[bool_columns] = df_encoded[bool_columns].astype(int)
+    
+    return df_encoded
+
 
 def get_x_y(data_frame, attr_labels, pos_label=None, survival=True):
     """Split data frame into features and labels.
@@ -278,9 +302,7 @@ def load_whas500(*, return_X_y=True, as_frame=False):
     if return_X_y:
         return X, y
     y = _create_event_time_df(y)
-    enc = OneHotEncoder()
-    #X = pd.DataFrame(enc.fit_transform(X))
-    frame = pd.concat([X, y], axis=1)
+    frame = pd.concat([_encode_categorical_columns(X),  y], axis=1)
     target_names = ["event", "time"]
     fdescr = "The Worcester Heart Attack Study dataset"
     feature_names = X.columns
@@ -341,9 +363,9 @@ def load_gbsg2(*, return_X_y=True, as_frame=False):
     if return_X_y:
         return X, y
     y = _create_event_time_df(y)    
-    enc = OneHotEncoder()
-    #X = pd.DataFrame(enc.fit_transform(X))
-    frame = pd.concat([X, y], axis=1)
+    
+    
+    frame = pd.concat([_encode_categorical_columns(X),  y], axis=1)
     target_names = ["event", "time"]
     fdescr = "The German Breast Cancer Study Group 2 dataset"
     feature_names = X.columns
@@ -401,9 +423,9 @@ def load_veterans_lung_cancer(*, return_X_y=True, as_frame=False):
     if return_X_y:
         return X, y
     y = _create_event_time_df(y)
-    enc = OneHotEncoder()
-    #X = pd.DataFrame(enc.fit_transform(X))
-    frame = pd.concat([X, y], axis=1)
+    
+    
+    frame = pd.concat([_encode_categorical_columns(X),  y], axis=1)
     target_names = ["event", "time"]
     fdescr = "The Veterans' Administration Lung Cancer Trial dataset"
     feature_names = X.columns
@@ -483,8 +505,6 @@ def load_aids(endpoint="aids", return_X_y=True, as_frame=False):
     if return_X_y:
         return x, y
     y = _create_event_time_df(y)
-    enc = OneHotEncoder()
-    X = pd.DataFrame(enc.fit_transform(x))
     frame = pd.concat([x, y], axis=1)
     target_names = ["event", "time"]
     fdescr = "The AIDS Clinical Trial dataset"
@@ -546,9 +566,9 @@ def load_breast_cancer(*, return_X_y=True, as_frame=False):
     if return_X_y:
         return X, y
     y = _create_event_time_df(y)
-    enc = OneHotEncoder()
-    #X = pd.DataFrame(enc.fit_transform(X))
-    frame = pd.concat([X, y], axis=1)
+    
+    
+    frame = pd.concat([_encode_categorical_columns(X),  y], axis=1)
     target_names = ["event", "time"]
     fdescr = "The breast cancer dataset"
     feature_names = X.columns
@@ -621,9 +641,9 @@ def load_flchain(*, return_X_y=True, as_frame=False):
     if return_X_y:
         return X, y
     y = _create_event_time_df(y)
-    enc = OneHotEncoder()
-    #X = pd.DataFrame(enc.fit_transform(X))
-    frame = pd.concat([X, y], axis=1)
+    
+    
+    frame = pd.concat([_encode_categorical_columns(X),  y], axis=1)
     target_names = ["event", "time"]
     fdescr = "The assay of serum free light chain dataset"
     feature_names = X.columns
