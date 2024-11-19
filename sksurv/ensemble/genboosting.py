@@ -447,20 +447,33 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
     def _raw_predict(self, X, **kwargs):
         if ("return_pi" in kwargs) or ("return_std" in kwargs):
             DescribeResult = namedtuple("DescribeResult", ["mean", "lower", "upper"])
-            pred = [np.zeros(X.shape[0], dtype=float) for _ in range(4)] # 4 is mean, std, lower, upper            
+            pred = {"mean": np.zeros(X.shape[0], dtype=float), # 4 is mean, std, lower, upper            
+                    "lower": np.zeros(X.shape[0], dtype=float),
+                    "upper": np.zeros(X.shape[0], dtype=float)}
             for estimator in self.estimators_:
                 preds = estimator.predict(X, **kwargs)
-                for i, elt in enumerate(preds):
-                    try: 
-                        pred[i] += self.learning_rate * elt
-                    except Exception as e:
-                        pass                 
-            return np.asarray([np.maximum(elt, 0) for elt in pred])
+                if "return_std" in kwargs:
+                    for elt in enumerate(preds):
+                        try: 
+                            pred["mean"] += self.learning_rate * elt[0]
+                            pred["lower"] += self.learning_rate * elt[2]
+                            pred["upper"] += self.learning_rate * elt[3]
+                        except Exception as e:
+                            pass
+                else: 
+                    for elt in enumerate(preds):                        
+                        try: 
+                            pred["mean"] += self.learning_rate * elt.mean
+                            pred["lower"] += self.learning_rate * elt.lower
+                            pred["upper"] += self.learning_rate * elt.upper
+                        except Exception as e:
+                            pass                 
+            return DescribeResult(np.maximum(pred["mean"], 0),  
+                                  np.maximum(pred["lower"], 0), 
+                                  np.maximum(pred["upper"], 0))
         pred = np.zeros(X.shape[0], dtype=float)
         for estimator in self.estimators_:
-            pred += self.learning_rate * estimator.predict(X, **kwargs)
-        if "return_std" in kwargs:            
-            return DescribeResult(pred[0], pred[2], pred[3])
+            pred += self.learning_rate * estimator.predict(X, **kwargs)        
         return pred
 
     def _predict(self, X, **kwargs):
@@ -471,7 +484,7 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
             return self._loss._scale_raw_prediction(pred)
         if "return_std" in kwargs:
             DescribeResult = namedtuple("DescribeResult", ["mean", "lower", "upper"])
-            res = [self._loss._scale_raw_prediction(p) for p in (pred[0], pred[2], pred[3])]
+            res = [self._loss._scale_raw_prediction(p) for p in (pred[0], pred[1], pred[2])]
             return DescribeResult(res[0], res[1], res[2])
 
     def predict(self, X, **kwargs):
