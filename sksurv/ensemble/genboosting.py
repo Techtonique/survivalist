@@ -13,6 +13,7 @@
 import numbers
 
 import numpy as np
+from collections import namedtuple
 from sklearn.base import BaseEstimator
 from sklearn.ensemble._base import BaseEnsemble
 from sklearn.ensemble._gb import VerboseReporter
@@ -51,7 +52,7 @@ class _ComponentwiseBaseLearner(BaseEstimator):
         try: 
             self.regr.fit(X, y, sample_weight=sample_weight)
         except Exception as e:
-            self.regr.fit(X, y)
+            self.regr.fit(X, y)        
         return self.regr
 
     def predict(self, X, **kwargs):
@@ -430,6 +431,10 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
         self.n_estimators_ = self._fit(Xi, event, time, y_pred, sample_weight, self._rng, begin_at_stage)
 
         self._set_baseline_model(X, event, time)
+        try: 
+            self.X_ = self.regr.X_
+        except AttributeError:
+            pass 
         return self
 
     def _set_baseline_model(self, X, event, time):
@@ -440,16 +445,34 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
             self._baseline_model = None
 
     def _raw_predict(self, X, **kwargs):
+        if ("return_pi" in kwargs) or ("return_std" in kwargs):
+            DescribeResult = namedtuple("DescribeResult", ["mean", "lower", "upper"])
+            pred = [np.zeros(X.shape[0], dtype=float) for _ in range(4)] # 4 is mean, std, lower, upper            
+            for estimator in self.estimators_:
+                preds = estimator.predict(X, **kwargs)
+                for i, elt in enumerate(preds):
+                    try: 
+                        pred[i] += self.learning_rate * elt
+                    except Exception as e:
+                        pass                 
+            return np.asarray([np.maximum(elt, 0) for elt in pred])
         pred = np.zeros(X.shape[0], dtype=float)
         for estimator in self.estimators_:
             pred += self.learning_rate * estimator.predict(X, **kwargs)
+        if "return_std" in kwargs:            
+            return DescribeResult(pred[0], pred[2], pred[3])
         return pred
 
     def _predict(self, X, **kwargs):
         # account for intercept
         Xi = np.column_stack((np.ones(X.shape[0]), X))
         pred = self._raw_predict(Xi, **kwargs)
-        return self._loss._scale_raw_prediction(pred)
+        if len(np.asarray(pred).shape) == 1:
+            return self._loss._scale_raw_prediction(pred)
+        if "return_std" in kwargs:
+            DescribeResult = namedtuple("DescribeResult", ["mean", "lower", "upper"])
+            res = [self._loss._scale_raw_prediction(p) for p in (pred[0], pred[2], pred[3])]
+            return DescribeResult(res[0], res[1], res[2])
 
     def predict(self, X, **kwargs):
         """Predict risk scores.
@@ -471,7 +494,6 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
         """
         check_is_fitted(self, "estimators_")
         X = self._validate_data(X, reset=False)
-
         return self._predict(X, **kwargs)
 
     def _get_baseline_model(self):
@@ -604,6 +626,19 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
         >>> plt.ylim(0, 1)
         >>> plt.show()
         """
+        if ("return_pi" in kwargs) or ("return_std" in kwargs):
+            preds = self.predict(X, **kwargs)
+            DescribeResult = namedtuple("DescribeResult", ["mean", "lower", "upper"])
+            res = (self._predict_survival_function(self._get_baseline_model(), 
+                                                   preds.mean, 
+                                                   return_array, **kwargs),
+            self._predict_survival_function(self._get_baseline_model(), 
+                                                   preds.lower, 
+                                                   return_array, **kwargs),
+            self._predict_survival_function(self._get_baseline_model(), 
+                                                   preds.upper, 
+                                                   return_array, **kwargs))
+            return DescribeResult(res[0], res[1], res[2])
         return self._predict_survival_function(self._get_baseline_model(), 
                                                self.predict(X, **kwargs), 
                                                return_array, **kwargs)

@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import nnetsauce as ns
 from sksurv.datasets import load_whas500
 from sksurv.ensemble import ComponentwiseGenGradientBoostingSurvivalAnalysis
 from sklearn.linear_model import RidgeCV
@@ -8,8 +9,10 @@ from sklearn.ensemble import ExtraTreesRegressor
 X, y = load_whas500()
 X = X.astype(float)
 
-estimator = ComponentwiseGenGradientBoostingSurvivalAnalysis(regr = RidgeCV(), loss="coxph")
-estimator2 = ComponentwiseGenGradientBoostingSurvivalAnalysis(regr = ExtraTreeRegressor(), loss="coxph")
+estimator = ComponentwiseGenGradientBoostingSurvivalAnalysis(regr = RidgeCV(), 
+                                                             loss="coxph")
+estimator2 = ComponentwiseGenGradientBoostingSurvivalAnalysis(regr = ExtraTreeRegressor(), 
+                                                              loss="coxph")
 
 estimator.fit(X, y)
 estimator2.fit(X, y)
@@ -32,3 +35,8 @@ for fn in surv_funcs2:
     plt.step(fn.x, fn(fn.x), where="post")
     plt.ylim(0, 1)
     plt.show()
+
+
+
+estimator3 = ComponentwiseGenGradientBoostingSurvivalAnalysis(regr = ns.CustomRegressor(ExtraTreeRegressor()), 
+                                                              loss="coxph")

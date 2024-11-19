@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from sksurv.datasets import load_whas500
+from sksurv.datasets import load_whas500, load_veterans_lung_cancer
 from sksurv.custom import SurvivalCustom
 from sksurv.tree import SurvivalTree
 from sklearn.linear_model import Ridge, MultiTaskElasticNet, RidgeCV, ElasticNetCV
