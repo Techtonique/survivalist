@@ -59,6 +59,8 @@ def coxph_loss(cnp.npy_uint8[:] event,
     cdef cnp.npy_intp n_samples = event.shape[0]
     cdef cnp.npy_double at_risk
     cdef cnp.npy_double loss = 0
+    cdef int i
+    cdef int j
 
     with nogil:
         for i in range(n_samples):
