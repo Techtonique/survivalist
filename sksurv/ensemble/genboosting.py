@@ -451,7 +451,6 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
                     "upper": np.zeros(X.shape[0], dtype=float)}
             for estimator in self.estimators_:
                 preds = estimator.predict(X, **kwargs)
-                print("preds (L.454): ", preds)
                 if "return_std" in kwargs:                    
                     pred["mean"] += self.learning_rate * preds.mean
                     pred["lower"] += self.learning_rate * preds.upper
@@ -469,7 +468,6 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
         pred = self._raw_predict(Xi, **kwargs)
         if len(np.asarray(pred).shape) == 1:
             return self._loss._scale_raw_prediction(pred)
-        print("pred (L.472): ", pred)
         if ("return_std" in kwargs) or ("return_pi" in kwargs):
             DescribeResult = namedtuple("DescribeResult", ["mean", "lower", "upper"])
             res = [self._loss._scale_raw_prediction(p) for p in (pred[0], pred[1], pred[2])]
@@ -628,9 +626,7 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
         >>> plt.show()
         """
         if ("return_pi" in kwargs) or ("return_std" in kwargs):
-            print("kwargs (L.631): ", kwargs)        
-            preds = self.predict(X, **kwargs)    
-            print("preds (L.633): ", preds)        
+            preds = self.predict(X, **kwargs)                
             DescribeResult = namedtuple("DescribeResult", ["mean", "lower", "upper"])
             res = (self._predict_survival_function(self._get_baseline_model(), 
                                                    preds.mean, 

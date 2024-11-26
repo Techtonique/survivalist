@@ -1415,7 +1415,6 @@ class GradientBoostingSurvivalAnalysis(BaseGradientBoosting, SurvivalAnalysisMix
         score = self._raw_predict(X)
         if score.shape[1] == 1:
             score = score.ravel()
-
         return self._loss._scale_raw_prediction(score)
 
     def predict(self, X):
