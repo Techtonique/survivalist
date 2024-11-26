@@ -200,7 +200,7 @@ class PIComponentwiseGenGradientBoostingSurvivalAnalysis(ComponentwiseGenGradien
         #print(f"Risk scores: {risk_scores_calib}")
         self.calibrated_residuals_ = np.abs(self.calibrated_risk_scores_ - risk_scores_calib)
         #print(f"Calibrated residuals: {self.calibrated_residuals_}")
-        self.quantiles_ = np.quantile(self.calibrated_residuals_, self.alpha_)
+        self.quantiles_ = np.quantile(self.calibrated_residuals_, 1 - self.alpha_)
         print(f"Quantiles: {self.quantiles_}")
         return self
 
