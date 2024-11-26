@@ -35,8 +35,3 @@ for fn in surv_funcs2:
     plt.step(fn.x, fn(fn.x), where="post")
     plt.ylim(0, 1)
     plt.show()
-
-
-
-estimator3 = ComponentwiseGenGradientBoostingSurvivalAnalysis(regr = ns.CustomRegressor(ExtraTreeRegressor()), 
-                                                              loss="coxph")

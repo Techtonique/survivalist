@@ -207,10 +207,11 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
         self.random_state = random_state
         self.verbose = verbose
         self.show_progress = show_progress
+        self.quantiles_ = None
 
     @property
     def _predict_risk_score(self):
-        return isinstance(self._loss, CoxPH)
+        return isinstance(self.loss_obj, CoxPH)
 
     def _is_fitted(self):
         return len(getattr(self, "estimators_", [])) > 0
@@ -322,7 +323,7 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
                 y_oob_masked = y[~sample_mask]
                 sample_weight_oob_masked = sample_weight[~sample_mask]
                 if i == 0:  # store the initial loss to compute the OOB score
-                    initial_loss = self._loss(
+                    initial_loss = self.loss_obj(
                         y_true=y_oob_masked,
                         raw_prediction=y_pred[~sample_mask],
                         sample_weight=sample_weight_oob_masked,
@@ -330,7 +331,7 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
             else:
                 subsample_weight = sample_weight
 
-            residuals = self._loss.gradient(y, y_pred, sample_weight=sample_weight)
+            residuals = self.loss_obj.gradient(y, y_pred, sample_weight=sample_weight)
 
             best_learner = _fit_stage_componentwise(X, residuals, subsample_weight, 
                                                     regr=self.regr)
@@ -343,12 +344,12 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
 
             # track loss
             if do_oob:
-                self.train_score_[i] = self._loss(
+                self.train_score_[i] = self.loss_obj(
                     y_true=y[sample_mask],
                     raw_prediction=y_pred[sample_mask],
                     sample_weight=sample_weight[sample_mask],
                 )
-                self.oob_scores_[i] = self._loss(
+                self.oob_scores_[i] = self.loss_obj(
                     y_true=y_oob_masked,
                     raw_prediction=y_pred[~sample_mask],
                     sample_weight=sample_weight_oob_masked,
@@ -358,7 +359,7 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
                 self.oob_score_ = self.oob_scores_[-1]
             else:
                 # no need to fancy index w/ no subsampling
-                self.train_score_[i] = self._loss(y_true=y, raw_prediction=y_pred, sample_weight=sample_weight)
+                self.train_score_[i] = self.loss_obj(y_true=y, raw_prediction=y_pred, sample_weight=sample_weight)
 
             if self.verbose > 0:
                 verbose_reporter.update(i, self)
@@ -398,8 +399,8 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
         n_samples = X.shape[0]
         Xi = np.column_stack((np.ones(n_samples), X))
 
-        self._loss = LOSS_FUNCTIONS[self.loss]()
-        if isinstance(self._loss, (CensoredSquaredLoss, IPCWLeastSquaresError)):
+        self.loss_obj = LOSS_FUNCTIONS[self.loss]()
+        if isinstance(self.loss_obj, (CensoredSquaredLoss, IPCWLeastSquaresError)):
             time = np.log(time)
 
         if not self._is_fitted():
@@ -430,19 +431,19 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
 
         self.n_estimators_ = self._fit(Xi, event, time, y_pred, sample_weight, self._rng, begin_at_stage)
 
-        self._set_baseline_model(X, event, time)
+        self.set_baseline_model(X, event, time)
         try: 
             self.X_ = self.regr.X_
         except AttributeError:
             pass 
         return self
 
-    def _set_baseline_model(self, X, event, time):
-        if isinstance(self._loss, CoxPH):
+    def set_baseline_model(self, X, event, time):
+        if isinstance(self.loss_obj, CoxPH):
             risk_scores = self._predict(X)
-            self._baseline_model = BreslowEstimator().fit(risk_scores, event, time)
+            self.baseline_model = BreslowEstimator().fit(risk_scores, event, time)
         else:
-            self._baseline_model = None
+            self.baseline_model = None
 
     def _raw_predict(self, X, **kwargs):
         if ("return_pi" in kwargs) or ("return_std" in kwargs):            
@@ -467,10 +468,10 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
         Xi = np.column_stack((np.ones(X.shape[0]), X))
         pred = self._raw_predict(Xi, **kwargs)
         if len(np.asarray(pred).shape) == 1:
-            return self._loss._scale_raw_prediction(pred)
+            return self.loss_obj._scale_raw_prediction(pred)
         if ("return_std" in kwargs) or ("return_pi" in kwargs):
             DescribeResult = namedtuple("DescribeResult", ["mean", "lower", "upper"])
-            res = [self._loss._scale_raw_prediction(p) for p in (pred[0], pred[1], pred[2])]
+            res = [self.loss_obj._scale_raw_prediction(p) for p in (pred[0], pred[1], pred[2])]
             return DescribeResult(res[0], res[1], res[2])
 
     def predict(self, X, **kwargs):
@@ -495,10 +496,10 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
         X = self._validate_data(X, reset=False)
         return self._predict(X, **kwargs)
 
-    def _get_baseline_model(self):
-        if self._baseline_model is None:
+    def get_baseline_model(self):
+        if self.baseline_model is None:
             raise ValueError("`fit` must be called with the loss option set to 'coxph'.")
-        return self._baseline_model
+        return self.baseline_model
 
     def predict_cumulative_hazard_function(self, X, return_array=False, **kwargs):
         """Predict cumulative hazard function.
@@ -560,7 +561,20 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
         >>> plt.ylim(0, 1)
         >>> plt.show()
         """
-        return self._predict_cumulative_hazard_function(self._get_baseline_model(), 
+        if self.quantiles_ is not None:
+            preds = self.predict(X, **kwargs)
+            DescribeResult = namedtuple("DescribeResult", ["mean", "lower", "upper"])
+            res = (self._predict_cumulative_hazard_function(self.get_baseline_model(), 
+                                                            preds.mean, 
+                                                            return_array),
+            self._predict_cumulative_hazard_function(self.get_baseline_model(), 
+                                                            preds.lower, 
+                                                            return_array),
+            self._predict_cumulative_hazard_function(self.get_baseline_model(), 
+                                                            preds.upper, 
+                                                            return_array))
+            return DescribeResult(res[0], res[1], res[2])
+        return self._predict_cumulative_hazard_function(self.get_baseline_model(), 
                                                         self.predict(X, **kwargs), 
                                                         return_array)
 
@@ -628,23 +642,23 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
         if ("return_pi" in kwargs) or ("return_std" in kwargs):
             preds = self.predict(X, **kwargs)                
             DescribeResult = namedtuple("DescribeResult", ["mean", "lower", "upper"])
-            res = (self._predict_survival_function(self._get_baseline_model(), 
+            res = (self._predict_survival_function(self.get_baseline_model(), 
                                                    preds.mean, 
                                                    return_array, **kwargs),
-            self._predict_survival_function(self._get_baseline_model(), 
+            self._predict_survival_function(self.get_baseline_model(), 
                                                    preds.lower, 
                                                    return_array, **kwargs),
-            self._predict_survival_function(self._get_baseline_model(), 
+            self._predict_survival_function(self.get_baseline_model(), 
                                                    preds.upper, 
                                                    return_array, **kwargs))
             return DescribeResult(res[0], res[1], res[2])
-        return self._predict_survival_function(self._get_baseline_model(), 
+        return self._predict_survival_function(self.get_baseline_model(), 
                                                self.predict(X, **kwargs), 
                                                return_array, **kwargs)
 
     @property
     def unique_times_(self):
-        return self._get_baseline_model().unique_times_
+        return self.get_baseline_model().unique_times_
 
     @property
     def feature_importances_(self):

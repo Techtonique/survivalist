@@ -96,7 +96,10 @@ class SurvivalAnalysisMixin:
 
         name_event, name_time = y.dtype.names
 
-        risk_score = self.predict(X)
+        try: 
+            risk_score = self.predict(X).mean
+        except AttributeError:
+            risk_score = self.predict(X)
         if not getattr(self, "_predict_risk_score", True):
             risk_score *= -1  # convert prediction on time scale to risk scale
 
