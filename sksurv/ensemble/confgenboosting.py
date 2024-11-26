@@ -197,11 +197,8 @@ class PIComponentwiseGenGradientBoostingSurvivalAnalysis(ComponentwiseGenGradien
         self.obj_train.fit(X_train, y_train, sample_weight=sample_weight)
         self.calibrated_risk_scores_ = self.obj_train.predict(X_calib)         
         risk_scores_calib = self.obj_train.fit(X_calib, y_calib, sample_weight=sample_weight).predict(X_calib)
-        #print(f"Risk scores: {risk_scores_calib}")
         self.calibrated_residuals_ = np.abs(self.calibrated_risk_scores_ - risk_scores_calib)
-        #print(f"Calibrated residuals: {self.calibrated_residuals_}")
-        self.quantiles_ = np.quantile(self.calibrated_residuals_, 1 - self.alpha_)
-        print(f"Quantiles: {self.quantiles_}")
+        self.quantiles_ = np.quantile(self.calibrated_residuals_, 1 - self.alpha_)        
         return self
 
     def predict(self, X, **kwargs):
