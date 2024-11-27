@@ -1,6 +1,6 @@
 Linear Models
 =============
-.. currentmodule:: sksurv.linear_model
+.. currentmodule:: survivalist.linear_model
 
 .. autosummary::
     :toctree: generated/

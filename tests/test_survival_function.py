@@ -2,9 +2,9 @@ import numpy as np
 from numpy.testing import assert_array_almost_equal
 import pytest
 
-from sksurv.linear_model import CoxnetSurvivalAnalysis
-from sksurv.testing import all_survival_estimators
-from sksurv.util import Surv
+from survivalist.linear_model import CoxnetSurvivalAnalysis
+from survivalist.testing import all_survival_estimators
+from survivalist.util import Surv
 
 
 def all_survival_function_estimators():

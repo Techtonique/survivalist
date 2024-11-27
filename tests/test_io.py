@@ -6,8 +6,8 @@ import pandas as pd
 import pandas.testing as tm
 import pytest
 
-from sksurv.io import loadarff, writearff
-from sksurv.testing import FixtureParameterFactory
+from survivalist.io import loadarff, writearff
+from survivalist.testing import FixtureParameterFactory
 
 EXPECTED_1 = [
     "@relation test_nominal\n",

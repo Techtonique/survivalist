@@ -459,7 +459,7 @@ class RandomSurvivalForest(SurvivalAnalysisMixin, _BaseSurvivalForest):
 
     See also
     --------
-    sksurv.tree.SurvivalTree
+    survivalist.tree.SurvivalTree
         A single survival tree.
 
     Notes
@@ -569,20 +569,20 @@ class RandomSurvivalForest(SurvivalAnalysisMixin, _BaseSurvivalForest):
         return_array : boolean, default: False
             If set, return an array with the cumulative hazard rate
             for each `self.unique_times_`, otherwise an array of
-            :class:`sksurv.functions.StepFunction`.
+            :class:`survivalist.functions.StepFunction`.
 
         Returns
         -------
         cum_hazard : ndarray
             If `return_array` is set, an array with the cumulative hazard rate
             for each `self.unique_times_`, otherwise an array of length `n_samples`
-            of :class:`sksurv.functions.StepFunction` instances will be returned.
+            of :class:`survivalist.functions.StepFunction` instances will be returned.
 
         Examples
         --------
         >>> import matplotlib.pyplot as plt
-        >>> from sksurv.datasets import load_whas500
-        >>> from sksurv.ensemble import RandomSurvivalForest
+        >>> from survivalist.datasets import load_whas500
+        >>> from survivalist.ensemble import RandomSurvivalForest
 
         Load and prepare the data.
 
@@ -627,21 +627,21 @@ class RandomSurvivalForest(SurvivalAnalysisMixin, _BaseSurvivalForest):
         return_array : boolean
             If set, return an array with the probability
             of survival for each `self.unique_times_`,
-            otherwise an array of :class:`sksurv.functions.StepFunction`.
+            otherwise an array of :class:`survivalist.functions.StepFunction`.
 
         Returns
         -------
         survival : ndarray
             If `return_array` is set, an array with the probability
             of survival for each `self.unique_times_`,
-            otherwise an array of :class:`sksurv.functions.StepFunction`
+            otherwise an array of :class:`survivalist.functions.StepFunction`
             will be returned.
 
         Examples
         --------
         >>> import matplotlib.pyplot as plt
-        >>> from sksurv.datasets import load_whas500
-        >>> from sksurv.ensemble import RandomSurvivalForest
+        >>> from survivalist.datasets import load_whas500
+        >>> from survivalist.ensemble import RandomSurvivalForest
 
         Load and prepare the data.
 
@@ -804,7 +804,7 @@ class ExtraSurvivalTrees(SurvivalAnalysisMixin, _BaseSurvivalForest):
 
     See also
     --------
-    sksurv.tree.SurvivalTree
+    survivalist.tree.SurvivalTree
         A single survival tree.
     """
 
@@ -883,20 +883,20 @@ class ExtraSurvivalTrees(SurvivalAnalysisMixin, _BaseSurvivalForest):
         return_array : boolean, default: False
             If set, return an array with the cumulative hazard rate
             for each `self.unique_times_`, otherwise an array of
-            :class:`sksurv.functions.StepFunction`.
+            :class:`survivalist.functions.StepFunction`.
 
         Returns
         -------
         cum_hazard : ndarray
             If `return_array` is set, an array with the cumulative hazard rate
             for each `self.unique_times_`, otherwise an array of length `n_samples`
-            of :class:`sksurv.functions.StepFunction` instances will be returned.
+            of :class:`survivalist.functions.StepFunction` instances will be returned.
 
         Examples
         --------
         >>> import matplotlib.pyplot as plt
-        >>> from sksurv.datasets import load_whas500
-        >>> from sksurv.ensemble import ExtraSurvivalTrees
+        >>> from survivalist.datasets import load_whas500
+        >>> from survivalist.ensemble import ExtraSurvivalTrees
 
         Load and prepare the data.
 
@@ -941,21 +941,21 @@ class ExtraSurvivalTrees(SurvivalAnalysisMixin, _BaseSurvivalForest):
         return_array : boolean, default: False
             If set, return an array with the probability
             of survival for each `self.unique_times_`,
-            otherwise an array of :class:`sksurv.functions.StepFunction`.
+            otherwise an array of :class:`survivalist.functions.StepFunction`.
 
         Returns
         -------
         survival : ndarray
             If `return_array` is set, an array with the probability of
             survival for each `self.unique_times_`, otherwise an array of
-            length `n_samples` of :class:`sksurv.functions.StepFunction`
+            length `n_samples` of :class:`survivalist.functions.StepFunction`
             instances will be returned.
 
         Examples
         --------
         >>> import matplotlib.pyplot as plt
-        >>> from sksurv.datasets import load_whas500
-        >>> from sksurv.ensemble import ExtraSurvivalTrees
+        >>> from survivalist.datasets import load_whas500
+        >>> from survivalist.ensemble import ExtraSurvivalTrees
 
         Load and prepare the data.
 

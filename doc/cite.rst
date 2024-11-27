@@ -1,17 +1,17 @@
-Citing scikit-survival
+Citing survivalist
 ======================
 
-If you are using **scikit-survival** in your scientific research,
+If you are using **survivalist** in your scientific research,
 please cite the following paper:
 
-    S. Pölsterl, "scikit-survival: A Library for Time-to-Event Analysis Built on Top of scikit-learn,"
+    S. Pölsterl, "survivalist: A Library for Time-to-Event Analysis Built on Top of scikit-learn,"
     Journal of Machine Learning Research, vol. 21, no. 212, pp. 1–6, 2020.
 
 BibTeX entry::
 
-    @article{sksurv,
+    @article{survivalist,
       author  = {Sebastian P{\"o}lsterl},
-      title   = {scikit-survival: A Library for Time-to-Event Analysis Built on Top of scikit-learn},
+      title   = {survivalist: A Library for Time-to-Event Analysis Built on Top of scikit-learn},
       journal = {Journal of Machine Learning Research},
       year    = {2020},
       volume  = {21},

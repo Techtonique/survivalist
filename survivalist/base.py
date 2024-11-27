@@ -35,7 +35,7 @@ class SurvivalAnalysisMixin:
 
         Parameters
         ----------
-        baseline_model : sksurv.linear_model.coxph.BreslowEstimator
+        baseline_model : survivalist.linear_model.coxph.BreslowEstimator
             Estimator of baseline survival function.
 
         prediction : array-like, shape=(n_samples,)
@@ -44,7 +44,7 @@ class SurvivalAnalysisMixin:
         return_array : bool
             If True, return a float array of the survival function
             evaluated at the unique event times, otherwise return
-            an array of :class:`sksurv.functions.StepFunction` instances.
+            an array of :class:`survivalist.functions.StepFunction` instances.
 
         Returns
         -------
@@ -65,7 +65,7 @@ class SurvivalAnalysisMixin:
 
         Parameters
         ----------
-        baseline_model : sksurv.linear_model.coxph.BreslowEstimator
+        baseline_model : survivalist.linear_model.coxph.BreslowEstimator
             Estimator of baseline cumulative hazard function.
 
         prediction : array-like, shape=(n_samples,)
@@ -74,7 +74,7 @@ class SurvivalAnalysisMixin:
         return_array : bool
             If True, return a float array of the cumulative hazard function
             evaluated at the unique event times, otherwise return
-            an array of :class:`sksurv.functions.StepFunction` instances.
+            an array of :class:`survivalist.functions.StepFunction` instances.
 
         Returns
         -------

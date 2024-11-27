@@ -7,8 +7,8 @@ import pandas as pd
 import pandas.testing as tm
 import pytest
 
-from sksurv.testing import FixtureParameterFactory
-from sksurv.util import Surv, _PropertyAvailableIfDescriptor, property_available_if, safe_concat
+from survivalist.testing import FixtureParameterFactory
+from survivalist.util import Surv, _PropertyAvailableIfDescriptor, property_available_if, safe_concat
 
 
 class ConcatCasesFactory(FixtureParameterFactory):

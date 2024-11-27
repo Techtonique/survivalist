@@ -1,16 +1,14 @@
 import matplotlib.pyplot as plt
 import nnetsauce as ns 
 import numpy as np
-from sksurv.datasets import load_whas500, load_veterans_lung_cancer, load_gbsg2
-from sksurv.custom import SurvivalCustom
-from sksurv.tree import SurvivalTree
+from survivalist.datasets import load_whas500, load_veterans_lung_cancer, load_gbsg2
+from survivalist.custom import SurvivalCustom
 from sklearn.linear_model import Ridge, MultiTaskElasticNet, RidgeCV, ElasticNetCV, BayesianRidge, LassoCV
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor, ExtraTreesRegressor
 from sklearn.neural_network import MLPRegressor
-from sksurv.linear_model import CoxPHSurvivalAnalysis
-from sksurv.metrics import brier_score, integrated_brier_score
+from survivalist.metrics import brier_score, integrated_brier_score
 from time import time
 
 import pandas as pd

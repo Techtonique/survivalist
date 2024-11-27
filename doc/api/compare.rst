@@ -1,6 +1,6 @@
 Hypothesis testing
 ==================
-.. currentmodule:: sksurv.compare
+.. currentmodule:: survivalist.compare
 
 .. autosummary::
     :toctree: generated/

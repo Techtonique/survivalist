@@ -3,8 +3,8 @@ from numpy.testing import assert_array_equal
 import pandas as pd
 import pytest
 
-from sksurv.datasets import load_whas500
-from sksurv.testing import all_survival_estimators
+from survivalist.datasets import load_whas500
+from survivalist.testing import all_survival_estimators
 
 
 @pytest.mark.parametrize("estimator_cls", all_survival_estimators())

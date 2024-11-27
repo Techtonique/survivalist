@@ -10,23 +10,23 @@ from sklearn.exceptions import ConvergenceWarning
 from sklearn.metrics import mean_squared_error
 from sklearn.preprocessing import MinMaxScaler, normalize
 
-from sksurv.bintrees import AVLTree, RBTree
-from sksurv.column import encode_categorical
-from sksurv.datasets import get_x_y, load_whas500
-from sksurv.exceptions import NoComparablePairException
-from sksurv.io import loadarff
-from sksurv.kernels import ClinicalKernelTransform
-from sksurv.metrics import concordance_index_censored
-from sksurv.svm._prsvm import survival_constraints_simple
-from sksurv.svm.naive_survival_svm import NaiveSurvivalSVM
-from sksurv.svm.survival_svm import (
+from survivalist.bintrees import AVLTree, RBTree
+from survivalist.column import encode_categorical
+from survivalist.datasets import get_x_y, load_whas500
+from survivalist.exceptions import NoComparablePairException
+from survivalist.io import loadarff
+from survivalist.kernels import ClinicalKernelTransform
+from survivalist.metrics import concordance_index_censored
+from survivalist.svm._prsvm import survival_constraints_simple
+from survivalist.svm.naive_survival_svm import NaiveSurvivalSVM
+from survivalist.svm.survival_svm import (
     FastKernelSurvivalSVM,
     FastSurvivalSVM,
     OrderStatisticTreeSurvivalCounter,
     SurvivalCounter,
 )
-from sksurv.testing import FixtureParameterFactory, assert_cindex_almost_equal
-from sksurv.util import Surv
+from survivalist.testing import FixtureParameterFactory, assert_cindex_almost_equal
+from survivalist.util import Surv
 
 WHAS500_NOTIES_FILE = join(dirname(__file__), "data", "whas500-noties.arff")
 

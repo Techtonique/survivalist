@@ -1,6 +1,6 @@
 Survival Trees
 ==============
-.. currentmodule:: sksurv.tree
+.. currentmodule:: survivalist.tree
 
 .. autosummary::
     :toctree: generated/

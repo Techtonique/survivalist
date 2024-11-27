@@ -9,11 +9,11 @@ from sklearn.metrics import accuracy_score, roc_auc_score
 from sklearn.svm import SVC
 from sklearn.tree import DecisionTreeClassifier
 
-from sksurv.ensemble import RandomSurvivalForest
-from sksurv.linear_model import CoxPHSurvivalAnalysis
-from sksurv.meta import MeanEstimator, Stacking
-from sksurv.svm import FastSurvivalSVM
-from sksurv.testing import assert_chf_properties, assert_cindex_almost_equal, assert_survival_function_properties
+from survivalist.ensemble import RandomSurvivalForest
+from survivalist.linear_model import CoxPHSurvivalAnalysis
+from survivalist.meta import MeanEstimator, Stacking
+from survivalist.svm import FastSurvivalSVM
+from survivalist.testing import assert_chf_properties, assert_cindex_almost_equal, assert_survival_function_properties
 
 
 class _NoFitEstimator(BaseEstimator):

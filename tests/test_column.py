@@ -4,8 +4,8 @@ import pandas as pd
 import pandas.testing as tm
 import pytest
 
-from sksurv import column
-from sksurv.testing import FixtureParameterFactory
+from survivalist import column
+from survivalist.testing import FixtureParameterFactory
 
 
 class StandardizeCase(FixtureParameterFactory):

@@ -6,11 +6,11 @@ from sklearn.ensemble import ExtraTreesClassifier, RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import make_pipeline
 
-from sksurv.datasets import load_breast_cancer
-from sksurv.ensemble import ExtraSurvivalTrees, RandomSurvivalForest
-from sksurv.preprocessing import OneHotEncoder
-from sksurv.testing import assert_chf_properties, assert_cindex_almost_equal, assert_survival_function_properties
-from sksurv.tree import SurvivalTree
+from survivalist.datasets import load_breast_cancer
+from survivalist.ensemble import ExtraSurvivalTrees, RandomSurvivalForest
+from survivalist.preprocessing import OneHotEncoder
+from survivalist.testing import assert_chf_properties, assert_cindex_almost_equal, assert_survival_function_properties
+from survivalist.tree import SurvivalTree
 
 FORESTS = [
     RandomSurvivalForest,

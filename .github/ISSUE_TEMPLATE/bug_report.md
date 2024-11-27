@@ -36,5 +36,5 @@ Please paste or specifically describe the actual output or traceback.
 Please execute the following snippet and paste the output below.
 
 ```python
-import sksurv; sksurv.show_versions()
+import survivalist; survivalist.show_versions()
 ```

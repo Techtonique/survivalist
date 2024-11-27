@@ -1,9 +1,9 @@
-.. scikit-survival documentation master file
+.. survivalist documentation master file
 
-scikit-survival
+survivalist
 ===============
 
-scikit-survival is a Python module for `survival analysis <https://en.wikipedia.org/wiki/Survival_analysis>`_
+survivalist is a Python module for `survival analysis <https://en.wikipedia.org/wiki/Survival_analysis>`_
 built on top of `scikit-learn <https://scikit-learn.org/>`_. It allows doing survival analysis
 while utilizing the power of scikit-learn, e.g., for pre-processing or doing cross-validation.
 
@@ -30,12 +30,12 @@ this unique characteristic of such a dataset into account.
         :link: install
         :link-type: doc
 
-        The easiest way to install scikit-survival is to use
+        The easiest way to install survivalist is to use
         `Anaconda <https://www.anaconda.com/distribution/>`_ by running::
 
-          conda install -c conda-forge scikit-survival
+          conda install -c conda-forge survivalist
 
-        Alternatively, you can install scikit-survival from source
+        Alternatively, you can install survivalist from source
         following :ref:`this guide <install-from-source>`.
 
 
@@ -43,14 +43,14 @@ this unique characteristic of such a dataset into account.
         :link: user_guide/index
         :link-type: doc
 
-        The user guide provides in-depth information on the key concepts of scikit-survival, an overview of available survival models, and hands-on examples.
+        The user guide provides in-depth information on the key concepts of survivalist, an overview of available survival models, and hands-on examples.
 
 
     .. grid-item-card:: API Reference :fas:`cogs`
         :link: api/index
         :link-type: doc
 
-        The reference guide contains a detailed description of the scikit-survival API. It describes which classes and functions are available
+        The reference guide contains a detailed description of the survivalist API. It describes which classes and functions are available
         and what their parameters are.
 
 
@@ -59,7 +59,7 @@ this unique characteristic of such a dataset into account.
         :link-type: doc
 
         Saw a typo in the documentation? Want to add new functionalities? The contributing guidelines will guide you through the process of
-        setting up a development environment and submitting your changes to the scikit-survival team.
+        setting up a development environment and submitting your changes to the survivalist team.
 
 
 .. toctree::

@@ -6,11 +6,11 @@ import pytest
 from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import train_test_split
 
-from sksurv.datasets import load_gbsg2
-from sksurv.exceptions import NoComparablePairException
-from sksurv.functions import StepFunction
-from sksurv.linear_model import CoxPHSurvivalAnalysis
-from sksurv.metrics import (
+from survivalist.datasets import load_gbsg2
+from survivalist.exceptions import NoComparablePairException
+from survivalist.functions import StepFunction
+from survivalist.linear_model import CoxPHSurvivalAnalysis
+from survivalist.metrics import (
     as_concordance_index_ipcw_scorer,
     as_cumulative_dynamic_auc_scorer,
     as_integrated_brier_score_scorer,
@@ -20,11 +20,11 @@ from sksurv.metrics import (
     cumulative_dynamic_auc,
     integrated_brier_score,
 )
-from sksurv.nonparametric import kaplan_meier_estimator
-from sksurv.preprocessing import OneHotEncoder
-from sksurv.svm import FastSurvivalSVM
-from sksurv.testing import FixtureParameterFactory, assert_cindex_almost_equal
-from sksurv.util import Surv
+from survivalist.nonparametric import kaplan_meier_estimator
+from survivalist.preprocessing import OneHotEncoder
+from survivalist.svm import FastSurvivalSVM
+from survivalist.testing import FixtureParameterFactory, assert_cindex_almost_equal
+from survivalist.util import Surv
 
 
 def whas500_pred():

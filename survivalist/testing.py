@@ -20,8 +20,8 @@ from numpy.testing import assert_almost_equal, assert_array_equal
 import pytest
 from sklearn.base import BaseEstimator, TransformerMixin
 
-import sksurv
-from sksurv.metrics import concordance_index_censored
+import survivalist
+from survivalist.metrics import concordance_index_censored
 
 
 def assert_cindex_almost_equal(event_indicator, event_time, estimate, expected):
@@ -87,20 +87,20 @@ def _is_survival_estimator(x):
         inspect.isclass(x)
         and issubclass(x, BaseEstimator)
         and not issubclass(x, TransformerMixin)
-        and x.__module__.startswith("sksurv.")
+        and x.__module__.startswith("survivalist.")
         and not x.__name__.startswith("_")
         and x.__module__.split(".", 2)[1] not in {"metrics", "nonparametric"}
     )
 
 
 def all_survival_estimators():
-    root = str(Path(sksurv.__file__).parent)
+    root = str(Path(survivalist.__file__).parent)
     all_classes = []
     for _importer, modname, _ispkg in pkgutil.walk_packages(
-        path=[root], prefix="sksurv."
+        path=[root], prefix="survivalist."
     ):
         # meta-estimators require base estimators
-        if modname.startswith("sksurv.meta"):
+        if modname.startswith("survivalist.meta"):
             continue
         module = import_module(modname)
         for _name, cls in inspect.getmembers(module, _is_survival_estimator):

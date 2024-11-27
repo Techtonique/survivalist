@@ -55,13 +55,13 @@ jobs:
         if: runner.os == 'macOS'
       - name: Build package
         run: |
-          source activate sksurv-test
+          source activate survivalist-test
           python -m build .
-          pip install --exists-action=w --pre --no-index --find-links dist/ scikit-survival
-          rm -fr build dist sksurv
+          pip install --exists-action=w --pre --no-index --find-links dist/ survivalist
+          rm -fr build dist survivalist
       - name: Run Tests
         run: |
-          source activate sksurv-test
+          source activate survivalist-test
           ci/run_tests.sh
       - name: Check whether to create coverage report
         id: coverage
@@ -130,11 +130,11 @@ jobs:
           echo 'font.size: 10' >> ${XDG_CONFIG_HOME}/matplotlib/matplotlibrc
       - name: Build package
         run: |
-          source activate sksurv-test
+          source activate survivalist-test
           python -m build .
-          pip install --exists-action=w --pre --no-index --find-links dist/ scikit-survival
-          rm -fr build dist sksurv
+          pip install --exists-action=w --pre --no-index --find-links dist/ survivalist
+          rm -fr build dist survivalist
       - name: Test notebooks
         run: |
-          source activate sksurv-test
+          source activate survivalist-test
           pytest --nbval doc/user_guide/*.ipynb --nbval-sanitize-with ci/nb_sanitize.cfg

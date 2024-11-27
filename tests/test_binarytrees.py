@@ -1,6 +1,6 @@
 import pytest
 
-from sksurv.bintrees import AVLTree, RBTree
+from survivalist.bintrees import AVLTree, RBTree
 
 
 @pytest.fixture(params=[RBTree, AVLTree])

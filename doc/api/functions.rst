@@ -1,6 +1,6 @@
 Functions
 =========
-.. currentmodule:: sksurv.functions
+.. currentmodule:: survivalist.functions
 
 .. autosummary::
     :toctree: generated/

@@ -8,11 +8,11 @@ import pytest
 from sklearn.exceptions import ConvergenceWarning
 from sklearn.pipeline import make_pipeline
 
-from sksurv.datasets import get_x_y, load_breast_cancer
-from sksurv.linear_model.coxnet import CoxnetSurvivalAnalysis
-from sksurv.preprocessing import OneHotEncoder
-from sksurv.testing import FixtureParameterFactory
-from sksurv.util import Surv
+from survivalist.datasets import get_x_y, load_breast_cancer
+from survivalist.linear_model.coxnet import CoxnetSurvivalAnalysis
+from survivalist.preprocessing import OneHotEncoder
+from survivalist.testing import FixtureParameterFactory
+from survivalist.util import Surv
 
 BREAST_CANCER_COEFFICIENTS_FILE = join(dirname(__file__), "data", "breast_cancer_glmnet_coefficients.csv")
 BREAST_CANCER_HIGH_COEFFICIENTS_FILE = join(dirname(__file__), "data", "breast_cancer_glmnet_coefficients_high.csv")

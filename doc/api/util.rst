@@ -1,6 +1,6 @@
 Utilities
 =========
-.. currentmodule:: sksurv.util
+.. currentmodule:: survivalist.util
 
 .. autosummary::
     :toctree: generated/

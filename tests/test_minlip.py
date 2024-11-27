@@ -4,13 +4,13 @@ import pytest
 from sklearn.exceptions import ConvergenceWarning
 from sklearn.preprocessing import scale
 
-from sksurv.column import encode_categorical
-from sksurv.datasets import load_gbsg2
-from sksurv.exceptions import NoComparablePairException
-from sksurv.svm._minlip import create_difference_matrix
-from sksurv.svm.minlip import HingeLossSurvivalSVM, MinlipSurvivalAnalysis
-from sksurv.testing import FixtureParameterFactory, assert_cindex_almost_equal
-from sksurv.util import Surv
+from survivalist.column import encode_categorical
+from survivalist.datasets import load_gbsg2
+from survivalist.exceptions import NoComparablePairException
+from survivalist.svm._minlip import create_difference_matrix
+from survivalist.svm.minlip import HingeLossSurvivalSVM, MinlipSurvivalAnalysis
+from survivalist.testing import FixtureParameterFactory, assert_cindex_almost_equal
+from survivalist.util import Surv
 
 
 def create_toy_data():

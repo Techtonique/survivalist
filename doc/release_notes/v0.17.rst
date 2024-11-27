@@ -3,10 +3,10 @@
 What's new in 0.17
 ==================
 
-scikit-survival 0.17.2 (2022-04-24)
+survivalist 0.17.2 (2022-04-24)
 -----------------------------------
 
-This release fixes several issues with packaging scikit-survival.
+This release fixes several issues with packaging survivalist.
 
 Bug fixes
 ^^^^^^^^^
@@ -21,16 +21,16 @@ Documentation
 - Use `permutation_importance <https://scikit-learn.org/stable/modules/generated/sklearn.inspection.permutation_importance.html#sklearn.inspection.permutation_importance>`_
   from sklearn instead of eli5.
 - Build documentation with Sphinx 4.4.0.
-- Fix missing documentation for classes in ``sksurv.meta``.
+- Fix missing documentation for classes in ``survivalist.meta``.
 
 
-scikit-survival 0.17.1 (2022-03-05)
+survivalist 0.17.1 (2022-03-05)
 -----------------------------------
 
 This release adds support for Python 3.10.
 
 
-scikit-survival 0.17.0 (2022-01-09)
+survivalist 0.17.0 (2022-01-09)
 -----------------------------------
 
 This release adds support for scikit-learn 1.0, which includes
@@ -50,20 +50,20 @@ Enhancements
 ^^^^^^^^^^^^
 - Add support for ``feature_names_in_`` and ``n_features_in_``
   to all estimators and transforms.
-- Add :meth:`sksurv.preprocessing.OneHotEncoder.get_feature_names_out`.
+- Add :meth:`survivalist.preprocessing.OneHotEncoder.get_feature_names_out`.
 - Update bundled version of Eigen to 3.3.9.
 
 Backwards incompatible changes
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 - Drop ``min_impurity_split`` parameter from
-  :class:`sksurv.ensemble.GradientBoostingSurvivalAnalysis`.
+  :class:`survivalist.ensemble.GradientBoostingSurvivalAnalysis`.
 - ``base_estimators`` and ``meta_estimator`` attributes of
-  :class:`sksurv.meta.Stacking` do not contain fitted models anymore,
+  :class:`survivalist.meta.Stacking` do not contain fitted models anymore,
   use ``estimators_`` and ``final_estimator_``, respectively.
 
 Deprecations
 ^^^^^^^^^^^^
-- The ``normalize`` parameter of :class:`sksurv.linear_model.IPCRidge`
+- The ``normalize`` parameter of :class:`survivalist.linear_model.IPCRidge`
   is deprecated and will be removed in a future version. Instead, use
   a scikit-learn pipeline:
   ``make_pipeline(StandardScaler(with_mean=False), IPCRidge())``.

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# scikit-survival documentation build configuration file
+# survivalist documentation build configuration file
 #
 # This file is execfile()d with the current directory set to its
 # containing dir.
@@ -23,7 +23,7 @@ import sys
 from nbconvert.preprocessors import Preprocessor
 import nbsphinx
 
-import sksurv
+import survivalist
 
 # on_rtd is whether we are on readthedocs.org, this line of code grabbed from docs.readthedocs.org
 # https://docs.readthedocs.io/en/latest/faq.html?highlight=environ#how-do-i-change-behavior-for-read-the-docs
@@ -84,7 +84,7 @@ source_suffix = ".rst"
 master_doc = "index"
 
 # General information about the project.
-project = "scikit-survival"
+project = "survivalist"
 current_year = datetime.now(UTC).year
 copyright = f"2015-{current_year}, Sebastian Pölsterl and contributors"
 
@@ -96,7 +96,7 @@ copyright = f"2015-{current_year}, Sebastian Pölsterl and contributors"
 if on_rtd:
     release = get_version(project)
 else:
-    release = sksurv.__version__
+    release = survivalist.__version__
 
 # The short X.Y.Z version.
 version = ".".join(release.split(".")[:3])
@@ -154,9 +154,9 @@ nbsphinx_prolog = r"""
 
     <div class="admonition note" style="line-height: 150%;">
       This page was generated from
-      <a class="reference external" href="https://github.com/sebp/scikit-survival/blob/{{ branch|e }}/{{ docname|e }}">{{ docname|e }}</a>.<br/>
+      <a class="reference external" href="https://github.com/sebp/survivalist/blob/{{ branch|e }}/{{ docname|e }}">{{ docname|e }}</a>.<br/>
       Interactive online version:
-      <span style="white-space: nowrap;"><a href="https://mybinder.org/v2/gh/sebp/scikit-survival/{{ branch|e }}?urlpath=lab/tree/{{ notebook|e }}"><img alt="Binder badge" src="https://mybinder.org/badge_logo.svg" style="vertical-align:text-bottom"></a>.</span>
+      <span style="white-space: nowrap;"><a href="https://mybinder.org/v2/gh/sebp/survivalist/{{ branch|e }}?urlpath=lab/tree/{{ notebook|e }}"><img alt="Binder badge" src="https://mybinder.org/badge_logo.svg" style="vertical-align:text-bottom"></a>.</span>
     </div>
 """
 
@@ -190,7 +190,7 @@ html_sidebars = {
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
-html_title = f"scikit-survival {version}"
+html_title = f"survivalist {version}"
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
 # html_short_title = None
@@ -213,7 +213,7 @@ html_js_files = ["github-stats.js"]
 html_static_path = ["_static"]
 
 extlinks = {
-    "issue": ("https://github.com/sebp/scikit-survival/issues/%s", "#%s"),
+    "issue": ("https://github.com/sebp/survivalist/issues/%s", "#%s"),
 }
 
 intersphinx_mapping = {
@@ -230,8 +230,8 @@ def linkcode_resolve(domain, info):
 
     Adapted from scipy.
     """
-    import sksurv
-    from sksurv.util import _PropertyAvailableIfDescriptor
+    import survivalist
+    from survivalist.util import _PropertyAvailableIfDescriptor
 
     if domain != "py":
         return None
@@ -272,12 +272,12 @@ def linkcode_resolve(domain, info):
     else:
         linespec = ""
 
-    startdir = Path(sksurv.__file__).parent.parent.absolute()
-    if not fn.startswith(str(startdir)):  # not in sksurv
+    startdir = Path(survivalist.__file__).parent.parent.absolute()
+    if not fn.startswith(str(startdir)):  # not in survivalist
         return None
     fn = "/".join(Path(fn).relative_to(startdir).parts)
 
-    if fn.startswith("sksurv/"):
+    if fn.startswith("survivalist/"):
         m = re.match(r"^.*dev[0-9]+\+g([a-f0-9]+)$", release)
         if m:
             branch = m.group(1)
@@ -285,7 +285,7 @@ def linkcode_resolve(domain, info):
             branch = "master"
         else:
             branch = "v{}".format(release)
-        return "https://github.com/sebp/scikit-survival/blob/{branch}/{filename}{linespec}".format(
+        return "https://github.com/sebp/survivalist/blob/{branch}/{filename}{linespec}".format(
             branch=branch, filename=fn, linespec=linespec
         )
     else:
@@ -295,7 +295,7 @@ def linkcode_resolve(domain, info):
 class RTDUrlPreprocessor(Preprocessor):
     """Convert URLs to RTD in notebook to relative urls."""
 
-    URL_PATTERN = re.compile(r"\(https://scikit-survival\.readthedocs\.io/.+?/.+?/([-._a-zA-Z0-9/]+)/(.+?)\.html.*?\)")
+    URL_PATTERN = re.compile(r"\(https://survivalist\.readthedocs\.io/.+?/.+?/([-._a-zA-Z0-9/]+)/(.+?)\.html.*?\)")
     DOC_DIR = Path(__file__).parent
 
     def preprocess_cell(self, cell, resources, index):
@@ -343,7 +343,7 @@ def patch_sklearn():
     # Remove inherited API doc to avoid sphinx's duplicate object description error
     BaseGradientBoosting.feature_importances_.__doc__ = None
 
-    # Avoid "no attribute 'steps'" for sksurv.meta.Stacking and its subclasses
+    # Avoid "no attribute 'steps'" for survivalist.meta.Stacking and its subclasses
     _BaseComposition.steps = []
 
 

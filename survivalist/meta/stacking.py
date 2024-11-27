@@ -317,14 +317,14 @@ class Stacking(MetaEstimatorMixin, SurvivalAnalysisMixin, _BaseComposition):
         return_array : boolean, default: False
             If set, return an array with the cumulative hazard rate
             for each `self.unique_times_`, otherwise an array of
-            :class:`sksurv.functions.StepFunction`.
+            :class:`survivalist.functions.StepFunction`.
 
         Returns
         -------
         cum_hazard : ndarray
             If `return_array` is set, an array with the cumulative hazard rate
             for each `self.unique_times_`, otherwise an array of length `n_samples`
-            of :class:`sksurv.functions.StepFunction` instances will be returned.
+            of :class:`survivalist.functions.StepFunction` instances will be returned.
         """
         Xt = self._predict_estimators(X)
         return self.final_estimator_.predict_cumulative_hazard_function(
@@ -347,13 +347,13 @@ class Stacking(MetaEstimatorMixin, SurvivalAnalysisMixin, _BaseComposition):
         survival : ndarray
             If `return_array` is set, an array with the probability of
             survival for each `self.unique_times_`, otherwise an array of
-            length `n_samples` of :class:`sksurv.functions.StepFunction`
+            length `n_samples` of :class:`survivalist.functions.StepFunction`
             instances will be returned.
 
         return_array : boolean, default: False
             If set, return an array with the probability
             of survival for each `self.unique_times_`,
-            otherwise an array of :class:`sksurv.functions.StepFunction`.
+            otherwise an array of :class:`survivalist.functions.StepFunction`.
 
         """
         Xt = self._predict_estimators(X)

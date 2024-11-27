@@ -1,6 +1,6 @@
 Kernels
 =======
-.. currentmodule:: sksurv.kernels
+.. currentmodule:: survivalist.kernels
 
 .. autosummary::
     :toctree: generated/

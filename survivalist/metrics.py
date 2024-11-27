@@ -406,7 +406,7 @@ def cumulative_dynamic_auc(
     censoring is independent of the features.
 
     This function can also be used to evaluate models with time-dependent predictions
-    :math:`\\hat{f}(\\mathbf{x}_i, t)`, such as :class:`sksurv.ensemble.RandomSurvivalForest`
+    :math:`\\hat{f}(\\mathbf{x}_i, t)`, such as :class:`survivalist.ensemble.RandomSurvivalForest`
     (see :ref:`User Guide </user_guide/evaluating-survival-models.ipynb#Using-Time-dependent-Risk-Scores>`).
     In this case, `estimate` must be a 2-d array where ``estimate[i, j]`` is the
     predicted risk score for the i-th instance at time point ``times[j]``.
@@ -618,10 +618,10 @@ def brier_score(survival_train, survival_test, estimate, times):
 
     Examples
     --------
-    >>> from sksurv.datasets import load_gbsg2
-    >>> from sksurv.linear_model import CoxPHSurvivalAnalysis
-    >>> from sksurv.metrics import brier_score
-    >>> from sksurv.preprocessing import OneHotEncoder
+    >>> from survivalist.datasets import load_gbsg2
+    >>> from survivalist.linear_model import CoxPHSurvivalAnalysis
+    >>> from survivalist.metrics import brier_score
+    >>> from survivalist.preprocessing import OneHotEncoder
 
     Load and prepare data.
 
@@ -740,10 +740,10 @@ def integrated_brier_score(survival_train, survival_test, estimate, times):
     Examples
     --------
     >>> import numpy as np
-    >>> from sksurv.datasets import load_gbsg2
-    >>> from sksurv.linear_model import CoxPHSurvivalAnalysis
-    >>> from sksurv.metrics import integrated_brier_score
-    >>> from sksurv.preprocessing import OneHotEncoder
+    >>> from survivalist.datasets import load_gbsg2
+    >>> from survivalist.linear_model import CoxPHSurvivalAnalysis
+    >>> from survivalist.metrics import integrated_brier_score
+    >>> from survivalist.preprocessing import OneHotEncoder
 
     Load and prepare data.
 

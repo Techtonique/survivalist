@@ -24,7 +24,7 @@ def show_versions():
     }
 
     deps = [
-        "scikit-survival",
+        "survivalist",
         "scikit-learn",
         "numpy",
         "scipy",
@@ -132,7 +132,7 @@ def patch_pipeline():
 
 
 try:
-    __version__ = version("scikit-survival")
+    __version__ = version("survivalist")
 except PackageNotFoundError:  # pragma: no cover
     # package is not installed
     __version__ = "unknown"

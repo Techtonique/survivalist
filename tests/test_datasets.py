@@ -10,9 +10,9 @@ import pandas as pd
 import pandas.testing as tm
 import pytest
 
-import sksurv.datasets as sdata
-from sksurv.io import writearff
-from sksurv.testing import FixtureParameterFactory
+import survivalist.datasets as sdata
+from survivalist.io import writearff
+from survivalist.testing import FixtureParameterFactory
 
 ARFF_CATEGORICAL_INDEX_1 = """@relation arff_categorical_index
 @attribute index {SampleOne,SampleTwo,SampleThree,SampleFour}

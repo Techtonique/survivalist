@@ -1,6 +1,6 @@
 Ensemble Models
 ===============
-.. currentmodule:: sksurv.ensemble
+.. currentmodule:: survivalist.ensemble
 
 .. autosummary::
     :toctree: generated/

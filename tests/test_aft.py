@@ -3,9 +3,9 @@ from numpy.testing import assert_array_almost_equal
 import pytest
 from sklearn.pipeline import make_pipeline
 
-from sksurv.base import SurvivalAnalysisMixin
-from sksurv.linear_model import IPCRidge
-from sksurv.testing import assert_cindex_almost_equal
+from survivalist.base import SurvivalAnalysisMixin
+from survivalist.linear_model import IPCRidge
+from survivalist.testing import assert_cindex_almost_equal
 
 
 class TestIPCRidge:

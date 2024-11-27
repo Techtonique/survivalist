@@ -41,11 +41,11 @@ reStructuredText
 readthedocs
 scikit
 scikit-learn
-scikit-survival
+survivalist
 scipy
 sigmoid
 sklearn
-sksurv
+survivalist
 sqrt
 stagewise
 subobjects

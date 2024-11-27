@@ -5,15 +5,15 @@ from sklearn.dummy import DummyRegressor
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import KFold, ParameterGrid
 
-from sksurv.ensemble import ComponentwiseGradientBoostingSurvivalAnalysis
-from sksurv.kernels import ClinicalKernelTransform
-from sksurv.linear_model import IPCRidge
-from sksurv.meta import EnsembleSelection, EnsembleSelectionRegressor
-from sksurv.metrics import concordance_index_censored
-from sksurv.svm import FastKernelSurvivalSVM, FastSurvivalSVM
-from sksurv.testing import FixtureParameterFactory, assert_cindex_almost_equal
-from sksurv.tree import SurvivalTree
-from sksurv.util import check_array_survival
+from survivalist.ensemble import ComponentwiseGradientBoostingSurvivalAnalysis
+from survivalist.kernels import ClinicalKernelTransform
+from survivalist.linear_model import IPCRidge
+from survivalist.meta import EnsembleSelection, EnsembleSelectionRegressor
+from survivalist.metrics import concordance_index_censored
+from survivalist.svm import FastKernelSurvivalSVM, FastSurvivalSVM
+from survivalist.testing import FixtureParameterFactory, assert_cindex_almost_equal
+from survivalist.tree import SurvivalTree
+from survivalist.util import check_array_survival
 
 
 def score_cindex(est, X_test, y_test, **predict_params):

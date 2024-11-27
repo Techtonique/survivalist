@@ -290,7 +290,7 @@ def kaplan_meier_estimator(
 
     See also
     --------
-    sksurv.nonparametric.SurvivalFunctionEstimator
+    survivalist.nonparametric.SurvivalFunctionEstimator
         Estimator API of the Kaplan-Meier estimator.
 
     References
@@ -456,7 +456,7 @@ class SurvivalFunctionEstimator(BaseEstimator):
 
     See also
     --------
-    sksurv.nonparametric.kaplan_meier_estimator
+    survivalist.nonparametric.kaplan_meier_estimator
         Functional API of the Kaplan-Meier estimator.
     """
 

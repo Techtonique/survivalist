@@ -16,19 +16,19 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "scikit-survival"
+name = "survivalist"
 description = "Survival analysis built on top of scikit-learn"
-readme = "README.rst"
+readme = "README.md"
 authors = [
-    {name = "Sebastian Pölsterl", email = "sebp@k-d-w.org"}
+    {name = "T. Moudiki", email = "thierry.moudiki@gmail.com"}
 ]
-license = {file = "COPYING"}
+license = {file = "LICENSE"}
 requires-python = ">=3.10"
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Science/Research",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "License :: OSI Approved :: BSD3 Clause Clear",
     "Operating System :: MacOS",
     "Operating System :: Microsoft :: Windows",
     "Operating System :: POSIX",
@@ -57,11 +57,11 @@ dependencies = [
 dynamic = ["version"]
 
 [project.urls]
-"Homepage" = "https://github.com/sebp/scikit-survival"
-"Documentation" = "https://scikit-survival.readthedocs.io"
-"Source Code" = "https://github.com/sebp/scikit-survival"
-"Bug Tracker" = "https://github.com/sebp/scikit-survival/issues"
-"Release Notes" = "https://scikit-survival.readthedocs.io/en/latest/release_notes.html"
+"Homepage" = "https://techtonique.github.io/survivalist"
+"Documentation" = "https://techtonique.github.io/survivalist"
+"Source Code" = "https://github.com/Techtonique/survivalist"
+"Bug Tracker" = "https://github.com/Techtonique/survivalist/issues"
+"Release Notes" = "https://github.com/Techtonique/survivalist/releases"
 
 [project.optional-dependencies]
 dev = [
@@ -105,15 +105,14 @@ nbval = [
 include-package-data = false
 
 [tool.setuptools.packages.find]
-include = ["sksurv*"]
+include = ["survivalist*"]
 namespaces = false
 
 [tool.setuptools.package-data]
-"sksurv.datasets" = ["data/*.arff"]
+"survivalist.datasets" = ["data/*.arff"]
 
 [tool.black]
 line-length = 120
-extend-exclude = "sksurv/linear_model/src/eigen"
 target-version = ["py310"]
 
 [tool.pytest.ini_options]
@@ -148,7 +147,7 @@ filterwarnings = [
 branch = true
 plugins = ["Cython.Coverage"]
 relative_files = true
-source = ["sksurv"]
+source = ["survivalist"]
 
 [tool.coverage.report]
 exclude_lines = [
@@ -177,8 +176,7 @@ omit = [
 
 [tool.ruff]
 extend-exclude = [
-    "doc/conf.py",
-    "sksurv/linear_model/src/eigen",
+    "doc/conf.py"
 ]
 # Group violations by containing file.
 output-format = "grouped"
@@ -208,6 +206,6 @@ max-complexity = 10
 
 [tool.ruff.lint.isort]
 force-sort-within-sections = true
-known-first-party = ["sksurv"]
+known-first-party = ["survivalist"]
 
 [tool.setuptools_scm]

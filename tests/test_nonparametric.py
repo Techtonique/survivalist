@@ -5,14 +5,14 @@ from numpy.testing import assert_array_almost_equal, assert_array_equal
 import pandas as pd
 import pytest
 
-from sksurv.nonparametric import (
+from survivalist.nonparametric import (
     CensoringDistributionEstimator,
     SurvivalFunctionEstimator,
     kaplan_meier_estimator,
     nelson_aalen_estimator,
 )
-from sksurv.testing import FixtureParameterFactory
-from sksurv.util import Surv
+from survivalist.testing import FixtureParameterFactory
+from survivalist.util import Surv
 
 CHANNING_FILE = join(dirname(__file__), "data", "channing.csv")
 AIDS_CHILDREN_FILE = join(dirname(__file__), "data", "Lagakos_AIDS_children.csv")

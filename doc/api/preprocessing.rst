@@ -1,13 +1,13 @@
 Pre-Processing
 ==============
-.. currentmodule:: sksurv.preprocessing
+.. currentmodule:: survivalist.preprocessing
 
 .. autosummary::
     :toctree: generated/
 
     OneHotEncoder
 
-.. currentmodule:: sksurv.column
+.. currentmodule:: survivalist.column
 
 .. autosummary::
     :toctree: generated/

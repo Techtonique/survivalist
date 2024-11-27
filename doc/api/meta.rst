@@ -1,6 +1,6 @@
 Meta Models
 ===========
-.. currentmodule:: sksurv.meta
+.. currentmodule:: survivalist.meta
 
 .. autosummary::
     :toctree: generated/

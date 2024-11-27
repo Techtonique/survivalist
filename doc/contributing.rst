@@ -3,7 +3,7 @@
 Contributing Guidelines
 =======================
 
-This page explains how you can contribute to the development of scikit-survival.
+This page explains how you can contribute to the development of survivalist.
 There are a lot of ways you can contribute:
 
 - Writing new code, e.g. implementations of new algorithms, or examples.
@@ -11,8 +11,8 @@ There are a lot of ways you can contribute:
 - Improving documentation.
 - Reviewing open pull requests.
 
-scikit-survival is developed on `GitHub`_ using the `Git`_ version control system.
-The preferred way to contribute to scikit-survival is to fork
+survivalist is developed on `GitHub`_ using the `Git`_ version control system.
+The preferred way to contribute to survivalist is to fork
 the main repository on GitHub, then submit a *pull request* (PR).
 
 
@@ -21,7 +21,7 @@ the main repository on GitHub, then submit a *pull request* (PR).
 Creating a Fork
 ---------------
 
-These are the steps you need to take to create a copy of the scikit-survival repository
+These are the steps you need to take to create a copy of the survivalist repository
 on your computer.
 
 
@@ -29,13 +29,13 @@ on your computer.
    GitHub if you do not already have one.
 
 2. `Fork <https://help.github.com/en/github/getting-started-with-github/fork-a-repo>`_
-   the `scikit-survival repository <https://github.com/sebp/scikit-survival>`_.
+   the `survivalist repository <https://github.com/sebp/survivalist>`_.
 
-3. Clone your fork of the scikit-survival repository from your GitHub account to your local disk.
+3. Clone your fork of the survivalist repository from your GitHub account to your local disk.
    You have to execute from the command line::
 
-    git clone --recurse-submodules git@github.com:YourLogin/scikit-survival.git
-    cd scikit-survival
+    git clone --recurse-submodules git@github.com:YourLogin/survivalist.git
+    cd survivalist
 
 
 .. _setup-dev-environment:
@@ -51,17 +51,17 @@ These are the steps you need to take.
 
 1. Install `conda`_ for your operating system if you haven't already.
 
-2. Create a new environment, named ``sksurv``::
+2. Create a new environment, named ``survivalist``::
 
     python ci/render-requirements.py ci/deps/requirements.yaml.tmpl > dev-environment.yaml
-    conda env create -n sksurv --file dev-environment.yaml
+    conda env create -n survivalist --file dev-environment.yaml
 
 
 3. Activate the newly created environment::
 
-    conda activate sksurv
+    conda activate survivalist
 
-4. Compile the C/C++ extensions and install scikit-survival in development mode::
+4. Compile the C/C++ extensions and install survivalist in development mode::
 
     pip install -e .[dev]
 
@@ -89,7 +89,7 @@ For a pull request to be accepted, your changes must meet the below requirements
    Alternatively, you can use `pre-commit`_ to check your code on every commit automatically.
 
 3. Each function, class, method, and attribute needs to be documented using doc strings.
-   scikit-survival conforms to the
+   survivalist conforms to the
    `numpy docstring standard <https://numpydoc.readthedocs.io/en/latest/format.html#docstring-standard>`_.
 
 4. Code submissions must always include unit tests.
@@ -102,7 +102,7 @@ For a pull request to be accepted, your changes must meet the below requirements
    Tests will also be executed automatically once you submit a pull request.
 
 5. The contributed code will be licensed under the
-   `GNU General Public License v3.0 <https://github.com/sebp/scikit-survival/blob/master/COPYING>`_.
+   `GNU General Public License v3.0 <https://github.com/sebp/survivalist/blob/master/COPYING>`_.
    If you did not write the code yourself, you must ensure the existing license
    is compatible and include the license information in the contributed files,
    or obtain a permission from the original author to relicense the contributed code.
@@ -164,7 +164,7 @@ If you are new to Cython you may find the project's documentation on
 .. _conda: https://conda.io/miniconda.html
 .. _Cython: https://cython.org
 .. _Git: https://git-scm.com/
-.. _GitHub: https://github.com/sebp/scikit-survival
+.. _GitHub: https://github.com/sebp/survivalist
 .. _Sphinx: https://www.sphinx-doc.org/
 .. _tox: https://tox.readthedocs.io/en/latest/
 .. _pre-commit: https://pre-commit.com/#usage

@@ -7,9 +7,9 @@ import pandas as pd
 import pytest
 from scipy.sparse import coo_matrix
 
-from sksurv.column import categorical_to_numeric, encode_categorical, standardize
-from sksurv.datasets import load_breast_cancer, load_whas500
-from sksurv.util import Surv
+from survivalist.column import categorical_to_numeric, encode_categorical, standardize
+from survivalist.datasets import load_breast_cancer, load_whas500
+from survivalist.util import Surv
 
 DataSet = namedtuple("DataSet", ["x", "y"])
 DataSetWithNames = namedtuple("DataSetWithNames", ["x", "y", "names", "x_data_frame"])

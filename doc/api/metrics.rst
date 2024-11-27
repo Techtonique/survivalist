@@ -1,6 +1,6 @@
 Metrics
 =======
-.. currentmodule:: sksurv.metrics
+.. currentmodule:: survivalist.metrics
 
 .. autosummary::
     :toctree: generated/

@@ -1,7 +1,7 @@
 import pytest
 
-from sksurv.base import SurvivalAnalysisMixin
-from sksurv.testing import all_survival_estimators
+from survivalist.base import SurvivalAnalysisMixin
+from survivalist.testing import all_survival_estimators
 
 
 @pytest.mark.parametrize("estimator_cls", all_survival_estimators())

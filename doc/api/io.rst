@@ -1,6 +1,6 @@
 I/O Utilities
 =============
-.. currentmodule:: sksurv.io
+.. currentmodule:: survivalist.io
 
 .. autosummary::
     :toctree: generated/

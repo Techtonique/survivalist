@@ -9,10 +9,10 @@ from sklearn.exceptions import ConvergenceWarning
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 
-from sksurv.column import standardize
-from sksurv.datasets import load_breast_cancer
-from sksurv.linear_model.coxph import CoxPHOptimizer, CoxPHSurvivalAnalysis
-from sksurv.preprocessing import OneHotEncoder
+from survivalist.column import standardize
+from survivalist.datasets import load_breast_cancer
+from survivalist.linear_model.coxph import CoxPHOptimizer, CoxPHSurvivalAnalysis
+from survivalist.preprocessing import OneHotEncoder
 
 
 @pytest.fixture()

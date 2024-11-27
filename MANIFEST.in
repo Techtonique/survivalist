@@ -1,5 +1,4 @@
 # by default, the source distribution includes everything that is under version control
-graft sksurv/linear_model/src/eigen/Eigen
 
 prune doc/_build
 prune doc/api/generated

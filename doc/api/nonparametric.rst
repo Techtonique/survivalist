@@ -1,6 +1,6 @@
 Non-parametric Estimators
 =========================
-.. currentmodule:: sksurv.nonparametric
+.. currentmodule:: survivalist.nonparametric
 
 .. autosummary::
     :toctree: generated/

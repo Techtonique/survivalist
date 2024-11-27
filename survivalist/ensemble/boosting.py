@@ -569,20 +569,20 @@ class ComponentwiseGradientBoostingSurvivalAnalysis(
         return_array : boolean, default: False
             If set, return an array with the cumulative hazard rate
             for each `self.unique_times_`, otherwise an array of
-            :class:`sksurv.functions.StepFunction`.
+            :class:`survivalist.functions.StepFunction`.
 
         Returns
         -------
         cum_hazard : ndarray
             If `return_array` is set, an array with the cumulative hazard rate
             for each `self.unique_times_`, otherwise an array of length `n_samples`
-            of :class:`sksurv.functions.StepFunction` instances will be returned.
+            of :class:`survivalist.functions.StepFunction` instances will be returned.
 
         Examples
         --------
         >>> import matplotlib.pyplot as plt
-        >>> from sksurv.datasets import load_whas500
-        >>> from sksurv.ensemble import ComponentwiseGradientBoostingSurvivalAnalysis
+        >>> from survivalist.datasets import load_whas500
+        >>> from survivalist.ensemble import ComponentwiseGradientBoostingSurvivalAnalysis
 
         Load the data.
 
@@ -633,21 +633,21 @@ class ComponentwiseGradientBoostingSurvivalAnalysis(
         return_array : boolean, default: False
             If set, return an array with the probability
             of survival for each `self.unique_times_`,
-            otherwise an array of :class:`sksurv.functions.StepFunction`.
+            otherwise an array of :class:`survivalist.functions.StepFunction`.
 
         Returns
         -------
         survival : ndarray
             If `return_array` is set, an array with the probability of
             survival for each `self.unique_times_`, otherwise an array of
-            length `n_samples` of :class:`sksurv.functions.StepFunction`
+            length `n_samples` of :class:`survivalist.functions.StepFunction`
             instances will be returned.
 
         Examples
         --------
         >>> import matplotlib.pyplot as plt
-        >>> from sksurv.datasets import load_whas500
-        >>> from sksurv.ensemble import ComponentwiseGradientBoostingSurvivalAnalysis
+        >>> from survivalist.datasets import load_whas500
+        >>> from survivalist.ensemble import ComponentwiseGradientBoostingSurvivalAnalysis
 
         Load the data.
 
@@ -936,7 +936,7 @@ class GradientBoostingSurvivalAnalysis(
 
     See also
     --------
-    sksurv.ensemble.ComponentwiseGradientBoostingSurvivalAnalysis
+    survivalist.ensemble.ComponentwiseGradientBoostingSurvivalAnalysis
         Gradient boosting with component-wise least squares as base learner.
 
     References
@@ -1614,20 +1614,20 @@ class GradientBoostingSurvivalAnalysis(
         return_array : boolean, default: False
             If set, return an array with the cumulative hazard rate
             for each `self.unique_times_`, otherwise an array of
-            :class:`sksurv.functions.StepFunction`.
+            :class:`survivalist.functions.StepFunction`.
 
         Returns
         -------
         cum_hazard : ndarray
             If `return_array` is set, an array with the cumulative hazard rate
             for each `self.unique_times_`, otherwise an array of length `n_samples`
-            of :class:`sksurv.functions.StepFunction` instances will be returned.
+            of :class:`survivalist.functions.StepFunction` instances will be returned.
 
         Examples
         --------
         >>> import matplotlib.pyplot as plt
-        >>> from sksurv.datasets import load_whas500
-        >>> from sksurv.ensemble import GradientBoostingSurvivalAnalysis
+        >>> from survivalist.datasets import load_whas500
+        >>> from survivalist.ensemble import GradientBoostingSurvivalAnalysis
 
         Load the data.
 
@@ -1678,21 +1678,21 @@ class GradientBoostingSurvivalAnalysis(
         return_array : boolean, default: False
             If set, return an array with the probability
             of survival for each `self.unique_times_`,
-            otherwise an array of :class:`sksurv.functions.StepFunction`.
+            otherwise an array of :class:`survivalist.functions.StepFunction`.
 
         Returns
         -------
         survival : ndarray
             If `return_array` is set, an array with the probability of
             survival for each `self.unique_times_`, otherwise an array of
-            length `n_samples` of :class:`sksurv.functions.StepFunction`
+            length `n_samples` of :class:`survivalist.functions.StepFunction`
             instances will be returned.
 
         Examples
         --------
         >>> import matplotlib.pyplot as plt
-        >>> from sksurv.datasets import load_whas500
-        >>> from sksurv.ensemble import GradientBoostingSurvivalAnalysis
+        >>> from survivalist.datasets import load_whas500
+        >>> from survivalist.ensemble import GradientBoostingSurvivalAnalysis
 
         Load the data.
 

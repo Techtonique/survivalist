@@ -3,7 +3,7 @@
 What's new in 0.5
 =================
 
-scikit-survival 0.5 (2017-12-09)
+survivalist 0.5 (2017-12-09)
 --------------------------------
 
 This release adds support for scikit-learn 0.19 and pandas 0.21. In turn,

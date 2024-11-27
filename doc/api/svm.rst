@@ -2,7 +2,7 @@
 
 Survival Support Vector Machine
 ===============================
-.. currentmodule:: sksurv.svm
+.. currentmodule:: survivalist.svm
 
 .. autosummary::
     :toctree: generated/

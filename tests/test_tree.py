@@ -11,11 +11,11 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import OrdinalEncoder
 from sklearn.tree._tree import TREE_UNDEFINED
 
-from sksurv.compare import compare_survival
-from sksurv.datasets import load_breast_cancer, load_veterans_lung_cancer
-from sksurv.nonparametric import kaplan_meier_estimator, nelson_aalen_estimator
-from sksurv.tree import ExtraSurvivalTree, SurvivalTree
-from sksurv.util import Surv
+from survivalist.compare import compare_survival
+from survivalist.datasets import load_breast_cancer, load_veterans_lung_cancer
+from survivalist.nonparametric import kaplan_meier_estimator, nelson_aalen_estimator
+from survivalist.tree import ExtraSurvivalTree, SurvivalTree
+from survivalist.util import Surv
 
 
 @pytest.fixture()

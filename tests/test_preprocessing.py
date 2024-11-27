@@ -6,7 +6,7 @@ import pandas as pd
 import pandas.testing as tm
 import pytest
 
-from sksurv.preprocessing import OneHotEncoder
+from survivalist.preprocessing import OneHotEncoder
 
 
 def _encoded_data(data):

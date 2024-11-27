@@ -3,7 +3,7 @@
 What's new in 0.18
 ==================
 
-scikit-survival 0.18.0 (2022-08-15)
+survivalist 0.18.0 (2022-08-15)
 -----------------------------------
 
 This release adds support for scikit-learn 1.1, which
@@ -25,17 +25,17 @@ the minimum supported versions of dependencies are updated to
 
 Enhancements
 ^^^^^^^^^^^^
-- Add ``n_iter_`` attribute to all estimators in :ref:`sksurv.svm <mod-svm>` (:issue:`277`).
+- Add ``n_iter_`` attribute to all estimators in :ref:`survivalist.svm <mod-svm>` (:issue:`277`).
 - Add ``return_array`` argument to all models providing
   ``predict_survival_function`` and ``predict_cumulative_hazard_function``
   (:issue:`268`).
 
 Deprecations
 ^^^^^^^^^^^^
-- The ``loss_`` attribute of :class:`sksurv.ensemble.ComponentwiseGradientBoostingSurvivalAnalysis`
-  and :class:`sksurv.ensemble.GradientBoostingSurvivalAnalysis`
+- The ``loss_`` attribute of :class:`survivalist.ensemble.ComponentwiseGradientBoostingSurvivalAnalysis`
+  and :class:`survivalist.ensemble.GradientBoostingSurvivalAnalysis`
   has been deprecated.
 - The default for the ``max_features`` argument has been changed
-  from ``'auto'`` to ``'sqrt'`` for :class:`sksurv.ensemble.RandomSurvivalForest`
-  and :class:`sksurv.ensemble.ExtraSurvivalTrees`. ``'auto'`` and ``'sqrt'``
+  from ``'auto'`` to ``'sqrt'`` for :class:`survivalist.ensemble.RandomSurvivalForest`
+  and :class:`survivalist.ensemble.ExtraSurvivalTrees`. ``'auto'`` and ``'sqrt'``
   have the same effect.

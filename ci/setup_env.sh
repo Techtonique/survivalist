@@ -14,19 +14,19 @@ fi
 
 python ci/render-requirements.py ci/deps/requirements.yaml.tmpl > environment.yaml
 
-conda env create -n sksurv-test --file environment.yaml
+conda env create -n survivalist-test --file environment.yaml
 
-echo "numpy ${CI_NUMPY_VERSION:?}" > "${CONDA:?}/envs/sksurv-test/conda-meta/pinned"
-echo "pandas ${CI_PANDAS_VERSION:?}" >> "${CONDA:?}/envs/sksurv-test/conda-meta/pinned"
-echo "scikit-learn ${CI_SKLEARN_VERSION:?}" >> "${CONDA:?}/envs/sksurv-test/conda-meta/pinned"
+echo "numpy ${CI_NUMPY_VERSION:?}" > "${CONDA:?}/envs/survivalist-test/conda-meta/pinned"
+echo "pandas ${CI_PANDAS_VERSION:?}" >> "${CONDA:?}/envs/survivalist-test/conda-meta/pinned"
+echo "scikit-learn ${CI_SKLEARN_VERSION:?}" >> "${CONDA:?}/envs/survivalist-test/conda-meta/pinned"
 
 # Useful for debugging any issues with conda
 conda info -a
 
 # shellcheck disable=SC1091
-source activate sksurv-test
+source activate survivalist-test
 
 # delete any version that is already installed
-pip uninstall --yes scikit-survival || exit 0
+pip uninstall --yes survivalist || exit 0
 
-conda list -n sksurv-test
+conda list -n survivalist-test

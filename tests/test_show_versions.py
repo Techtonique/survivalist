@@ -1,10 +1,10 @@
 import re
 
-import sksurv
+import survivalist
 
 
 def test_show_versions(capsys):
-    sksurv.show_versions()
+    survivalist.show_versions()
     captured = capsys.readouterr()
 
     assert "SYSTEM" in captured.out

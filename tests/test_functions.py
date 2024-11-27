@@ -2,8 +2,8 @@ import numpy as np
 from numpy.testing import assert_array_equal
 import pytest
 
-from sksurv.functions import StepFunction
-from sksurv.testing import all_survival_estimators
+from survivalist.functions import StepFunction
+from survivalist.testing import all_survival_estimators
 
 
 @pytest.fixture()
@@ -27,7 +27,7 @@ def toy_data_exponential():
     y["event"][:2] = True
 
     # mark entry with largest time as censored
-    # see https://github.com/sebp/scikit-survival/issues/249
+    # see https://github.com/sebp/survivalist/issues/249
     idxmax = np.argmax(y["time"])
     y["event"][idxmax] = False
     return x, y

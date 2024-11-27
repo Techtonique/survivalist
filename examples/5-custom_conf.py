@@ -1,15 +1,13 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from sksurv.datasets import load_whas500, load_gbsg2, load_veterans_lung_cancer
-from sksurv.custom import PISurvivalCustom
-from sksurv.tree import SurvivalTree
-from sksurv.ensemble import GradientBoostingSurvivalAnalysis
+from survivalist.datasets import load_whas500, load_gbsg2, load_veterans_lung_cancer
+from survivalist.custom import PISurvivalCustom
+from survivalist.ensemble import GradientBoostingSurvivalAnalysis
 from sklearn.linear_model import Ridge, MultiTaskElasticNet, RidgeCV, ElasticNetCV
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.neural_network import MLPRegressor
-from sksurv.linear_model import CoxPHSurvivalAnalysis
-from sksurv.metrics import brier_score, integrated_brier_score
+from survivalist.metrics import brier_score, integrated_brier_score
 from time import time
 import pandas as pd
 
@@ -43,7 +41,7 @@ X = _encode_categorical_columns(X)
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-from sksurv.nonparametric import kaplan_meier_estimator
+from survivalist.nonparametric import kaplan_meier_estimator
 
 event_time = [y[1] for y in y_test]
 event_status = [y[0] for y in y_test]
@@ -68,7 +66,7 @@ X = _encode_categorical_columns(X)
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-from sksurv.nonparametric import kaplan_meier_estimator
+from survivalist.nonparametric import kaplan_meier_estimator
 
 event_time = [y[1] for y in y_test]
 event_status = [y[0] for y in y_test]
@@ -92,7 +90,7 @@ X = _encode_categorical_columns(X)
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-from sksurv.nonparametric import kaplan_meier_estimator
+from survivalist.nonparametric import kaplan_meier_estimator
 
 event_time = [y[1] for y in y_test]
 event_status = [y[0] for y in y_test]

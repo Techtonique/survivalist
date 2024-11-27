@@ -1,6 +1,6 @@
 Datasets
 ========
-.. currentmodule:: sksurv.datasets
+.. currentmodule:: survivalist.datasets
 
 .. autosummary::
     :toctree: generated/

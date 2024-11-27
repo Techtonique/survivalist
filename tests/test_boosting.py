@@ -9,11 +9,11 @@ import pandas as pd
 import pytest
 from sklearn.metrics import mean_squared_error
 
-from sksurv.column import categorical_to_numeric, standardize
-from sksurv.datasets import load_whas500
-from sksurv.ensemble import ComponentwiseGradientBoostingSurvivalAnalysis, GradientBoostingSurvivalAnalysis
-from sksurv.testing import FixtureParameterFactory, assert_cindex_almost_equal
-from sksurv.util import Surv
+from survivalist.column import categorical_to_numeric, standardize
+from survivalist.datasets import load_whas500
+from survivalist.ensemble import ComponentwiseGradientBoostingSurvivalAnalysis, GradientBoostingSurvivalAnalysis
+from survivalist.testing import FixtureParameterFactory, assert_cindex_almost_equal
+from survivalist.util import Surv
 
 CGBOOST_CUMHAZ_FILE = join(dirname(__file__), "data", "compnentwise-gradient-boosting-coxph-cumhazard.csv")
 CGBOOST_SURV_FILE = join(dirname(__file__), "data", "compnentwise-gradient-boosting-coxph-surv.csv")

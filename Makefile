@@ -45,23 +45,23 @@ clean-test: ## remove test and coverage artifacts
 	rm -fr htmlcov
 
 lint: ## check style with flake8
-	flake8 nnetsauce tests
+	flake8 survivalist tests
 
 coverage: ## check code coverage quickly with the default Python	
-	coverage report --omit="venv/*,nnetsauce/tests/*" --show-missing
+	coverage report --omit="venv/*,survivalist/tests/*" --show-missing
 
 docs: install ## generate docs		
 	pip install black pdoc 
-	black nnetsauce/* --line-length=80	
-	find nnetsauce/ -name "*.py" -exec autopep8 --max-line-length=80 --in-place {} +
-	pdoc -t docs nnetsauce/* --output-dir nnetsauce-docs
+	black survivalist/* --line-length=80	
+	find survivalist/ -name "*.py" -exec autopep8 --max-line-length=80 --in-place {} +
+	pdoc -t docs survivalist/* --output-dir survivalist-docs
 	find . -name '__pycache__' -exec rm -fr {} +
 
 servedocs: install ## compile the docs watching for change	 	
 	pip install black pdoc 
-	black nnetsauce/* --line-length=80	
-	find nnetsauce/ -name "*.py" -exec autopep8 --max-line-length=80 --in-place {} +
-	pdoc -t docs nnetsauce/* 
+	black survivalist/* --line-length=80	
+	find survivalist/ -name "*.py" -exec autopep8 --max-line-length=80 --in-place {} +
+	pdoc -t docs survivalist/* 
 	find . -name '__pycache__' -exec rm -fr {} +
 
 release: dist ## package and upload a release
@@ -77,7 +77,7 @@ install: clean ## install the package to the active Python's site-packages
 	python3 -m pip install .
 
 build-site: docs ## export mkdocs website to a folder		
-	cp -rf nnetsauce-docs/* ../../Pro_Website/Techtonique.github.io/nnetsauce
+	cp -rf survivalist-docs/* ../../Pro_Website/Techtonique.github.io/survivalist
 	find . -name '__pycache__' -exec rm -fr {} +
 
 run-custom: ## run all custom examples with one command
@@ -94,5 +94,5 @@ run-lazy: ## run all lazy examples with one command
 
 run-tests: install ## run all the tests with one command
 	pip3 install coverage nose2
-	python3 -m coverage run -m unittest discover -s nnetsauce/tests -p "*.py"	
+	python3 -m coverage run -m unittest discover -s survivalist/tests -p "*.py"	
 

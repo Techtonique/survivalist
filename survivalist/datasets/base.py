@@ -195,11 +195,11 @@ def load_arff_files_standardized(
 
     standardize_numeric : bool, optional, default: True
         Whether to standardize data to zero mean and unit variance.
-        See :func:`sksurv.column.standardize`.
+        See :func:`survivalist.column.standardize`.
 
     to_numeric : boo, optional, default: True
         Whether to convert categorical variables to numeric values.
-        See :func:`sksurv.column.categorical_to_numeric`.
+        See :func:`survivalist.column.categorical_to_numeric`.
 
     Returns
     -------

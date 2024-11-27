@@ -1,10 +1,10 @@
-Installing scikit-survival
+Installing survivalist
 ==========================
 
-The recommended and easiest way to install scikit-survival is to use
+The recommended and easiest way to install survivalist is to use
 :ref:`install-conda` or :ref:`install-pip`.
-Pre-built binary packages for scikit-survival are available for Linux, macOS, and Windows.
-Alternatively, you can install scikit-survival :ref:`install-from-source`.
+Pre-built binary packages for survivalist are available for Linux, macOS, and Windows.
+Alternatively, you can install survivalist :ref:`install-from-source`.
 
 .. _install-conda:
 
@@ -12,18 +12,18 @@ conda
 -----
 
 If you have `conda <https://docs.anaconda.com/>`_ installed, you can
-install scikit-survival from the ``conda-forge`` channel by running::
+install survivalist from the ``conda-forge`` channel by running::
 
-  conda install -c conda-forge scikit-survival
+  conda install -c conda-forge survivalist
 
 .. _install-pip:
 
 pip
 ---
 
-If you use ``pip``, install the latest release of scikit-survival with::
+If you use ``pip``, install the latest release of survivalist with::
 
-  pip install scikit-survival
+  pip install survivalist
 
 
 .. _install-from-source:
@@ -31,7 +31,7 @@ If you use ``pip``, install the latest release of scikit-survival with::
 From Source
 -----------
 
-If you want to build scikit-survival from source, you
+If you want to build survivalist from source, you
 will need a C/C++ compiler to compile extensions.
 
 **Linux**
@@ -62,15 +62,15 @@ to determine which Microsoft Visual C++ compiler to use with a specific Python v
 Latest Release
 ^^^^^^^^^^^^^^
 
-To install the latest release of scikit-survival from source, run::
+To install the latest release of survivalist from source, run::
 
-  pip install scikit-survival --no-binary scikit-survival
+  pip install survivalist --no-binary survivalist
 
 
 .. note::
 
     If you have not installed the :ref:`dependencies <dependencies>` previously, this command
-    will first install all dependencies before installing scikit-survival.
+    will first install all dependencies before installing survivalist.
     Therefore, installation might fail if build requirements of some dependencies
     are not met. In particular, `osqp <https://github.com/oxfordcontrol/osqp-python>`_
     does require `CMake <https://cmake.org/>`_ to be installed.
@@ -78,11 +78,11 @@ To install the latest release of scikit-survival from source, run::
 Development Version
 ^^^^^^^^^^^^^^^^^^^
 
-To install the latest source from our `GitHub repository <https://github.com/sebp/scikit-survival/>`_,
+To install the latest source from our `GitHub repository <https://github.com/sebp/survivalist/>`_,
 you need to have `Git <https://git-scm.com/>`_ installed and
 simply run::
 
-  pip install git+https://github.com/sebp/scikit-survival.git
+  pip install git+https://github.com/sebp/survivalist.git
 
 
 
@@ -91,7 +91,7 @@ simply run::
 Dependencies
 ------------
 
-The current minimum dependencies to run scikit-survival are:
+The current minimum dependencies to run survivalist are:
 
 - Python 3.10 or later
 - ecos

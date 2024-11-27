@@ -4,10 +4,10 @@ import pandas as pd
 from pandas.testing import assert_frame_equal
 import pytest
 
-from sksurv.compare import compare_survival
-from sksurv.datasets import load_veterans_lung_cancer
-from sksurv.testing import FixtureParameterFactory
-from sksurv.util import Surv
+from survivalist.compare import compare_survival
+from survivalist.datasets import load_veterans_lung_cancer
+from survivalist.testing import FixtureParameterFactory
+from survivalist.util import Surv
 
 
 def assert_stats_frame_equal(computed_stats, expected_stats):
