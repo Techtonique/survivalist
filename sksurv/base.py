@@ -87,7 +87,7 @@ class SurvivalAnalysisMixin:
             return_array,
             **kwargs,
         )
-
+    
     def score(self, X, y):
         """Returns the concordance index of the prediction.
 
@@ -111,15 +111,21 @@ class SurvivalAnalysisMixin:
         name_event, name_time = y.dtype.names
 
         try:
-            risk_score = self.predict(X).mean
-        except AttributeError:
             risk_score = self.predict(X)
+        except Exception as e:
+            print("Exception", e)
+            preds = self.predict(X)
+            #print("preds", preds)
+            risk_score = preds.mean
+            print("risk_score", risk_score) 
         if not getattr(self, "_predict_risk_score", True):
             risk_score *= -1  # convert prediction on time scale to risk scale
-
-        result = concordance_index_censored(
-            y[name_event], y[name_time], risk_score
-        )
+        print("y[name_event]", y[name_event])
+        print("y[name_time]", y[name_time])
+        print("y[name_event].shape", y[name_event].shape)
+        print("y[name_time].shape", y[name_time].shape)
+        print("risk_score", risk_score) 
+        result = concordance_index_censored(y[name_event], y[name_time], risk_score)
         return result[0]
 
     def _more_tags(self):
