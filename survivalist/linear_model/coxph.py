@@ -25,7 +25,7 @@ from ..functions import StepFunction
 from ..nonparametric import _compute_counts
 from ..util import check_array_survival
 
-__all__ = ["CoxPHSurvivalAnalysis"]
+__all__ = ["CoxPHSurvivalAnalysis", "BreslowEstimator"]
 
 
 class BreslowEstimator:

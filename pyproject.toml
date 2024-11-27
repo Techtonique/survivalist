@@ -176,7 +176,7 @@ omit = [
 
 [tool.ruff]
 extend-exclude = [
-    "doc/conf.py"
+    "doc/conf.py",
 ]
 # Group violations by containing file.
 output-format = "grouped"

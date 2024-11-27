@@ -19,9 +19,6 @@ from sklearn.utils.validation import check_is_fitted, check_random_state
 
 from ..base import SurvivalAnalysisMixin
 from ..metrics import concordance_index_censored
-from ..tree import ExtraSurvivalTree, SurvivalTree
-from ..tree._criterion import get_unique_times
-from ..tree.tree import _array_to_step_function
 from ..util import check_array_survival
 
 __all__ = ["RandomSurvivalForest", "ExtraSurvivalTrees"]

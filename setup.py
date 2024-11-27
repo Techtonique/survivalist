@@ -56,7 +56,6 @@ class clean(Command):
 
 EXTENSIONS = {
     "_coxph_loss": {"sources": ["survivalist/ensemble/_coxph_loss.pyx"]},
-    "__coxnet": {"sources": ["survivalist/linear_model/_coxnet.pyx"]},
 }
 
 
