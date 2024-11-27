@@ -6,7 +6,6 @@ from sklearn.linear_model import Ridge, MultiTaskElasticNet, RidgeCV, ElasticNet
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.neural_network import MLPRegressor
-from survivalist.linear_model import CoxPHSurvivalAnalysis
 from survivalist.metrics import brier_score, integrated_brier_score
 from time import time
 
