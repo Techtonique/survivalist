@@ -3,16 +3,29 @@ from ..ensemble import PIComponentwiseGenGradientBoostingSurvivalAnalysis
 
 __all__ = ["PISurvivalCustom"]
 
+
 class PISurvivalCustom(PIComponentwiseGenGradientBoostingSurvivalAnalysis):
     """Generic Gradient boosting with any base learner (with prediction intervals).
-    
+
     Parameters
     ----------
+    regr : object, default: LinearRegression()
+        The base learner that will be used for the regression model.
+        The default is LinearRegression.
+
     loss : {'coxph', 'squared', 'ipcwls'}, optional, default: 'coxph'
         loss function to be optimized. 'coxph' refers to partial likelihood loss
         of Cox's proportional hazards model. The loss 'squared' minimizes a
         squared regression loss that ignores predictions beyond the time of censoring,
         and 'ipcwls' refers to inverse-probability of censoring weighted least squares error.
+
+    level : int, default: 95
+        Confidence level for the prediction intervals.
+    
+    type_pi: str, optional, default: 'scp'
+        Type of prediction intervals. The value must be one of 'scp'
+        (Split Conformal Prediction), 'bootstrap', 'kde', 'normal', 'ecdf',
+        'permutation', 'smooth-bootstrap'
 
     random_state : int seed, RandomState instance, or None, default: None
         The seed of the pseudo random number generator to use when
@@ -59,19 +72,23 @@ class PISurvivalCustom(PIComponentwiseGenGradientBoostingSurvivalAnalysis):
         regr=LinearRegression(),
         loss="coxph",
         level=95,
+        type_pi="scp",
+        n_replications=250,
         random_state=None,
         verbose=0,
     ):
-        self.regr = regr 
+        self.regr = regr
         self._baseline_model = self.regr
         self.loss = loss
-        self.n_estimators = 1 # this
-        self.learning_rate = 1.0 # this too 
+        self.n_estimators = 1  # this
+        self.learning_rate = 1.0  # this too
         self.subsample = 1.0
         self.level = level
+        self.type_pi = type_pi
+        self.n_replications = n_replications
         self.random_state = random_state
         self.verbose = verbose
-        self.show_progress = False 
-        self.warm_start=False
-        self.dropout_rate=0
+        self.show_progress = False
+        self.warm_start = False
+        self.dropout_rate = 0
         self.alpha_ = 1 - level / 100

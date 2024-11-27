@@ -70,33 +70,3 @@ print("\n\n BayesianRidge survival func (upper)", surv_funcs.upper)
 print("\n\n GaussianProcessRegressor survival func (mean)", surv_funcs2.mean)
 print("\n\n GaussianProcessRegressor survival func (lower)", surv_funcs2.lower)
 print("\n\n GaussianProcessRegressor survival func (upper)", surv_funcs2.upper)
-
-
-print("\n\n Conformal BayesRidge ------------------")                                                    
-
-
-# estimator = SurvivalCustom(regr=ns.PredictionInterval(RidgeCV(), 
-#                                                       method="localconformal",))
-# estimator2 = SurvivalCustom(regr=ns.PredictionInterval(LassoCV(), 
-#                                                        method="localconformal",))
-
-# start = time()
-# estimator.fit(X_train, y_train)
-# print("Time to fit RidgeCV: ", time() - start)
-# start = time()
-# estimator2.fit(X_train, y_train)
-# print("Time to fit LassoCV: ", time() - start)
-
-
-# surv_funcs = estimator.predict_survival_function(X_test.iloc[0:5,:],                                                  
-#                                                  return_pi=True)
-# surv_funcs2 = estimator2.predict_survival_function(X_test.iloc[0:5,:], 
-#                                                    return_pi=True)
-
-# print("\n\n RidgeCV survival func (mean)", surv_funcs.mean)
-# print("\n\n RidgeCV survival func (lower)", surv_funcs.lower)
-# print("\n\n RidgeCV survival func (upper)", surv_funcs.upper)
-
-# print("\n\n LassoCV survival func (mean)", surv_funcs2.mean)
-# print("\n\n LassoCV survival func (lower)", surv_funcs2.lower)
-# print("\n\n LassoCV survival func (upper)", surv_funcs2.upper)

@@ -69,7 +69,9 @@ def compare_survival(y, group_indicator, return_stats=False):
     groups, group_counts = np.unique(group_indicator, return_counts=True)
     n_groups = groups.shape[0]
     if n_groups == 1:
-        raise ValueError("At least two groups must be specified, but only one was provided.")
+        raise ValueError(
+            "At least two groups must be specified, but only one was provided."
+        )
 
     # sort descending
     o = np.argsort(-time, kind="mergesort")
@@ -100,7 +102,11 @@ def compare_survival(y, group_indicator, return_stats=False):
             total_at_risk = k
             expected += at_risk * (total_events / total_at_risk)
             if total_at_risk > 1:
-                multiplier = total_events * (total_at_risk - total_events) / (total_at_risk * (total_at_risk - 1))
+                multiplier = (
+                    total_events
+                    * (total_at_risk - total_events)
+                    / (total_at_risk * (total_at_risk - 1))
+                )
                 temp = at_risk * multiplier
                 covar[covar_indices] += temp
                 covar -= np.outer(temp, at_risk) / total_at_risk

@@ -105,7 +105,9 @@ def clinical_kernel(x, y=None):
         y_numeric = x_numeric
 
     continuous_ordinal_kernel(x_numeric, y_numeric, mat)
-    _nominal_kernel(x.loc[:, nominal_columns].values, y.loc[:, nominal_columns].values, mat)
+    _nominal_kernel(
+        x.loc[:, nominal_columns].values, y.loc[:, nominal_columns].values, mat
+    )
     mat /= x.shape[1]
     return mat
 
@@ -142,7 +144,14 @@ class ClinicalKernelTransform(BaseEstimator, TransformerMixin):
            Annual International Conference of the IEEE Engineering in Medicine and Biology Society, 5913-7, 2009
     """
 
-    def __init__(self, *, fit_once=False, _numeric_ranges=None, _numeric_columns=None, _nominal_columns=None):
+    def __init__(
+        self,
+        *,
+        fit_once=False,
+        _numeric_ranges=None,
+        _numeric_columns=None,
+        _nominal_columns=None,
+    ):
         self.fit_once = fit_once
 
         self._numeric_ranges = _numeric_ranges
@@ -161,7 +170,9 @@ class ClinicalKernelTransform(BaseEstimator, TransformerMixin):
             Data to estimate parameters from.
         """
         if not self.fit_once:
-            raise ValueError("prepare can only be used if fit_once parameter is set to True")
+            raise ValueError(
+                "prepare can only be used if fit_once parameter is set to True"
+            )
 
         self._prepare_by_column_dtype(X)
 
@@ -180,7 +191,9 @@ class ClinicalKernelTransform(BaseEstimator, TransformerMixin):
             col = X.iloc[:, i]
             if isinstance(dt, CategoricalDtype):
                 if col.cat.ordered:
-                    numeric_ranges.append(col.cat.codes.max() - col.cat.codes.min())
+                    numeric_ranges.append(
+                        col.cat.codes.max() - col.cat.codes.min()
+                    )
                     numeric_columns.append(i)
                 else:
                     nominal_columns.append(i)
@@ -270,7 +283,11 @@ class ClinicalKernelTransform(BaseEstimator, TransformerMixin):
         )
 
         if len(self._nominal_columns) > 0:
-            _nominal_kernel(Y[:, self._nominal_columns], self.X_fit_[:, self._nominal_columns], mat)
+            _nominal_kernel(
+                Y[:, self._nominal_columns],
+                self.X_fit_[:, self._nominal_columns],
+                mat,
+            )
 
         mat /= self.n_features_in_
 
@@ -316,11 +333,14 @@ class ClinicalKernelTransform(BaseEstimator, TransformerMixin):
             )
 
         val = pairwise_continuous_ordinal_kernel(
-            X[self._numeric_columns], Y[self._numeric_columns], self._numeric_ranges
+            X[self._numeric_columns],
+            Y[self._numeric_columns],
+            self._numeric_ranges,
         )
         if len(self._nominal_columns) > 0:
             val += pairwise_nominal_kernel(
-                X[self._nominal_columns].astype(np.int8), Y[self._nominal_columns].astype(np.int8)
+                X[self._nominal_columns].astype(np.int8),
+                Y[self._nominal_columns].astype(np.int8),
             )
 
         val /= X.shape[0]

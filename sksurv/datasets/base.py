@@ -33,7 +33,10 @@ def _get_x_y_survival(dataset, col_event, col_time, val_outcome):
         y = None
         x_frame = dataset
     else:
-        y = np.empty(dtype=[(col_event, bool), (col_time, np.float64)], shape=dataset.shape[0])
+        y = np.empty(
+            dtype=[(col_event, bool), (col_time, np.float64)],
+            shape=dataset.shape[0],
+        )
         y[col_event] = (dataset[col_event] == val_outcome).values
         y[col_time] = dataset[col_time].values
 
@@ -52,43 +55,47 @@ def _get_x_y_other(dataset, col_label):
 
     return x_frame, y
 
+
 def _create_event_time_df(data):
     # Convert the list of tuples into a structured NumPy array
-    structured_data = np.array(data, dtype=[('event', '?'), ('time', 'f8')])
-    
+    structured_data = np.array(data, dtype=[("event", "?"), ("time", "f8")])
+
     # Convert the structured array to a DataFrame
     df = pd.DataFrame(structured_data)
-    
+
     # Change 'event' column to integer64, mapping False to 0 and True to 1
-    df['event'] = df['event'].astype('int64')
-    
+    df["event"] = df["event"].astype("int64")
+
     # Ensure 'time' column is float64
-    df['time'] = df['time'].astype('float64')
-    
+    df["time"] = df["time"].astype("float64")
+
     return df
+
 
 def _encode_categorical_columns(df, categorical_columns=None):
     """
     Automatically identifies categorical columns and applies one-hot encoding.
-    
+
     Parameters:
     - df (pd.DataFrame): The input DataFrame with mixed continuous and categorical variables.
     - categorical_columns (list): Optional list of column names to treat as categorical.
-    
+
     Returns:
     - pd.DataFrame: A new DataFrame with one-hot encoded categorical columns.
     """
     # Automatically identify categorical columns if not provided
     if categorical_columns is None:
-        categorical_columns = df.select_dtypes(include=['object', 'category']).columns.tolist()
-            
+        categorical_columns = df.select_dtypes(
+            include=["object", "category"]
+        ).columns.tolist()
+
     # Apply one-hot encoding to the identified categorical columns
     df_encoded = pd.get_dummies(df, columns=categorical_columns)
 
     # Convert boolean columns to integer (0 and 1)
-    bool_columns = df_encoded.select_dtypes(include=['bool']).columns.tolist()
+    bool_columns = df_encoded.select_dtypes(include=["bool"]).columns.tolist()
     df_encoded[bool_columns] = df_encoded[bool_columns].astype(int)
-    
+
     return df_encoded
 
 
@@ -129,10 +136,14 @@ def get_x_y(data_frame, attr_labels, pos_label=None, survival=True):
     """
     if survival:
         if len(attr_labels) != 2:
-            raise ValueError(f"expected sequence of length two for attr_labels, but got {len(attr_labels)}")
+            raise ValueError(
+                f"expected sequence of length two for attr_labels, but got {len(attr_labels)}"
+            )
         if pos_label is None:
             raise ValueError("pos_label needs to be specified if survival=True")
-        return _get_x_y_survival(data_frame, attr_labels[0], attr_labels[1], pos_label)
+        return _get_x_y_survival(
+            data_frame, attr_labels[0], attr_labels[1], pos_label
+        )
 
     return _get_x_y_other(data_frame, attr_labels)
 
@@ -209,14 +220,21 @@ def load_arff_files_standardized(
     x_train, y_train = get_x_y(dataset, attr_labels, pos_label, survival)
 
     if path_testing is not None:
-        x_test, y_test = _load_arff_testing(path_testing, attr_labels, pos_label, survival)
+        x_test, y_test = _load_arff_testing(
+            path_testing, attr_labels, pos_label, survival
+        )
 
         if len(x_train.columns.symmetric_difference(x_test.columns)) > 0:
-            warnings.warn("Restricting columns to intersection between training and testing data", stacklevel=2)
+            warnings.warn(
+                "Restricting columns to intersection between training and testing data",
+                stacklevel=2,
+            )
 
             cols = x_train.columns.intersection(x_test.columns)
             if len(cols) == 0:
-                raise ValueError("columns of training and test data do not intersect")
+                raise ValueError(
+                    "columns of training and test data do not intersect"
+                )
 
             x_train = x_train.loc[:, cols]
             x_test = x_test.loc[:, cols]
@@ -302,17 +320,19 @@ def load_whas500(*, return_X_y=True, as_frame=False):
     if return_X_y:
         return X, y
     y = _create_event_time_df(y)
-    frame = pd.concat([_encode_categorical_columns(X),  y], axis=1)
+    frame = pd.concat([_encode_categorical_columns(X), y], axis=1)
     target_names = ["event", "time"]
     fdescr = "The Worcester Heart Attack Study dataset"
     feature_names = X.columns
-    return Bunch(data=X, 
-                 target=y, 
-                 frame=frame,
-                 target_names=target_names,
-                 DESCR=fdescr,
-                 feature_names=feature_names, 
-                 filename=fn)
+    return Bunch(
+        data=X,
+        target=y,
+        frame=frame,
+        target_names=target_names,
+        DESCR=fdescr,
+        feature_names=feature_names,
+        filename=fn,
+    )
 
 
 def load_gbsg2(*, return_X_y=True, as_frame=False):
@@ -334,7 +354,7 @@ def load_gbsg2(*, return_X_y=True, as_frame=False):
         appropriate dtypes (numeric). The target is
         a pandas DataFrame or Series depending on the number of target columns.
         If `return_X_y` is True, then (`data`, `target`) will be pandas
-        DataFrames or Series as described below.    
+        DataFrames or Series as described below.
 
     Returns
     -------
@@ -345,7 +365,7 @@ def load_gbsg2(*, return_X_y=True, as_frame=False):
         *cens*: boolean indicating whether the endpoint has been reached
         or the event time is right censored.
 
-        *time*: total length of follow-up    
+        *time*: total length of follow-up
 
     References
     ----------
@@ -362,20 +382,21 @@ def load_gbsg2(*, return_X_y=True, as_frame=False):
         return_X_y = False
     if return_X_y:
         return X, y
-    y = _create_event_time_df(y)    
-    
-    
-    frame = pd.concat([_encode_categorical_columns(X),  y], axis=1)
+    y = _create_event_time_df(y)
+
+    frame = pd.concat([_encode_categorical_columns(X), y], axis=1)
     target_names = ["event", "time"]
     fdescr = "The German Breast Cancer Study Group 2 dataset"
     feature_names = X.columns
-    return Bunch(data=X, 
-                 target=y, 
-                 frame=frame,
-                 target_names=target_names,
-                 DESCR=fdescr,
-                 feature_names=feature_names,
-                 filename=fn)
+    return Bunch(
+        data=X,
+        target=y,
+        frame=frame,
+        target_names=target_names,
+        DESCR=fdescr,
+        feature_names=feature_names,
+        filename=fn,
+    )
 
 
 def load_veterans_lung_cancer(*, return_X_y=True, as_frame=False):
@@ -398,7 +419,7 @@ def load_veterans_lung_cancer(*, return_X_y=True, as_frame=False):
         appropriate dtypes (numeric). The target is
         a pandas DataFrame or Series depending on the number of target columns.
         If `return_X_y` is True, then (`data`, `target`) will be pandas
-        DataFrames or Series as described below.    
+        DataFrames or Series as described below.
 
     Returns
     -------
@@ -417,25 +438,30 @@ def load_veterans_lung_cancer(*, return_X_y=True, as_frame=False):
         "The Statistical Analysis of Failure Time Data." John Wiley & Sons, Inc. (2002)
     """
     fn = _get_data_path("veteran.arff")
-    X, y = get_x_y(loadarff(fn), attr_labels=["Status", "Survival_in_days"], pos_label="dead")
+    X, y = get_x_y(
+        loadarff(fn),
+        attr_labels=["Status", "Survival_in_days"],
+        pos_label="dead",
+    )
     if as_frame:
         return_X_y = False
     if return_X_y:
         return X, y
     y = _create_event_time_df(y)
-    
-    
-    frame = pd.concat([_encode_categorical_columns(X),  y], axis=1)
+
+    frame = pd.concat([_encode_categorical_columns(X), y], axis=1)
     target_names = ["event", "time"]
     fdescr = "The Veterans' Administration Lung Cancer Trial dataset"
     feature_names = X.columns
-    return Bunch(data=X,
-                    target=y,
-                    frame=frame,
-                    target_names=target_names,
-                    DESCR=fdescr,
-                    feature_names=feature_names,
-                    filename=fn)
+    return Bunch(
+        data=X,
+        target=y,
+        frame=frame,
+        target_names=target_names,
+        DESCR=fdescr,
+        feature_names=feature_names,
+        filename=fn,
+    )
 
 
 def load_aids(endpoint="aids", return_X_y=True, as_frame=False):
@@ -509,13 +535,15 @@ def load_aids(endpoint="aids", return_X_y=True, as_frame=False):
     target_names = ["event", "time"]
     fdescr = "The AIDS Clinical Trial dataset"
     feature_names = x.columns
-    return Bunch(data=x,
-                    target=y,
-                    frame=frame,
-                    target_names=target_names,
-                    DESCR=fdescr,
-                    feature_names=feature_names,
-                    filename=fn)
+    return Bunch(
+        data=x,
+        target=y,
+        frame=frame,
+        target_names=target_names,
+        DESCR=fdescr,
+        feature_names=feature_names,
+        filename=fn,
+    )
 
 
 def load_breast_cancer(*, return_X_y=True, as_frame=False):
@@ -537,7 +565,7 @@ def load_breast_cancer(*, return_X_y=True, as_frame=False):
         appropriate dtypes (numeric). The target is
         a pandas DataFrame or Series depending on the number of target columns.
         If `return_X_y` is True, then (`data`, `target`) will be pandas
-        DataFrames or Series as described below.    
+        DataFrames or Series as described below.
 
     Returns
     -------
@@ -566,19 +594,20 @@ def load_breast_cancer(*, return_X_y=True, as_frame=False):
     if return_X_y:
         return X, y
     y = _create_event_time_df(y)
-    
-    
-    frame = pd.concat([_encode_categorical_columns(X),  y], axis=1)
+
+    frame = pd.concat([_encode_categorical_columns(X), y], axis=1)
     target_names = ["event", "time"]
     fdescr = "The breast cancer dataset"
     feature_names = X.columns
-    return Bunch(data=X,
-                    target=y,
-                    frame=frame,
-                    target_names=target_names,
-                    DESCR=fdescr,
-                    feature_names=feature_names,
-                    filename=fn)
+    return Bunch(
+        data=X,
+        target=y,
+        frame=frame,
+        target_names=target_names,
+        DESCR=fdescr,
+        feature_names=feature_names,
+        filename=fn,
+    )
 
 
 def load_flchain(*, return_X_y=True, as_frame=False):
@@ -612,7 +641,7 @@ def load_flchain(*, return_X_y=True, as_frame=False):
         appropriate dtypes (numeric). The target is
         a pandas DataFrame or Series depending on the number of target columns.
         If `return_X_y` is True, then (`data`, `target`) will be pandas
-        DataFrames or Series as described below.    
+        DataFrames or Series as described below.
 
     Returns
     -------
@@ -635,23 +664,25 @@ def load_flchain(*, return_X_y=True, as_frame=False):
            the general population, Mayo Clinic Proceedings 87:512-523. (2012)
     """
     fn = _get_data_path("flchain.arff")
-    X, y = get_x_y(loadarff(fn), attr_labels=["death", "futime"], pos_label="dead")
+    X, y = get_x_y(
+        loadarff(fn), attr_labels=["death", "futime"], pos_label="dead"
+    )
     if as_frame:
         return_X_y = False
     if return_X_y:
         return X, y
     y = _create_event_time_df(y)
-    
-    
-    frame = pd.concat([_encode_categorical_columns(X),  y], axis=1)
+
+    frame = pd.concat([_encode_categorical_columns(X), y], axis=1)
     target_names = ["event", "time"]
     fdescr = "The assay of serum free light chain dataset"
     feature_names = X.columns
-    return Bunch(data=X,
-                    target=y,
-                    frame=frame,
-                    target_names=target_names,
-                    DESCR=fdescr,
-                    feature_names=feature_names,
-                    filename=fn)
-
+    return Bunch(
+        data=X,
+        target=y,
+        frame=frame,
+        target_names=target_names,
+        DESCR=fdescr,
+        feature_names=feature_names,
+        filename=fn,
+    )

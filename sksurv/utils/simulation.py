@@ -4,7 +4,8 @@ import matplotlib.pyplot as plt
 from scipy.stats import gaussian_kde, norm
 from scipy.interpolate import interp1d
 
-def simulate_distribution(data, method='bootstrap', num_samples=1000, **kwargs):
+
+def simulate_distribution(data, method="bootstrap", num_samples=1000, **kwargs):
     """
     Simulate the distribution of an input vector using various methods.
 
@@ -26,50 +27,65 @@ def simulate_distribution(data, method='bootstrap', num_samples=1000, **kwargs):
     Returns:
         np.ndarray: Simulated distribution samples.
     """
-    assert method in ['bootstrap', 'kde', 'parametric', 'ecdf', 'permutation', 'smooth-bootstrap'], \
-        f"Unknown method '{method}'. Choose from 'bootstrap', 'kde', 'parametric', 'ecdf', 'permutation', or 'smooth_bootstrap'."
-    
+    assert method in [
+        "bootstrap",
+        "kde",
+        "parametric",
+        "ecdf",
+        "permutation",
+        "smooth-bootstrap",
+    ], f"Unknown method '{method}'. Choose from 'bootstrap', 'kde', 'parametric', 'ecdf', 'permutation', or 'smooth_bootstrap'."
+
     data = np.array(data)
 
-    if method == 'bootstrap':
+    if method == "bootstrap":
         simulated_data = np.random.choice(data, size=num_samples, replace=True)
 
-    elif method == 'kde':
-        kde_bandwidth = kwargs.get('kde_bandwidth', 'scott')
+    elif method == "kde":
+        kde_bandwidth = kwargs.get("kde_bandwidth", "scott")
         kde = gaussian_kde(data, bw_method=kde_bandwidth)
         simulated_data = kde.resample(num_samples).flatten()
 
-    elif method == 'normal':
+    elif method == "normal":
         mean, std = np.mean(data), np.std(data)
         simulated_data = np.random.normal(mean, std, size=num_samples)
 
-    elif method == 'ecdf':
+    elif method == "ecdf":
         data = np.sort(data)
         ecdf_y = np.arange(1, len(data) + 1) / len(data)
-        inverse_cdf = interp1d(ecdf_y, data, bounds_error=False, fill_value=(data[0], data[-1]))
+        inverse_cdf = interp1d(
+            ecdf_y, data, bounds_error=False, fill_value=(data[0], data[-1])
+        )
         random_uniform = np.random.uniform(0, 1, size=num_samples)
         simulated_data = inverse_cdf(random_uniform)
 
-    elif method == 'permutation':
+    elif method == "permutation":
         simulated_data = np.random.permutation(data)
         while len(simulated_data) < num_samples:
-            simulated_data = np.concatenate([simulated_data, np.random.permutation(data)])
+            simulated_data = np.concatenate(
+                [simulated_data, np.random.permutation(data)]
+            )
         simulated_data = simulated_data[:num_samples]
 
-    elif method == 'smooth_bootstrap':
-        noise_std = kwargs.get('noise_std', 0.1)
-        bootstrap_samples = np.random.choice(data, size=num_samples, replace=True)
+    elif method == "smooth_bootstrap":
+        noise_std = kwargs.get("noise_std", 0.1)
+        bootstrap_samples = np.random.choice(
+            data, size=num_samples, replace=True
+        )
         noise = np.random.normal(0, noise_std, size=num_samples)
         simulated_data = bootstrap_samples + noise
 
     else:
-        raise ValueError(f"Unknown method '{method}'. Choose from 'bootstrap', 'kde', 'parametric', 'ecdf', 'permutation', or 'smooth_bootstrap'.")
+        raise ValueError(
+            f"Unknown method '{method}'. Choose from 'bootstrap', 'kde', 'parametric', 'ecdf', 'permutation', or 'smooth_bootstrap'."
+        )
 
     return simulated_data
 
-def simulate_replications(data, method='bootstrap',                            
-                          num_replications=10, 
-                          **kwargs):
+
+def simulate_replications(
+    data, method="bootstrap", num_replications=10, **kwargs
+):
     """
     Create multiple replications of the input's distribution using a specified simulation method.
 
@@ -90,18 +106,20 @@ def simulate_replications(data, method='bootstrap',
         pd.DataFrame: A DataFrame where each column represents a replication.
     """
 
-    num_samples=len(data)
+    num_samples = len(data)
 
     replications = []
 
     for _ in range(num_replications):
-        simulated_data = simulate_distribution(data, method=method, 
-                                               num_samples=num_samples, 
-                                               **kwargs)
+        simulated_data = simulate_distribution(
+            data, method=method, num_samples=num_samples, **kwargs
+        )
         replications.append(simulated_data)
 
     # Combine replications into a DataFrame
     replications_df = pd.DataFrame(replications).transpose()
-    replications_df.columns = [f"Replication_{i+1}" for i in range(num_replications)]
-    
+    replications_df.columns = [
+        f"Replication_{i+1}" for i in range(num_replications)
+    ]
+
     return replications_df

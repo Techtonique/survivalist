@@ -125,7 +125,9 @@ def _predict_risk_score(self):
 
 def patch_pipeline():
     Pipeline.predict_survival_function = predict_survival_function
-    Pipeline.predict_cumulative_hazard_function = predict_cumulative_hazard_function
+    Pipeline.predict_cumulative_hazard_function = (
+        predict_cumulative_hazard_function
+    )
     Pipeline._predict_risk_score = _predict_risk_score
 
 

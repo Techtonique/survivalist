@@ -104,15 +104,23 @@ class _BaseSurvivalForest(BaseForest, metaclass=ABCMeta):
         """
         self._validate_params()
 
-        X = self._validate_data(X, dtype=DTYPE, accept_sparse="csc", ensure_min_samples=2, force_all_finite=False)
+        X = self._validate_data(
+            X,
+            dtype=DTYPE,
+            accept_sparse="csc",
+            ensure_min_samples=2,
+            force_all_finite=False,
+        )
         event, time = check_array_survival(X, y)
 
         # _compute_missing_values_in_feature_mask checks if X has missing values and
         # will raise an error if the underlying tree base estimator can't handle missing
         # values.
         estimator = type(self.estimator)()
-        missing_values_in_feature_mask = estimator._compute_missing_values_in_feature_mask(
-            X, estimator_name=self.__class__.__name__
+        missing_values_in_feature_mask = (
+            estimator._compute_missing_values_in_feature_mask(
+                X, estimator_name=self.__class__.__name__
+            )
         )
 
         self.n_features_in_ = X.shape[1]
@@ -125,13 +133,17 @@ class _BaseSurvivalForest(BaseForest, metaclass=ABCMeta):
         y_numeric[:, 1] = event.astype(np.float64)
 
         # Get bootstrap sample size
-        n_samples_bootstrap = _get_n_samples_bootstrap(n_samples=X.shape[0], max_samples=self.max_samples)
+        n_samples_bootstrap = _get_n_samples_bootstrap(
+            n_samples=X.shape[0], max_samples=self.max_samples
+        )
 
         # Check parameters
         self._validate_estimator()
 
         if not self.bootstrap and self.oob_score:
-            raise ValueError("Out of bag estimation only available if bootstrap=True")
+            raise ValueError(
+                "Out of bag estimation only available if bootstrap=True"
+            )
 
         random_state = check_random_state(self.random_state)
 
@@ -148,14 +160,20 @@ class _BaseSurvivalForest(BaseForest, metaclass=ABCMeta):
             )
 
         if n_more_estimators == 0:
-            warnings.warn("Warm-start fitting without increasing n_estimators does not fit new trees.", stacklevel=2)
+            warnings.warn(
+                "Warm-start fitting without increasing n_estimators does not fit new trees.",
+                stacklevel=2,
+            )
         else:
             if self.warm_start and len(self.estimators_) > 0:
                 # We draw from the random state to get the random state we
                 # would have got if we hadn't used a warm_start.
                 random_state.randint(MAX_INT, size=len(self.estimators_))
 
-            trees = [self._make_estimator(append=False, random_state=random_state) for i in range(n_more_estimators)]
+            trees = [
+                self._make_estimator(append=False, random_state=random_state)
+                for i in range(n_more_estimators)
+            ]
 
             y_tree = (
                 y_numeric,
@@ -168,7 +186,9 @@ class _BaseSurvivalForest(BaseForest, metaclass=ABCMeta):
             # that case. However, for joblib 0.12+ we respect any
             # parallel_backend contexts set at a higher level,
             # since correctness does not rely on using threads.
-            trees = Parallel(n_jobs=self.n_jobs, verbose=self.verbose, prefer="threads")(
+            trees = Parallel(
+                n_jobs=self.n_jobs, verbose=self.verbose, prefer="threads"
+            )(
                 delayed(_parallel_build_trees)(
                     t,
                     self.bootstrap,
@@ -200,11 +220,17 @@ class _BaseSurvivalForest(BaseForest, metaclass=ABCMeta):
         predictions = np.zeros(n_samples)
         n_predictions = np.zeros(n_samples)
 
-        n_samples_bootstrap = _get_n_samples_bootstrap(n_samples, self.max_samples)
+        n_samples_bootstrap = _get_n_samples_bootstrap(
+            n_samples, self.max_samples
+        )
 
         for estimator in self.estimators_:
-            unsampled_indices = _generate_unsampled_indices(estimator.random_state, n_samples, n_samples_bootstrap)
-            p_estimator = estimator.predict(X[unsampled_indices, :], check_input=False)
+            unsampled_indices = _generate_unsampled_indices(
+                estimator.random_state, n_samples, n_samples_bootstrap
+            )
+            p_estimator = estimator.predict(
+                X[unsampled_indices, :], check_input=False
+            )
 
             predictions[unsampled_indices] += p_estimator
             n_predictions[unsampled_indices] += 1
@@ -221,7 +247,9 @@ class _BaseSurvivalForest(BaseForest, metaclass=ABCMeta):
         predictions /= n_predictions
         self.oob_prediction_ = predictions
 
-        self.oob_score_ = concordance_index_censored(event, time, predictions)[0]
+        self.oob_score_ = concordance_index_censored(event, time, predictions)[
+            0
+        ]
 
     def _predict(self, predict_fn, X):
         check_is_fitted(self, "estimators_")
@@ -239,14 +267,20 @@ class _BaseSurvivalForest(BaseForest, metaclass=ABCMeta):
 
         def _get_fn(est, name):
             fn = getattr(est, name)
-            if name in ("predict_cumulative_hazard_function", "predict_survival_function"):
+            if name in (
+                "predict_cumulative_hazard_function",
+                "predict_survival_function",
+            ):
                 fn = partial(fn, return_array=True)
             return fn
 
         # Parallel loop
         lock = threading.Lock()
         Parallel(n_jobs=n_jobs, verbose=self.verbose, require="sharedmem")(
-            delayed(_accumulate_prediction)(_get_fn(e, predict_fn), X, [y_hat], lock) for e in self.estimators_
+            delayed(_accumulate_prediction)(
+                _get_fn(e, predict_fn), X, [y_hat], lock
+            )
+            for e in self.estimators_
         )
 
         y_hat /= len(self.estimators_)

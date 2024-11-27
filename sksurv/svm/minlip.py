@@ -49,7 +49,9 @@ class OsqpSolver(QPSolver):
 
         solver_opts = self._get_options()
         m = osqp.OSQP()
-        m.setup(P=sparse.csc_matrix(P), q=q, A=G, u=h, **solver_opts)  # noqa: E741
+        m.setup(
+            P=sparse.csc_matrix(P), q=q, A=G, u=h, **solver_opts
+        )  # noqa: E741
         results = m.solve()
 
         if results.info.status_val == -2:  # max iter reached
@@ -132,9 +134,18 @@ class EcosSolver(QPSolver):
 
         dims = {
             "l": G.shape[0],  # scalar, dimension of positive orthant
-            "q": [G_quad.shape[0]],  # vector with dimensions of second order cones
+            "q": [
+                G_quad.shape[0]
+            ],  # vector with dimensions of second order cones
         }
-        results = ecos.solve(c, G_all, h_all, dims, verbose=self.verbose, max_iters=self.max_iter or 1000)
+        results = ecos.solve(
+            c,
+            G_all,
+            h_all,
+            dims,
+            verbose=self.verbose,
+            max_iters=self.max_iter or 1000,
+        )
         self._check_success(results)
 
         # drop solution for t
@@ -144,19 +155,26 @@ class EcosSolver(QPSolver):
 
     def _check_success(self, results):  # pylint: disable=no-self-use
         exit_flag = results["info"]["exitFlag"]
-        if exit_flag in (EcosSolver.EXIT_OPTIMAL, EcosSolver.EXIT_OPTIMAL + EcosSolver.EXIT_INACC_OFFSET):
+        if exit_flag in (
+            EcosSolver.EXIT_OPTIMAL,
+            EcosSolver.EXIT_OPTIMAL + EcosSolver.EXIT_INACC_OFFSET,
+        ):
             return
 
         if exit_flag == EcosSolver.EXIT_MAXIT:
             warnings.warn(
-                "ECOS solver did not converge: maximum iterations reached", category=ConvergenceWarning, stacklevel=3
+                "ECOS solver did not converge: maximum iterations reached",
+                category=ConvergenceWarning,
+                stacklevel=3,
             )
         elif exit_flag == EcosSolver.EXIT_PINF:  # pragma: no cover
             raise RuntimeError("Certificate of primal infeasibility found")
         elif exit_flag == EcosSolver.EXIT_DINF:  # pragma: no cover
             raise RuntimeError("Certificate of dual infeasibility found")
         else:  # pragma: no cover
-            raise RuntimeError(f"Unknown problem in ECOS solver, exit status: {exit_flag}")
+            raise RuntimeError(
+                f"Unknown problem in ECOS solver, exit status: {exit_flag}"
+            )
 
     def _decompose(self, P):
         # from scipy.linalg.pinvh
@@ -169,7 +187,9 @@ class EcosSolver(QPSolver):
             cond = largest_eigenvalue * max(P.shape) * np.finfo(t).eps
 
         not_below_cutoff = abs(s) > -cond
-        assert not_below_cutoff.all(), f"matrix has negative eigenvalues: {s.min()}"
+        assert (
+            not_below_cutoff.all()
+        ), f"matrix has negative eigenvalues: {s.min()}"
 
         above_cutoff = abs(s) > cond
         u = u[:, above_cutoff]
@@ -338,8 +358,14 @@ class MinlipSurvivalAnalysis(BaseEstimator, SurvivalAnalysisMixin):
         if callable(self.kernel):
             params = self.kernel_params or {}
         else:
-            params = {"gamma": self.gamma, "degree": self.degree, "coef0": self.coef0}
-        return pairwise_kernels(X, Y, metric=self.kernel, filter_params=True, **params)
+            params = {
+                "gamma": self.gamma,
+                "degree": self.degree,
+                "coef0": self.coef0,
+            }
+        return pairwise_kernels(
+            X, Y, metric=self.kernel, filter_params=True, **params
+        )
 
     def _setup_qp(self, K, D, time):
         n_pairs = D.shape[0]
@@ -363,9 +389,13 @@ class MinlipSurvivalAnalysis(BaseEstimator, SurvivalAnalysisMixin):
         return {"P": P, "q": q, "G": G, "h": h}
 
     def _fit(self, x, event, time):
-        D = create_difference_matrix(event.astype(np.uint8), time, kind=self.pairs)
+        D = create_difference_matrix(
+            event.astype(np.uint8), time, kind=self.pairs
+        )
         if D.shape[0] == 0:
-            raise NoComparablePairException("Data has no comparable pairs, cannot fit model.")
+            raise NoComparablePairException(
+                "Data has no comparable pairs, cannot fit model."
+            )
 
         max_iter = self.max_iter
         if self.solver == "ecos":
@@ -594,7 +624,9 @@ class HingeLossSurvivalSVM(MinlipSurvivalAnalysis):
         P = D.dot(D.dot(K).T).T
         q = -np.ones(n_pairs)
 
-        G = sparse.vstack((-sparse.eye(n_pairs), sparse.eye(n_pairs)), format="csc")
+        G = sparse.vstack(
+            (-sparse.eye(n_pairs), sparse.eye(n_pairs)), format="csc"
+        )
         h = np.empty(2 * n_pairs)
         h[:n_pairs] = 0
         h[n_pairs:] = self.alpha

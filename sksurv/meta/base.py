@@ -15,7 +15,17 @@ import numbers
 from sklearn.utils.metaestimators import _safe_split
 
 
-def _fit_and_score(est, x, y, scorer, train_index, test_index, parameters, fit_params, predict_params):
+def _fit_and_score(
+    est,
+    x,
+    y,
+    scorer,
+    train_index,
+    test_index,
+    parameters,
+    fit_params,
+    predict_params,
+):
     """Train survival model on given data and return its score on test data"""
     X_train, y_train = _safe_split(est, x, y, train_index)
     train_params = fit_params.copy()
@@ -30,6 +40,8 @@ def _fit_and_score(est, x, y, scorer, train_index, test_index, parameters, fit_p
 
     score = scorer(est, X_test, y_test, **test_predict_params)
     if not isinstance(score, numbers.Number):
-        raise ValueError(f"scoring must return a number, got {score!s} ({type(score)}) instead.")
+        raise ValueError(
+            f"scoring must return a number, got {score!s} ({type(score)}) instead."
+        )
 
     return score

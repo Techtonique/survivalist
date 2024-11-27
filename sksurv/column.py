@@ -64,7 +64,9 @@ def standardize(table, with_std=True):
         Table with numeric columns normalized.
         Categorical columns in the input table remain unchanged.
     """
-    new_frame = _apply_along_column(table, standardize_column, with_std=with_std)
+    new_frame = _apply_along_column(
+        table, standardize_column, with_std=with_std
+    )
 
     return new_frame
 
@@ -76,7 +78,9 @@ def _encode_categorical_series(series, allow_drop=True):
 
     enc, levels = values
     if enc is None:
-        return pd.Series(index=series.index, name=series.name, dtype=series.dtype)
+        return pd.Series(
+            index=series.index, name=series.name, dtype=series.dtype
+        )
 
     if not allow_drop and enc.shape[1] == 1:
         return series
@@ -115,16 +119,24 @@ def encode_categorical(table, columns=None, **kwargs):
         Numeric columns in the input table remain unchanged.
     """
     if isinstance(table, pd.Series):
-        if not isinstance(table.dtype, CategoricalDtype) and not is_object_dtype(table.dtype):
-            raise TypeError(f"series must be of categorical dtype, but was {table.dtype}")
+        if not isinstance(
+            table.dtype, CategoricalDtype
+        ) and not is_object_dtype(table.dtype):
+            raise TypeError(
+                f"series must be of categorical dtype, but was {table.dtype}"
+            )
         return _encode_categorical_series(table, **kwargs)
 
     def _is_categorical_or_object(series):
-        return isinstance(series.dtype, CategoricalDtype) or is_object_dtype(series.dtype)
+        return isinstance(series.dtype, CategoricalDtype) or is_object_dtype(
+            series.dtype
+        )
 
     if columns is None:
         # for columns containing categories
-        columns_to_encode = {nam for nam, s in table.items() if _is_categorical_or_object(s)}
+        columns_to_encode = {
+            nam for nam, s in table.items() if _is_categorical_or_object(s)
+        }
     else:
         columns_to_encode = set(columns)
 

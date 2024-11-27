@@ -16,7 +16,11 @@ import numpy as np
 from scipy import stats
 from sklearn.base import BaseEstimator
 from sklearn.utils._param_validation import Interval, StrOptions
-from sklearn.utils.validation import check_array, check_consistent_length, check_is_fitted
+from sklearn.utils.validation import (
+    check_array,
+    check_consistent_length,
+    check_is_fitted,
+)
 
 from .util import check_y_survival
 
@@ -133,7 +137,9 @@ def _compute_counts_truncated(event, time_enter, time_exit):
 
     n_samples = event.shape[0]
 
-    uniq_times = np.sort(np.unique(np.r_[time_enter, time_exit]), kind="mergesort")
+    uniq_times = np.sort(
+        np.unique(np.r_[time_enter, time_exit]), kind="mergesort"
+    )
     total_counts = np.empty(len(uniq_times), dtype=int)
     event_counts = np.empty(len(uniq_times), dtype=int)
 
@@ -161,7 +167,9 @@ def _compute_counts_truncated(event, time_enter, time_exit):
         while idx_exit < n_samples and s_time_exit[idx_exit] < ti:
             idx_exit += 1
 
-        risk_set = np.setdiff1d(order_enter[:idx_enter], order_exit[:idx_exit], assume_unique=True)
+        risk_set = np.setdiff1d(
+            order_enter[:idx_enter], order_exit[:idx_exit], assume_unique=True
+        )
         total_counts[i] = len(risk_set)
 
         count_event = 0
@@ -191,10 +199,19 @@ def _ci_logmlog(prob_survival, sigma_t, z):
 
 def _km_ci_estimator(prob_survival, ratio_var, conf_level, conf_type):
     if conf_type not in {"log-log"}:
-        raise ValueError(f"conf_type must be None or a str among {{'log-log'}}, but was {conf_type!r}")
+        raise ValueError(
+            f"conf_type must be None or a str among {{'log-log'}}, but was {conf_type!r}"
+        )
 
-    if not isinstance(conf_level, numbers.Real) or not np.isfinite(conf_level) or conf_level <= 0 or conf_level >= 1.0:
-        raise ValueError(f"conf_level must be a float in the range (0.0, 1.0), but was {conf_level!r}")
+    if (
+        not isinstance(conf_level, numbers.Real)
+        or not np.isfinite(conf_level)
+        or conf_level <= 0
+        or conf_level >= 1.0
+    ):
+        raise ValueError(
+            f"conf_level must be a float in the range (0.0, 1.0), but was {conf_level!r}"
+        )
 
     z = stats.norm.isf((1.0 - conf_level) / 2.0)
     sigma = np.sqrt(np.cumsum(ratio_var))
@@ -284,23 +301,33 @@ def kaplan_meier_estimator(
            Survival Function Based on Transformations", Scandinavian Journal of
            Statistics. 1990;17(1):35–41.
     """
-    event, time_enter, time_exit = check_y_survival(event, time_enter, time_exit, allow_all_censored=True)
+    event, time_enter, time_exit = check_y_survival(
+        event, time_enter, time_exit, allow_all_censored=True
+    )
     check_consistent_length(event, time_enter, time_exit)
 
     if conf_type is not None and reverse:
-        raise NotImplementedError("Confidence intervals of the censoring distribution is not implemented.")
+        raise NotImplementedError(
+            "Confidence intervals of the censoring distribution is not implemented."
+        )
 
     if time_enter is None:
-        uniq_times, n_events, n_at_risk, n_censored = _compute_counts(event, time_exit)
+        uniq_times, n_events, n_at_risk, n_censored = _compute_counts(
+            event, time_exit
+        )
 
         if reverse:
             n_at_risk -= n_events
             n_events = n_censored
     else:
         if reverse:
-            raise ValueError("The censoring distribution cannot be estimated from left truncated data")
+            raise ValueError(
+                "The censoring distribution cannot be estimated from left truncated data"
+            )
 
-        uniq_times, n_events, n_at_risk = _compute_counts_truncated(event, time_enter, time_exit)
+        uniq_times, n_events, n_at_risk = _compute_counts_truncated(
+            event, time_enter, time_exit
+        )
 
     # account for 0/0 = nan
     ratio = np.divide(
@@ -459,7 +486,9 @@ class SurvivalFunctionEstimator(BaseEstimator):
         self._validate_params()
         event, time = check_y_survival(y, allow_all_censored=True)
 
-        values = kaplan_meier_estimator(event, time, conf_level=self.conf_level, conf_type=self.conf_type)
+        values = kaplan_meier_estimator(
+            event, time, conf_level=self.conf_level, conf_type=self.conf_type
+        )
         if self.conf_type is None:
             unique_time, prob = values
         else:
@@ -502,12 +531,16 @@ class SurvivalFunctionEstimator(BaseEstimator):
                 "If return_conf_int is True, SurvivalFunctionEstimator must be fitted with conf_int != None"
             )
 
-        time = check_array(time, ensure_2d=False, estimator=self, input_name="time")
+        time = check_array(
+            time, ensure_2d=False, estimator=self, input_name="time"
+        )
 
         # K-M is undefined if estimate at last time point is non-zero
         extends = time > self.unique_time_[-1]
         if self.prob_[-1] > 0 and extends.any():
-            raise ValueError(f"time must be smaller than largest observed time point: {self.unique_time_[-1]}")
+            raise ValueError(
+                f"time must be smaller than largest observed time point: {self.unique_time_[-1]}"
+            )
 
         # beyond last time point is zero probability
         Shat = np.empty(time.shape, dtype=float)
@@ -553,7 +586,9 @@ class CensoringDistributionEstimator(SurvivalFunctionEstimator):
             self.unique_time_ = np.unique(time)
             self.prob_ = np.ones(self.unique_time_.shape[0])
         else:
-            unique_time, prob = kaplan_meier_estimator(event, time, reverse=True)
+            unique_time, prob = kaplan_meier_estimator(
+                event, time, reverse=True
+            )
             self.unique_time_ = np.r_[-np.inf, unique_time]
             self.prob_ = np.r_[1.0, prob]
 
@@ -580,7 +615,9 @@ class CensoringDistributionEstimator(SurvivalFunctionEstimator):
         Ghat = self.predict_proba(time[event])
 
         if (Ghat == 0.0).any():
-            raise ValueError("censoring survival function is zero at one or more time points")
+            raise ValueError(
+                "censoring survival function is zero at one or more time points"
+            )
 
         weights = np.zeros(time.shape[0])
         weights[event] = 1.0 / Ghat

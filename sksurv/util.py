@@ -49,7 +49,9 @@ class Surv:
             raise ValueError("name_time must be different from name_event")
 
         time = np.asanyarray(time, dtype=float)
-        y = np.empty(time.shape[0], dtype=[(name_event, bool), (name_time, float)])
+        y = np.empty(
+            time.shape[0], dtype=[(name_event, bool), (name_time, float)]
+        )
         y[name_time] = time
 
         event = np.asanyarray(event)
@@ -66,7 +68,9 @@ class Surv:
             if np.all(events == np.array([0, 1], dtype=events.dtype)):
                 y[name_event] = event.astype(bool)
             else:
-                raise ValueError("non-boolean event indicator must contain 0 and 1 only")
+                raise ValueError(
+                    "non-boolean event indicator must contain 0 and 1 only"
+                )
 
         return y
 
@@ -89,14 +93,21 @@ class Surv:
             Structured array with two fields.
         """
         if not isinstance(data, pd.DataFrame):
-            raise TypeError(f"expected pandas.DataFrame, but got {type(data)!r}")
+            raise TypeError(
+                f"expected pandas.DataFrame, but got {type(data)!r}"
+            )
 
         return Surv.from_arrays(
-            data.loc[:, event].values, data.loc[:, time].values, name_event=str(event), name_time=str(time)
+            data.loc[:, event].values,
+            data.loc[:, time].values,
+            name_event=str(event),
+            name_time=str(time),
         )
 
 
-def check_y_survival(y_or_event, *args, allow_all_censored=False, allow_time_zero=True):
+def check_y_survival(
+    y_or_event, *args, allow_all_censored=False, allow_time_zero=True
+):
     """Check that array correctly represents an outcome for survival analysis.
 
     Parameters
@@ -128,7 +139,11 @@ def check_y_survival(y_or_event, *args, allow_all_censored=False, allow_time_zer
     if len(args) == 0:
         y = y_or_event
 
-        if not isinstance(y, np.ndarray) or y.dtype.fields is None or len(y.dtype.fields) != 2:
+        if (
+            not isinstance(y, np.ndarray)
+            or y.dtype.fields is None
+            or len(y.dtype.fields) != 2
+        ):
             raise ValueError(
                 "y must be a structured array with the first field"
                 " being a binary class event indicator and the second field"
@@ -144,7 +159,9 @@ def check_y_survival(y_or_event, *args, allow_all_censored=False, allow_time_zer
 
     event = check_array(y_event, ensure_2d=False)
     if not np.issubdtype(event.dtype, np.bool_):
-        raise ValueError(f"elements of event indicator must be boolean, but found {event.dtype}")
+        raise ValueError(
+            f"elements of event indicator must be boolean, but found {event.dtype}"
+        )
 
     if not (allow_all_censored or np.any(event)):
         raise ValueError("all samples are censored")
@@ -157,7 +174,9 @@ def check_y_survival(y_or_event, *args, allow_all_censored=False, allow_time_zer
 
         yt = check_array(yt, ensure_2d=False)
         if not np.issubdtype(yt.dtype, np.number):
-            raise ValueError(f"time must be numeric, but found {yt.dtype} for argument {i + 2}")
+            raise ValueError(
+                f"time must be numeric, but found {yt.dtype} for argument {i + 2}"
+            )
 
         if allow_time_zero:
             cond = yt < 0
@@ -252,17 +271,27 @@ def safe_concat(objs, *args, **kwargs):
     for df in objs:
         if isinstance(df, pd.Series):
             if isinstance(df.dtype, CategoricalDtype):
-                categories[df.name] = {"categories": df.cat.categories, "ordered": df.cat.ordered}
+                categories[df.name] = {
+                    "categories": df.cat.categories,
+                    "ordered": df.cat.ordered,
+                }
         else:
             dfc = df.select_dtypes(include=["category"])
             for name, s in dfc.items():
                 if name in categories:
                     if axis == 1:
                         raise ValueError(f"duplicate columns {name}")
-                    if not categories[name]["categories"].equals(s.cat.categories):
-                        raise ValueError(f"categories for column {name} do not match")
+                    if not categories[name]["categories"].equals(
+                        s.cat.categories
+                    ):
+                        raise ValueError(
+                            f"categories for column {name} do not match"
+                        )
                 else:
-                    categories[name] = {"categories": s.cat.categories, "ordered": s.cat.ordered}
+                    categories[name] = {
+                        "categories": s.cat.categories,
+                        "ordered": s.cat.ordered,
+                    }
                 df[name] = df[name].astype(object)
 
     concatenated = pd.concat(objs, *args, axis=axis, **kwargs)
@@ -303,7 +332,9 @@ class _PropertyAvailableIfDescriptor:
         if obj is None:
             return self
 
-        attr_err = AttributeError(f"This {obj!r} has no attribute {self._name!r}")
+        attr_err = AttributeError(
+            f"This {obj!r} has no attribute {self._name!r}"
+        )
         if not self.check(obj):
             raise attr_err
 

@@ -21,7 +21,9 @@ __all__ = ["OneHotEncoder"]
 def check_columns_exist(actual, expected):
     missing_features = expected.difference(actual)
     if len(missing_features) != 0:
-        raise ValueError(f"{len(missing_features)} features are missing from data: {missing_features.tolist()}")
+        raise ValueError(
+            f"{len(missing_features)} features are missing from data: {missing_features.tolist()}"
+        )
 
 
 class OneHotEncoder(BaseEstimator, TransformerMixin):
@@ -78,9 +80,13 @@ class OneHotEncoder(BaseEstimator, TransformerMixin):
         return self
 
     def _encode(self, X, columns_to_encode):
-        return encode_categorical(X, columns=columns_to_encode, allow_drop=self.allow_drop)
+        return encode_categorical(
+            X, columns=columns_to_encode, allow_drop=self.allow_drop
+        )
 
-    def fit_transform(self, X, y=None, **fit_params):  # pylint: disable=unused-argument
+    def fit_transform(
+        self, X, y=None, **fit_params
+    ):  # pylint: disable=unused-argument
         """Convert categorical columns to numeric values.
 
         Parameters
@@ -99,7 +105,9 @@ class OneHotEncoder(BaseEstimator, TransformerMixin):
         """
         self._check_feature_names(X, reset=True)
         self._check_n_features(X, reset=True)
-        columns_to_encode = X.select_dtypes(include=["object", "category"]).columns
+        columns_to_encode = X.select_dtypes(
+            include=["object", "category"]
+        ).columns
         x_dummy = self._encode(X, columns_to_encode)
 
         self.feature_names_ = columns_to_encode

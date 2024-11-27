@@ -70,3 +70,70 @@ print("surv_funcs.upper", surv_funcs.upper)
 
 print(estimator.score(X_test, y_test))
 
+
+
+X, y = load_veterans_lung_cancer()
+X = _encode_categorical_columns(X)
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+from sksurv.nonparametric import kaplan_meier_estimator
+
+event_time = [y[1] for y in y_test]
+event_status = [y[0] for y in y_test]
+km = kaplan_meier_estimator(event_status, event_time,
+                            conf_type="log-log")
+estimator = PISurvivalCustom(regr=RandomForestRegressor(), type_pi="kde")
+estimator2 = GradientBoostingSurvivalAnalysis()
+
+start = time()
+estimator.fit(X_train, y_train)
+print("Time to fit PIRandomForestRegressor: ", time() - start)
+start = time()
+estimator2.fit(X_train, y_train)
+print("Time to fit SurvivalTree: ", time() - start)
+
+surv_funcs = estimator.predict_survival_function(X_test.iloc[:1])
+surv_funcs2 = estimator2.predict_survival_function(X_test.iloc[:1])
+
+print("km", km)
+print("surv_funcs2", surv_funcs2)
+print("surv_funcs.mean", surv_funcs.mean)
+print("surv_funcs.lower", surv_funcs.lower)
+print("surv_funcs.upper", surv_funcs.upper)
+
+print(estimator.score(X_test, y_test))
+
+
+X, y = load_whas500()
+X = _encode_categorical_columns(X)
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+from sksurv.nonparametric import kaplan_meier_estimator
+
+event_time = [y[1] for y in y_test]
+event_status = [y[0] for y in y_test]
+km = kaplan_meier_estimator(event_status, event_time,
+                            conf_type="log-log")
+estimator = PISurvivalCustom(regr=RandomForestRegressor(), type_pi="kde")
+estimator2 = GradientBoostingSurvivalAnalysis()
+
+start = time()
+estimator.fit(X_train, y_train)
+print("Time to fit PIRandomForestRegressor: ", time() - start)
+start = time()
+estimator2.fit(X_train, y_train)
+print("Time to fit SurvivalTree: ", time() - start)
+
+surv_funcs = estimator.predict_survival_function(X_test.iloc[:1])
+surv_funcs2 = estimator2.predict_survival_function(X_test.iloc[:1])
+
+print("km", km)
+print("surv_funcs2", surv_funcs2)
+print("surv_funcs.mean", surv_funcs.mean)
+print("surv_funcs.lower", surv_funcs.lower)
+print("surv_funcs.upper", surv_funcs.upper)
+
+print(estimator.score(X_test, y_test))
+

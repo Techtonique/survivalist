@@ -92,7 +92,9 @@ class StepFunction:
         if not np.isfinite(x).all():
             raise ValueError("x must be finite")
         if np.min(x) < self._domain[0] or np.max(x) > self.domain[1]:
-            raise ValueError(f"x must be within [{self.domain[0]:f}; {self.domain[1]:f}]")
+            raise ValueError(
+                f"x must be within [{self.domain[0]:f}; {self.domain[1]:f}]"
+            )
 
         # x is within the domain, but we need to account for self.domain[0] <= x < self.x[0]
         x = np.clip(x, a_min=self.x[0], a_max=None)
@@ -110,5 +112,10 @@ class StepFunction:
 
     def __eq__(self, other):
         if isinstance(other, type(self)):
-            return all(self.x == other.x) and all(self.y == other.y) and self.a == other.a and self.b == other.b
+            return (
+                all(self.x == other.x)
+                and all(self.y == other.y)
+                and self.a == other.a
+                and self.b == other.b
+            )
         return False

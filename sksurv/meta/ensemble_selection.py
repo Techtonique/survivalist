@@ -40,12 +40,16 @@ class EnsembleAverage(BaseEstimator):
     def __init__(self, base_estimators, name=None):
         self.base_estimators = base_estimators
         self.name = name
-        assert not hasattr(self.base_estimators[0], "classes_"), "base estimator cannot be a classifier"
+        assert not hasattr(
+            self.base_estimators[0], "classes_"
+        ), "base estimator cannot be a classifier"
 
     def get_base_params(self):
         return self.base_estimators[0].get_params()
 
-    def fit(self, X, y=None, **kwargs):  # pragma: no cover; # pylint: disable=unused-argument
+    def fit(
+        self, X, y=None, **kwargs
+    ):  # pragma: no cover; # pylint: disable=unused-argument
         return self
 
     def predict(self, X):
@@ -57,7 +61,9 @@ class EnsembleAverage(BaseEstimator):
 
 
 class MeanEstimator(BaseEstimator):
-    def fit(self, X, y=None, **kwargs):  # pragma: no cover; # pylint: disable=unused-argument
+    def fit(
+        self, X, y=None, **kwargs
+    ):  # pragma: no cover; # pylint: disable=unused-argument
         return self
 
     def predict(self, X):  # pylint: disable=no-self-use
@@ -65,7 +71,9 @@ class MeanEstimator(BaseEstimator):
 
 
 class MeanRankEstimator(BaseEstimator):
-    def fit(self, X, y=None, **kwargs):  # pragma: no cover; # pylint: disable=unused-argument
+    def fit(
+        self, X, y=None, **kwargs
+    ):  # pragma: no cover; # pylint: disable=unused-argument
         return self
 
     def predict(self, X):  # pylint: disable=no-self-use
@@ -75,8 +83,20 @@ class MeanRankEstimator(BaseEstimator):
         return ranks.mean(axis=X.ndim - 1)
 
 
-def _fit_and_score_fold(est, x, y, scorer, train_index, test_index, fit_params, idx, fold):
-    score = _fit_and_score(est, x, y, scorer, train_index, test_index, est.get_params(), fit_params, {})
+def _fit_and_score_fold(
+    est, x, y, scorer, train_index, test_index, fit_params, idx, fold
+):
+    score = _fit_and_score(
+        est,
+        x,
+        y,
+        scorer,
+        train_index,
+        test_index,
+        est.get_params(),
+        fit_params,
+        {},
+    )
     return idx, fold, score, est
 
 
@@ -120,7 +140,9 @@ class BaseEnsembleSelection(Stacking):
         n_jobs=1,
         verbose=0,
     ):
-        super().__init__(meta_estimator=meta_estimator, base_estimators=base_estimators)
+        super().__init__(
+            meta_estimator=meta_estimator, base_estimators=base_estimators
+        )
 
         self.scorer = scorer
         self.n_estimators = n_estimators
@@ -131,7 +153,17 @@ class BaseEnsembleSelection(Stacking):
         self.n_jobs = n_jobs
         self.verbose = verbose
 
-        self._extra_params.extend(["scorer", "n_estimators", "min_score", "min_correlation", "cv", "n_jobs", "verbose"])
+        self._extra_params.extend(
+            [
+                "scorer",
+                "n_estimators",
+                "min_score",
+                "min_correlation",
+                "cv",
+                "n_jobs",
+                "verbose",
+            ]
+        )
 
     def __len__(self):
         if hasattr(self, "fitted_models_"):
@@ -150,7 +182,9 @@ class BaseEnsembleSelection(Stacking):
         if isinstance(self.n_estimators, numbers.Integral):
             self.n_estimators_ = self.n_estimators
         else:
-            self.n_estimators_ = max(int(self.n_estimators * len(self.base_estimators)), 1)
+            self.n_estimators_ = max(
+                int(self.n_estimators * len(self.base_estimators)), 1
+            )
 
         if self.correlation == "pearson":
             self._corr_func = lambda x: np.corrcoef(x, rowvar=0)
@@ -181,11 +215,17 @@ class BaseEnsembleSelection(Stacking):
 
         return ensemble_scores, base_ensemble
 
-    def _create_cv_ensemble(self, base_ensemble, idx_models_included, model_names=None):
+    def _create_cv_ensemble(
+        self, base_ensemble, idx_models_included, model_names=None
+    ):
         """For each selected base estimator, average models trained on each fold"""
         fitted_models = np.empty(len(idx_models_included), dtype=object)
         for i, idx in enumerate(idx_models_included):
-            model_name = self.base_estimators[idx][0] if model_names is None else model_names[idx]
+            model_name = (
+                self.base_estimators[idx][0]
+                if model_names is None
+                else model_names[idx]
+            )
             avg_model = EnsembleAverage(base_ensemble[idx, :], name=model_name)
             fitted_models[i] = avg_model
 
@@ -238,7 +278,9 @@ class BaseEnsembleSelection(Stacking):
 
     def _restore_base_estimators(self, kernel_cache, out, X, cv):
         """Restore custom kernel functions of estimators for predictions"""
-        train_folds = {fold: train_index for fold, (train_index, _) in enumerate(cv)}
+        train_folds = {
+            fold: train_index for fold, (train_index, _) in enumerate(cv)
+        }
 
         for idx, fold, _, est in out:
             if idx in kernel_cache:
@@ -291,7 +333,11 @@ class BaseEnsembleSelection(Stacking):
         np.fill_diagonal(cor, 0)
 
         final_scores = scores.copy()
-        diversity = np.apply_along_axis(lambda x: (n_models - np.sum(x >= self.min_correlation)) / n_models, 0, cor)
+        diversity = np.apply_along_axis(
+            lambda x: (n_models - np.sum(x >= self.min_correlation)) / n_models,
+            0,
+            cor,
+        )
 
         final_scores += diversity
         return final_scores
@@ -430,20 +476,28 @@ class EnsembleSelection(BaseEnsembleSelection):
         )
 
     def _fit(self, X, y, cv, **fit_params):
-        scores, base_ensemble = self._fit_and_score_ensemble(X, y, cv, **fit_params)
-        self.fitted_models_, self.scores_ = self._prune_by_cv_score(scores, base_ensemble)
+        scores, base_ensemble = self._fit_and_score_ensemble(
+            X, y, cv, **fit_params
+        )
+        self.fitted_models_, self.scores_ = self._prune_by_cv_score(
+            scores, base_ensemble
+        )
 
     def _prune_by_cv_score(self, scores, base_ensemble, model_names=None):
         mean_scores = scores.mean(axis=1)
         idx_good_models = np.flatnonzero(mean_scores >= self.min_score)
         if len(idx_good_models) == 0:
-            raise ValueError("no base estimator exceeds min_score, try decreasing it")
+            raise ValueError(
+                "no base estimator exceeds min_score, try decreasing it"
+            )
 
         total_score = mean_scores[idx_good_models]
         max_score = total_score.max()
         total_score /= max_score
 
-        fitted_models = self._create_cv_ensemble(base_ensemble, idx_good_models, model_names)
+        fitted_models = self._create_cv_ensemble(
+            base_ensemble, idx_good_models, model_names
+        )
 
         return fitted_models, total_score
 
@@ -451,7 +505,8 @@ class EnsembleSelection(BaseEnsembleSelection):
         n_models = len(self.fitted_models_)
 
         out = Parallel(n_jobs=self.n_jobs, verbose=self.verbose)(
-            delayed(_predict)(est, X, i) for i, est in enumerate(self.fitted_models_)
+            delayed(_predict)(est, X, i)
+            for i, est in enumerate(self.fitted_models_)
         )
 
         predictions = np.empty((X.shape[0], n_models), order="F")
@@ -589,11 +644,15 @@ class EnsembleSelectionRegressor(BaseEnsembleSelection):
         return False
 
     def _fit(self, X, y, cv, **fit_params):
-        scores, base_ensemble = self._fit_and_score_ensemble(X, y, cv, **fit_params)
+        scores, base_ensemble = self._fit_and_score_ensemble(
+            X, y, cv, **fit_params
+        )
         fitted_models, scores = self._prune_by_cv_score(scores, base_ensemble)
 
         if len(fitted_models) > self.n_estimators_:
-            fitted_models, scores = self._prune_by_correlation(fitted_models, scores, X, y)
+            fitted_models, scores = self._prune_by_correlation(
+                fitted_models, scores, X, y
+            )
 
         self.fitted_models_ = fitted_models
         self.scores_ = scores
@@ -604,9 +663,13 @@ class EnsembleSelectionRegressor(BaseEnsembleSelection):
 
         idx_good_models = np.flatnonzero(mean_scores >= self.min_score)
         if len(idx_good_models) == 0:
-            raise ValueError("no base estimator exceeds min_score, try decreasing it")
+            raise ValueError(
+                "no base estimator exceeds min_score, try decreasing it"
+            )
 
-        fitted_models = self._create_cv_ensemble(base_ensemble, idx_good_models, model_names)
+        fitted_models = self._create_cv_ensemble(
+            base_ensemble, idx_good_models, model_names
+        )
 
         return fitted_models, mean_scores[idx_good_models]
 
@@ -614,7 +677,8 @@ class EnsembleSelectionRegressor(BaseEnsembleSelection):
         n_models = len(fitted_models)
 
         out = Parallel(n_jobs=self.n_jobs, verbose=self.verbose)(
-            delayed(_score_regressor)(est, X, y, i) for i, est in enumerate(fitted_models)
+            delayed(_score_regressor)(est, X, y, i)
+            for i, est in enumerate(fitted_models)
         )
 
         error = np.empty((X.shape[0], n_models), order="F")
@@ -632,7 +696,8 @@ class EnsembleSelectionRegressor(BaseEnsembleSelection):
         n_models = len(self.fitted_models_)
 
         out = Parallel(n_jobs=self.n_jobs, verbose=self.verbose)(
-            delayed(_predict)(est, X, i) for i, est in enumerate(self.fitted_models_)
+            delayed(_predict)(est, X, i)
+            for i, est in enumerate(self.fitted_models_)
         )
 
         predictions = np.empty((X.shape[0], n_models), order="F")

@@ -3,9 +3,10 @@ from ..ensemble import ComponentwiseGenGradientBoostingSurvivalAnalysis
 
 __all__ = ["SurvivalCustom"]
 
+
 class SurvivalCustom(ComponentwiseGenGradientBoostingSurvivalAnalysis):
     """Generic Gradient boosting with any base learner.
-    
+
     Parameters
     ----------
     loss : {'coxph', 'squared', 'ipcwls'}, optional, default: 'coxph'
@@ -61,14 +62,14 @@ class SurvivalCustom(ComponentwiseGenGradientBoostingSurvivalAnalysis):
         random_state=None,
         verbose=0,
     ):
-        self.regr = regr 
+        self.regr = regr
         self._baseline_model = self.regr
         self.loss = loss
-        self.n_estimators = 1 # this
-        self.learning_rate = 1.0 # this too 
+        self.n_estimators = 1  # this
+        self.learning_rate = 1.0  # this too
         self.subsample = 1.0
         self.random_state = random_state
         self.verbose = verbose
-        self.show_progress = False 
-        self.warm_start=False
-        self.dropout_rate=0
+        self.show_progress = False
+        self.warm_start = False
+        self.dropout_rate = 0

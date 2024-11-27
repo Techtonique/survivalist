@@ -23,12 +23,17 @@ from sklearn.utils import check_random_state
 from sklearn.utils._param_validation import Interval, StrOptions
 from sklearn.utils.extmath import squared_norm
 from sklearn.utils.validation import _check_sample_weight, check_is_fitted
-from tqdm import tqdm 
+from tqdm import tqdm
 
 from ..base import SurvivalAnalysisMixin
 from ..linear_model.coxph import BreslowEstimator
 from ..util import check_array_survival
-from .survival_loss import LOSS_FUNCTIONS, CensoredSquaredLoss, CoxPH, IPCWLeastSquaresError
+from .survival_loss import (
+    LOSS_FUNCTIONS,
+    CensoredSquaredLoss,
+    CoxPH,
+    IPCWLeastSquaresError,
+)
 
 __all__ = ["ComponentwiseGenGradientBoostingSurvivalAnalysis"]
 
@@ -46,28 +51,31 @@ def _sample_binomial_plus_one(p, size, random_state):
 class _ComponentwiseBaseLearner(BaseEstimator):
     def __init__(self, component, regr):
         self.component = component
-        self.regr = regr 
+        self.regr = regr
 
-    def fit(self, X, y, sample_weight):        
-        try: 
+    def fit(self, X, y, sample_weight):
+        try:
             self.regr.fit(X, y, sample_weight=sample_weight)
         except Exception as e:
-            self.regr.fit(X, y)        
+            self.regr.fit(X, y)
         return self.regr
 
     def predict(self, X, **kwargs):
         return self.regr.predict(X[:, self.component], **kwargs)
 
 
-def _fit_stage_componentwise(X, residuals, sample_weight, regr, 
-                             **fit_params):  # pylint: disable=unused-argument
+def _fit_stage_componentwise(
+    X, residuals, sample_weight, regr, **fit_params
+):  # pylint: disable=unused-argument
     """Fit component-wise weighted least squares model"""
     n_features = X.shape[1]
 
     base_learners = []
     error = np.empty(n_features)
     for component in range(n_features):
-        learner = _ComponentwiseBaseLearner(component, regr=regr).fit(X, residuals, sample_weight)
+        learner = _ComponentwiseBaseLearner(component, regr=regr).fit(
+            X, residuals, sample_weight
+        )
         l_pred = learner.predict(X)
         error[component] = squared_norm(residuals - l_pred)
         base_learners.append(learner)
@@ -76,9 +84,11 @@ def _fit_stage_componentwise(X, residuals, sample_weight, regr,
     return base_learners[np.nanargmin(error)]
 
 
-class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAnalysisMixin):
+class ComponentwiseGenGradientBoostingSurvivalAnalysis(
+    BaseEnsemble, SurvivalAnalysisMixin
+):
     """Generic Gradient boosting with any base learner.
-    
+
     Parameters
     ----------
     loss : {'coxph', 'squared', 'ipcwls'}, optional, default: 'coxph'
@@ -127,7 +137,7 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
         Enable verbose output. If 1 then it prints progress and performance
         once in a while.
         Values must be in the range `[0, inf)`.
-    
+
     show_progress : bool, default: True
         If set, show a progress bar for the fitting process.
 
@@ -197,7 +207,7 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
         verbose=0,
         show_progress=True,
     ):
-        self.regr = regr 
+        self.regr = regr
         self.loss = loss
         self.n_estimators = n_estimators
         self.learning_rate = learning_rate
@@ -222,7 +232,9 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
         self.train_score_ = np.zeros(self.n_estimators, dtype=np.float64)
         # do oob?
         if self.subsample < 1.0:
-            self.oob_improvement_ = np.zeros(self.n_estimators, dtype=np.float64)
+            self.oob_improvement_ = np.zeros(
+                self.n_estimators, dtype=np.float64
+            )
             self.oob_scores_ = np.zeros(self.n_estimators, dtype=np.float64)
             self.oob_score_ = np.nan
 
@@ -239,12 +251,20 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
         if self.subsample < 1 or hasattr(self, "oob_improvement_"):
             # if do oob resize arrays or create new if not available
             if hasattr(self, "oob_improvement_"):
-                self.oob_improvement_ = np.resize(self.oob_improvement_, total_n_estimators)
-                self.oob_scores_ = np.resize(self.oob_scores_, total_n_estimators)
+                self.oob_improvement_ = np.resize(
+                    self.oob_improvement_, total_n_estimators
+                )
+                self.oob_scores_ = np.resize(
+                    self.oob_scores_, total_n_estimators
+                )
                 self.oob_score_ = np.nan
             else:
-                self.oob_improvement_ = np.zeros(total_n_estimators, dtype=np.float64)
-                self.oob_scores_ = np.zeros((total_n_estimators,), dtype=np.float64)
+                self.oob_improvement_ = np.zeros(
+                    total_n_estimators, dtype=np.float64
+                )
+                self.oob_scores_ = np.zeros(
+                    (total_n_estimators,), dtype=np.float64
+                )
                 self.oob_score_ = np.nan
 
         if self.dropout_rate > 0:
@@ -276,7 +296,9 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
 
     def _update_with_dropout(self, i, X, raw_predictions, scale, random_state):
         # select base learners to be dropped for next iteration
-        drop_model, n_dropped = _sample_binomial_plus_one(self.dropout_rate, i + 1, random_state)
+        drop_model, n_dropped = _sample_binomial_plus_one(
+            self.dropout_rate, i + 1, random_state
+        )
 
         # adjust scaling factor of tree that is going to be trained in next iteration
         scale[i + 1] = 1.0 / (n_dropped + 1.0)
@@ -288,12 +310,27 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
                 scale[m] *= n_dropped / (n_dropped + 1.0)
             else:
                 # pseudoresponse of next iteration (without contribution of dropped trees)
-                raw_predictions += self.learning_rate * scale[m] * self.estimators_[m].predict(X)
+                raw_predictions += (
+                    self.learning_rate
+                    * scale[m]
+                    * self.estimators_[m].predict(X)
+                )
 
-    def _fit(self, X, event, time, y_pred, sample_weight, random_state, begin_at_stage=0):  # noqa: C901
+    def _fit(
+        self,
+        X,
+        event,
+        time,
+        y_pred,
+        sample_weight,
+        random_state,
+        begin_at_stage=0,
+    ):  # noqa: C901
         n_samples = X.shape[0]
         # account for intercept
-        y = np.fromiter(zip(event, time), dtype=[("event", bool), ("time", np.float64)])
+        y = np.fromiter(
+            zip(event, time), dtype=[("event", bool), ("time", np.float64)]
+        )
 
         do_oob = self.subsample < 1.0
         if do_oob:
@@ -316,8 +353,12 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
         for i in iterator:
             # subsampling
             if do_oob:
-                sample_mask = _random_sample_mask(n_samples, n_inbag, random_state)
-                subsample_weight = sample_weight * sample_mask.astype(np.float64)
+                sample_mask = _random_sample_mask(
+                    n_samples, n_inbag, random_state
+                )
+                subsample_weight = sample_weight * sample_mask.astype(
+                    np.float64
+                )
 
                 # OOB score before adding this stage
                 y_oob_masked = y[~sample_mask]
@@ -331,10 +372,13 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
             else:
                 subsample_weight = sample_weight
 
-            residuals = self.loss_obj.gradient(y, y_pred, sample_weight=sample_weight)
+            residuals = self.loss_obj.gradient(
+                y, y_pred, sample_weight=sample_weight
+            )
 
-            best_learner = _fit_stage_componentwise(X, residuals, subsample_weight, 
-                                                    regr=self.regr)
+            best_learner = _fit_stage_componentwise(
+                X, residuals, subsample_weight, regr=self.regr
+            )
             self.estimators_[i] = best_learner
 
             if do_dropout and i < len(scale) - 1:
@@ -354,12 +398,16 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
                     raw_prediction=y_pred[~sample_mask],
                     sample_weight=sample_weight_oob_masked,
                 )
-                previous_loss = initial_loss if i == 0 else self.oob_scores_[i - 1]
+                previous_loss = (
+                    initial_loss if i == 0 else self.oob_scores_[i - 1]
+                )
                 self.oob_improvement_[i] = previous_loss - self.oob_scores_[i]
                 self.oob_score_ = self.oob_scores_[-1]
             else:
                 # no need to fancy index w/ no subsampling
-                self.train_score_[i] = self.loss_obj(y_true=y, raw_prediction=y_pred, sample_weight=sample_weight)
+                self.train_score_[i] = self.loss_obj(
+                    y_true=y, raw_prediction=y_pred, sample_weight=sample_weight
+                )
 
             if self.verbose > 0:
                 verbose_reporter.update(i, self)
@@ -400,7 +448,9 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
         Xi = np.column_stack((np.ones(n_samples), X))
 
         self.loss_obj = LOSS_FUNCTIONS[self.loss]()
-        if isinstance(self.loss_obj, (CensoredSquaredLoss, IPCWLeastSquaresError)):
+        if isinstance(
+            self.loss_obj, (CensoredSquaredLoss, IPCWLeastSquaresError)
+        ):
             time = np.log(time)
 
         if not self._is_fitted():
@@ -418,7 +468,8 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
                 raise ValueError(
                     "n_estimators=%d must be larger or equal to "
                     "estimators_.shape[0]=%d when "
-                    "warm_start==True" % (self.n_estimators, self.estimators_.shape[0])
+                    "warm_start==True"
+                    % (self.n_estimators, self.estimators_.shape[0])
                 )
             begin_at_stage = self.estimators_.shape[0]
             y_pred = self._raw_predict(Xi)
@@ -427,40 +478,52 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
             # apply dropout to last stage of previous fit
             if hasattr(self, "_scale") and self.dropout_rate > 0:
                 # pylint: disable-next=access-member-before-definition
-                self._update_with_dropout(self.n_estimators_ - 1, Xi, y_pred, self._scale, self._rng)
+                self._update_with_dropout(
+                    self.n_estimators_ - 1, Xi, y_pred, self._scale, self._rng
+                )
 
-        self.n_estimators_ = self._fit(Xi, event, time, y_pred, sample_weight, self._rng, begin_at_stage)
+        self.n_estimators_ = self._fit(
+            Xi, event, time, y_pred, sample_weight, self._rng, begin_at_stage
+        )
 
         self.set_baseline_model(X, event, time)
-        try: 
+        try:
             self.X_ = self.regr.X_
         except AttributeError:
-            pass 
+            pass
         return self
 
     def set_baseline_model(self, X, event, time):
         if isinstance(self.loss_obj, CoxPH):
             risk_scores = self._predict(X)
-            self.baseline_model = BreslowEstimator().fit(risk_scores, event, time)
+            self.baseline_model = BreslowEstimator().fit(
+                risk_scores, event, time
+            )
         else:
             self.baseline_model = None
 
     def _raw_predict(self, X, **kwargs):
-        if ("return_pi" in kwargs) or ("return_std" in kwargs):            
-            pred = {"mean": np.zeros(X.shape[0], dtype=float), # 4 is mean, std, lower, upper            
-                    "lower": np.zeros(X.shape[0], dtype=float),
-                    "upper": np.zeros(X.shape[0], dtype=float)}
+        if ("return_pi" in kwargs) or ("return_std" in kwargs):
+            pred = {
+                "mean": np.zeros(
+                    X.shape[0], dtype=float
+                ),  # 4 is mean, std, lower, upper
+                "lower": np.zeros(X.shape[0], dtype=float),
+                "upper": np.zeros(X.shape[0], dtype=float),
+            }
             for estimator in self.estimators_:
                 preds = estimator.predict(X, **kwargs)
-                if "return_std" in kwargs:                    
+                if "return_std" in kwargs:
                     pred["mean"] += self.learning_rate * preds.mean
                     pred["lower"] += self.learning_rate * preds.upper
                     pred["upper"] += self.learning_rate * preds.lower
-            DescribeResult = namedtuple("DescribeResult", ["mean", "lower", "upper"])
+            DescribeResult = namedtuple(
+                "DescribeResult", ["mean", "lower", "upper"]
+            )
             return DescribeResult(pred["mean"], pred["lower"], pred["upper"])
         pred = np.zeros(X.shape[0], dtype=float)
         for estimator in self.estimators_:
-            pred += self.learning_rate * estimator.predict(X, **kwargs)        
+            pred += self.learning_rate * estimator.predict(X, **kwargs)
         return pred
 
     def _predict(self, X, **kwargs):
@@ -470,8 +533,13 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
         if len(np.asarray(pred).shape) == 1:
             return self.loss_obj._scale_raw_prediction(pred)
         if ("return_std" in kwargs) or ("return_pi" in kwargs):
-            DescribeResult = namedtuple("DescribeResult", ["mean", "lower", "upper"])
-            res = [self.loss_obj._scale_raw_prediction(p) for p in (pred[0], pred[1], pred[2])]
+            DescribeResult = namedtuple(
+                "DescribeResult", ["mean", "lower", "upper"]
+            )
+            res = [
+                self.loss_obj._scale_raw_prediction(p)
+                for p in (pred[0], pred[1], pred[2])
+            ]
             return DescribeResult(res[0], res[1], res[2])
 
     def predict(self, X, **kwargs):
@@ -498,10 +566,14 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
 
     def get_baseline_model(self):
         if self.baseline_model is None:
-            raise ValueError("`fit` must be called with the loss option set to 'coxph'.")
+            raise ValueError(
+                "`fit` must be called with the loss option set to 'coxph'."
+            )
         return self.baseline_model
 
-    def predict_cumulative_hazard_function(self, X, return_array=False, **kwargs):
+    def predict_cumulative_hazard_function(
+        self, X, return_array=False, **kwargs
+    ):
         """Predict cumulative hazard function.
 
         Only available if :meth:`fit` has been called with `loss = "coxph"`.
@@ -563,20 +635,24 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
         """
         if self.quantiles_ is not None:
             preds = self.predict(X, **kwargs)
-            DescribeResult = namedtuple("DescribeResult", ["mean", "lower", "upper"])
-            res = (self._predict_cumulative_hazard_function(self.get_baseline_model(), 
-                                                            preds.mean, 
-                                                            return_array),
-            self._predict_cumulative_hazard_function(self.get_baseline_model(), 
-                                                            preds.lower, 
-                                                            return_array),
-            self._predict_cumulative_hazard_function(self.get_baseline_model(), 
-                                                            preds.upper, 
-                                                            return_array))
+            DescribeResult = namedtuple(
+                "DescribeResult", ["mean", "lower", "upper"]
+            )
+            res = (
+                self._predict_cumulative_hazard_function(
+                    self.get_baseline_model(), preds.mean, return_array
+                ),
+                self._predict_cumulative_hazard_function(
+                    self.get_baseline_model(), preds.lower, return_array
+                ),
+                self._predict_cumulative_hazard_function(
+                    self.get_baseline_model(), preds.upper, return_array
+                ),
+            )
             return DescribeResult(res[0], res[1], res[2])
-        return self._predict_cumulative_hazard_function(self.get_baseline_model(), 
-                                                        self.predict(X, **kwargs), 
-                                                        return_array)
+        return self._predict_cumulative_hazard_function(
+            self.get_baseline_model(), self.predict(X, **kwargs), return_array
+        )
 
     def predict_survival_function(self, X, return_array=False, **kwargs):
         """Predict survival function.
@@ -640,21 +716,37 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
         >>> plt.show()
         """
         if ("return_pi" in kwargs) or ("return_std" in kwargs):
-            preds = self.predict(X, **kwargs)                
-            DescribeResult = namedtuple("DescribeResult", ["mean", "lower", "upper"])
-            res = (self._predict_survival_function(self.get_baseline_model(), 
-                                                   preds.mean, 
-                                                   return_array, **kwargs),
-            self._predict_survival_function(self.get_baseline_model(), 
-                                                   preds.lower, 
-                                                   return_array, **kwargs),
-            self._predict_survival_function(self.get_baseline_model(), 
-                                                   preds.upper, 
-                                                   return_array, **kwargs))
+            preds = self.predict(X, **kwargs)
+            DescribeResult = namedtuple(
+                "DescribeResult", ["mean", "lower", "upper"]
+            )
+            res = (
+                self._predict_survival_function(
+                    self.get_baseline_model(),
+                    preds.mean,
+                    return_array,
+                    **kwargs,
+                ),
+                self._predict_survival_function(
+                    self.get_baseline_model(),
+                    preds.lower,
+                    return_array,
+                    **kwargs,
+                ),
+                self._predict_survival_function(
+                    self.get_baseline_model(),
+                    preds.upper,
+                    return_array,
+                    **kwargs,
+                ),
+            )
             return DescribeResult(res[0], res[1], res[2])
-        return self._predict_survival_function(self.get_baseline_model(), 
-                                               self.predict(X, **kwargs), 
-                                               return_array, **kwargs)
+        return self._predict_survival_function(
+            self.get_baseline_model(),
+            self.predict(X, **kwargs),
+            return_array,
+            **kwargs,
+        )
 
     @property
     def unique_times_(self):
@@ -680,5 +772,3 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
     def _make_estimator(self, append=True, random_state=None):
         # we don't need _make_estimator
         raise NotImplementedError()
-
-

@@ -86,7 +86,11 @@ class Stacking(MetaEstimatorMixin, SurvivalAnalysisMixin, _BaseComposition):
         self.base_estimators = base_estimators
         self.probabilities = probabilities
 
-        self._extra_params = ["meta_estimator", "base_estimators", "probabilities"]
+        self._extra_params = [
+            "meta_estimator",
+            "base_estimators",
+            "probabilities",
+        ]
 
     def _validate_estimators(self):
         names, estimators = zip(*self.base_estimators)
@@ -94,7 +98,9 @@ class Stacking(MetaEstimatorMixin, SurvivalAnalysisMixin, _BaseComposition):
             raise ValueError(f"Names provided are not unique: {names}")
 
         for t in estimators:
-            if not hasattr(t, "fit") or not (hasattr(t, "predict") or hasattr(t, "predict_proba")):
+            if not hasattr(t, "fit") or not (
+                hasattr(t, "predict") or hasattr(t, "predict_proba")
+            ):
                 raise TypeError(
                     "All base estimators should implement "
                     "fit and predict/predict_proba"
@@ -192,7 +198,10 @@ class Stacking(MetaEstimatorMixin, SurvivalAnalysisMixin, _BaseComposition):
             if Xt is None:
                 # assume that prediction array has the same size for all base learners
                 n_classes = p.shape[1]
-                Xt = np.empty((p.shape[0], n_classes * len(self.base_estimators)), order="F")
+                Xt = np.empty(
+                    (p.shape[0], n_classes * len(self.base_estimators)),
+                    order="F",
+                )
             Xt[:, slice(start, start + n_classes)] = p
             start += n_classes
 
@@ -318,7 +327,9 @@ class Stacking(MetaEstimatorMixin, SurvivalAnalysisMixin, _BaseComposition):
             of :class:`sksurv.functions.StepFunction` instances will be returned.
         """
         Xt = self._predict_estimators(X)
-        return self.final_estimator_.predict_cumulative_hazard_function(Xt, return_array)
+        return self.final_estimator_.predict_cumulative_hazard_function(
+            Xt, return_array
+        )
 
     @available_if(_meta_estimator_has("predict_survival_function"))
     def predict_survival_function(self, X, return_array=False):

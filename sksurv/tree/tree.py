@@ -240,7 +240,9 @@ class SurvivalTree(BaseEstimator, SurvivalAnalysisMixin):
 
         if not np.isfinite(overall_sum):
             # Raise a ValueError in case of the presence of an infinite element.
-            _assert_all_finite_element_wise(X, xp=np, allow_nan=True, **common_kwargs)
+            _assert_all_finite_element_wise(
+                X, xp=np, allow_nan=True, **common_kwargs
+            )
 
         # If the sum is not nan, then there are no missing values
         if not np.isnan(overall_sum):
@@ -279,15 +281,32 @@ class SurvivalTree(BaseEstimator, SurvivalAnalysisMixin):
         self._fit(X, y, sample_weight, check_input)
         return self
 
-    def _fit(self, X, y, sample_weight=None, check_input=True, missing_values_in_feature_mask=None):
+    def _fit(
+        self,
+        X,
+        y,
+        sample_weight=None,
+        check_input=True,
+        missing_values_in_feature_mask=None,
+    ):
         random_state = check_random_state(self.random_state)
 
         if check_input:
-            X = self._validate_data(X, dtype=DTYPE, ensure_min_samples=2, accept_sparse="csc", force_all_finite=False)
+            X = self._validate_data(
+                X,
+                dtype=DTYPE,
+                ensure_min_samples=2,
+                accept_sparse="csc",
+                force_all_finite=False,
+            )
             event, time = check_array_survival(X, y)
             time = time.astype(np.float64)
-            self.unique_times_, self.is_event_time_ = get_unique_times(time, event)
-            missing_values_in_feature_mask = self._compute_missing_values_in_feature_mask(X)
+            self.unique_times_, self.is_event_time_ = get_unique_times(
+                time, event
+            )
+            missing_values_in_feature_mask = (
+                self._compute_missing_values_in_feature_mask(X)
+            )
             if issparse(X):
                 X.sort_indices()
 
@@ -310,7 +329,9 @@ class SurvivalTree(BaseEstimator, SurvivalAnalysisMixin):
             self.n_classes_ = np.ones(self.n_outputs_, dtype=np.intp) * 2
 
         # Build tree
-        criterion = LogrankCriterion(self.n_outputs_, n_samples, self.unique_times_, self.is_event_time_)
+        criterion = LogrankCriterion(
+            self.n_outputs_, n_samples, self.unique_times_, self.is_event_time_
+        )
 
         SPLITTERS = SPARSE_SPLITTERS if issparse(X) else DENSE_SPLITTERS
 
@@ -348,7 +369,13 @@ class SurvivalTree(BaseEstimator, SurvivalAnalysisMixin):
                 0.0,  # min_impurity_decrease
             )
 
-        builder.build(self.tree_, X, y_numeric, sample_weight, missing_values_in_feature_mask)
+        builder.build(
+            self.tree_,
+            X,
+            y_numeric,
+            sample_weight,
+            missing_values_in_feature_mask,
+        )
 
         return self
 
@@ -358,7 +385,9 @@ class SurvivalTree(BaseEstimator, SurvivalAnalysisMixin):
         # Check parameters
         max_depth = (2**31) - 1 if self.max_depth is None else self.max_depth
 
-        max_leaf_nodes = -1 if self.max_leaf_nodes is None else self.max_leaf_nodes
+        max_leaf_nodes = (
+            -1 if self.max_leaf_nodes is None else self.max_leaf_nodes
+        )
 
         if isinstance(self.min_samples_leaf, (Integral, np.integer)):
             min_samples_leaf = self.min_samples_leaf
@@ -401,7 +430,9 @@ class SurvivalTree(BaseEstimator, SurvivalAnalysisMixin):
             max_features = self.max_features
         else:  # float
             if self.max_features > 0.0:
-                max_features = max(1, int(self.max_features * self.n_features_in_))
+                max_features = max(
+                    1, int(self.max_features * self.n_features_in_)
+                )
             else:
                 max_features = 0
 
@@ -476,10 +507,14 @@ class SurvivalTree(BaseEstimator, SurvivalAnalysisMixin):
             pred = self.tree_.predict(X)
             return pred[..., 0]
 
-        chf = self.predict_cumulative_hazard_function(X, check_input, return_array=True)
+        chf = self.predict_cumulative_hazard_function(
+            X, check_input, return_array=True
+        )
         return chf[:, self.is_event_time_].sum(1)
 
-    def predict_cumulative_hazard_function(self, X, check_input=True, return_array=False):
+    def predict_cumulative_hazard_function(
+        self, X, check_input=True, return_array=False
+    ):
         """Predict cumulative hazard function.
 
         The cumulative hazard function (CHF) for an individual
@@ -549,7 +584,9 @@ class SurvivalTree(BaseEstimator, SurvivalAnalysisMixin):
             return arr
         return _array_to_step_function(self.unique_times_, arr)
 
-    def predict_survival_function(self, X, check_input=True, return_array=False):
+    def predict_survival_function(
+        self, X, check_input=True, return_array=False
+    ):
         """Predict survival function.
 
         The survival function for an individual

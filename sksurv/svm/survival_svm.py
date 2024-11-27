@@ -20,7 +20,12 @@ from scipy.optimize import minimize
 from sklearn.base import BaseEstimator
 from sklearn.exceptions import ConvergenceWarning
 from sklearn.metrics.pairwise import PAIRWISE_KERNEL_FUNCTIONS, pairwise_kernels
-from sklearn.utils import check_array, check_consistent_length, check_random_state, check_X_y
+from sklearn.utils import (
+    check_array,
+    check_consistent_length,
+    check_random_state,
+    check_X_y,
+)
 from sklearn.utils._param_validation import Interval, StrOptions
 from sklearn.utils.extmath import safe_sparse_dot, squared_norm
 from sklearn.utils.validation import check_is_fitted
@@ -29,7 +34,10 @@ from ..base import SurvivalAnalysisMixin
 from ..bintrees import AVLTree, RBTree
 from ..exceptions import NoComparablePairException
 from ..util import check_array_survival
-from ._prsvm import survival_constraints_simple, survival_constraints_with_support_vectors
+from ._prsvm import (
+    survival_constraints_simple,
+    survival_constraints_with_support_vectors,
+)
 
 
 class Counter(metaclass=ABCMeta):
@@ -37,7 +45,9 @@ class Counter(metaclass=ABCMeta):
     def __init__(self, x, y, status, time=None):
         self.x, self.y = check_X_y(x, y)
 
-        assert np.issubdtype(y.dtype, np.integer), f"y vector must have integer type, but was {y.dtype}"
+        assert np.issubdtype(
+            y.dtype, np.integer
+        ), f"y vector must have integer type, but was {y.dtype}"
         assert y.min() == 0, "minimum element of y vector must be 0"
 
         if time is None:
@@ -108,7 +118,9 @@ class OrderStatisticTreeSurvivalCounter(Counter):
                 j += 1
 
             # larger (root of t, y[od[i]])
-            count, vec_sum = tree.count_larger_with_event(self.y[od[i]], self.status[od[i]])
+            count, vec_sum = tree.count_larger_with_event(
+                self.y[od[i]], self.status[od[i]]
+            )
             l_plus[od[i]] = count
             xv_plus[od[i]] = vec_sum
 
@@ -155,7 +167,9 @@ class SurvivalCounter(Counter):
             # relevance levels are unique, therefore count can only be 1 or 0
             count_minus = 1 if relevance in indices else 0
             xv_count_plus = 0
-            xv_count_minus = np.dot(self.x.take(indices.get(relevance, []), axis=0), v).sum()
+            xv_count_minus = np.dot(
+                self.x.take(indices.get(relevance, []), axis=0), v
+            ).sum()
 
             for i in range(n_samples):
                 if self.y[od[i]] != relevance or not self.status[od[i]]:
@@ -224,7 +238,10 @@ class RankSVMOptimizer(metaclass=ABCMeta):
         return self._objective_func(w)
 
     def _do_gradient_func(self, w):
-        if self._last_gradient_w is not None and (w == self._last_gradient_w).all():
+        if (
+            self._last_gradient_w is not None
+            and (w == self._last_gradient_w).all()
+        ):
             return self._last_gradient
 
         self._update_constraints_if_necessary(w)
@@ -277,10 +294,14 @@ class SimpleOptimizer(RankSVMOptimizer):
     def __init__(self, x, y, alpha, rank_ratio, timeit=False):
         super().__init__(alpha, rank_ratio, timeit)
         self.data_x = x
-        self.constraints = survival_constraints_simple(np.asarray(y, dtype=np.uint8))
+        self.constraints = survival_constraints_simple(
+            np.asarray(y, dtype=np.uint8)
+        )
 
         if self.constraints.shape[0] == 0:
-            raise NoComparablePairException("Data has no comparable pairs, cannot fit model.")
+            raise NoComparablePairException(
+                "Data has no comparable pairs, cannot fit model."
+            )
 
         self.L = np.ones(self.constraints.shape[0])
 
@@ -320,11 +341,15 @@ class PRSVMOptimizer(RankSVMOptimizer):
         super().__init__(alpha, rank_ratio, timeit)
         self.data_x = x
         self.data_y = np.asarray(y, dtype=np.uint8)
-        self._constraints = lambda w: survival_constraints_with_support_vectors(self.data_y, w)
+        self._constraints = lambda w: survival_constraints_with_support_vectors(
+            self.data_y, w
+        )
 
         Aw = self._constraints(np.zeros(x.shape[1]))
         if Aw.shape[0] == 0:
-            raise NoComparablePairException("Data has no comparable pairs, cannot fit model.")
+            raise NoComparablePairException(
+                "Data has no comparable pairs, cannot fit model."
+            )
 
     @property
     def n_coefficients(self):
@@ -383,7 +408,9 @@ class LargeScaleOptimizer(RankSVMOptimizer):
         self._counter = counter
         self._regr_penalty = (1.0 - rank_ratio) * alpha
         self._rank_penalty = rank_ratio * alpha
-        self._has_time = hasattr(self._counter, "time") and self._regr_penalty > 0
+        self._has_time = (
+            hasattr(self._counter, "time") and self._regr_penalty > 0
+        )
         self._fit_intercept = fit_intercept if self._has_time else False
 
     @property
@@ -402,7 +429,9 @@ class LargeScaleOptimizer(RankSVMOptimizer):
 
         l_plus, _, l_minus, _ = self._counter.calculate(np.zeros(n))
         if np.all(l_plus == 0) and np.all(l_minus == 0):
-            raise NoComparablePairException("Data has no comparable pairs, cannot fit model.")
+            raise NoComparablePairException(
+                "Data has no comparable pairs, cannot fit model."
+            )
 
         return w
 
@@ -419,13 +448,21 @@ class LargeScaleOptimizer(RankSVMOptimizer):
     def _objective_func(self, w):
         bias, wf = self._split_coefficents(w)
 
-        l_plus, xv_plus, l_minus, xv_minus = self._counter.calculate(wf)  # pylint: disable=unused-variable
+        l_plus, xv_plus, l_minus, xv_minus = self._counter.calculate(
+            wf
+        )  # pylint: disable=unused-variable
 
         xw = self._xw
         val = 0.5 * squared_norm(wf)
         if self._has_time:
             val += (
-                0.5 * self._regr_penalty * squared_norm(self.y_compressed - bias - xw.compress(self.regr_mask, axis=0))
+                0.5
+                * self._regr_penalty
+                * squared_norm(
+                    self.y_compressed
+                    - bias
+                    - xw.compress(self.regr_mask, axis=0)
+                )
             )
 
         val += (
@@ -446,26 +483,38 @@ class LargeScaleOptimizer(RankSVMOptimizer):
         if self._has_time:
             pred_time = self._counter.time - self._xw - bias
             self.regr_mask = (pred_time > 0) | self._counter.status
-            self.y_compressed = self._counter.time.compress(self.regr_mask, axis=0)
+            self.y_compressed = self._counter.time.compress(
+                self.regr_mask, axis=0
+            )
 
     def _gradient_func(self, w):
         bias, wf = self._split_coefficents(w)
 
-        l_plus, xv_plus, l_minus, xv_minus = self._counter.calculate(wf)  # pylint: disable=unused-variable
+        l_plus, xv_plus, l_minus, xv_minus = self._counter.calculate(
+            wf
+        )  # pylint: disable=unused-variable
         x = self._counter.x
 
         xw = self._xw  # noqa: F841; # pylint: disable=unused-variable
-        z = numexpr.evaluate("(l_plus + l_minus) * xw - xv_plus - xv_minus - l_minus + l_plus")
+        z = numexpr.evaluate(
+            "(l_plus + l_minus) * xw - xv_plus - xv_minus - l_minus + l_plus"
+        )
 
         grad = wf + self._rank_penalty * np.dot(x.T, z)
         if self._has_time:
             xc = x.compress(self.regr_mask, axis=0)
             xcs = np.dot(xc, wf)
-            grad += self._regr_penalty * (np.dot(xc.T, xcs) + xc.sum(axis=0) * bias - np.dot(xc.T, self.y_compressed))
+            grad += self._regr_penalty * (
+                np.dot(xc.T, xcs)
+                + xc.sum(axis=0) * bias
+                - np.dot(xc.T, self.y_compressed)
+            )
 
             # intercept
             if self._fit_intercept:
-                grad_intercept = self._regr_penalty * (xcs.sum() + xc.shape[0] * bias - self.y_compressed.sum())
+                grad_intercept = self._regr_penalty * (
+                    xcs.sum() + xc.shape[0] * bias - self.y_compressed.sum()
+                )
                 grad = np.r_[grad_intercept, grad]
 
         return grad
@@ -473,7 +522,9 @@ class LargeScaleOptimizer(RankSVMOptimizer):
     def _hessian_func(self, w, s):
         s_bias, s_feat = self._split_coefficents(s)
 
-        l_plus, xv_plus, l_minus, xv_minus = self._counter.calculate(s_feat)  # pylint: disable=unused-variable
+        l_plus, xv_plus, l_minus, xv_minus = self._counter.calculate(
+            s_feat
+        )  # pylint: disable=unused-variable
         x = self._counter.x
 
         xs = np.dot(x, s_feat)  # pylint: disable=unused-variable
@@ -488,7 +539,9 @@ class LargeScaleOptimizer(RankSVMOptimizer):
             if self._fit_intercept:
                 xsum = xc.sum(axis=0)
                 hessp += self._regr_penalty * xsum * s_bias
-                hessp_intercept = self._regr_penalty * xc.shape[0] * s_bias + self._regr_penalty * np.dot(xsum, s_feat)
+                hessp_intercept = self._regr_penalty * xc.shape[
+                    0
+                ] * s_bias + self._regr_penalty * np.dot(xsum, s_feat)
                 hessp = np.r_[hessp_intercept, hessp]
 
         return hessp
@@ -521,7 +574,9 @@ class NonlinearLargeScaleOptimizer(RankSVMOptimizer):
         self._fit_intercept = fit_intercept
         self._rank_penalty = rank_ratio * alpha
         self._regr_penalty = (1.0 - rank_ratio) * alpha
-        self._has_time = hasattr(self._counter, "time") and self._regr_penalty > 0
+        self._has_time = (
+            hasattr(self._counter, "time") and self._regr_penalty > 0
+        )
         self._fit_intercept = fit_intercept if self._has_time else False
 
     @property
@@ -540,7 +595,9 @@ class NonlinearLargeScaleOptimizer(RankSVMOptimizer):
 
         l_plus, _, l_minus, _ = self._counter.calculate(np.zeros(n))
         if np.all(l_plus == 0) and np.all(l_minus == 0):
-            raise NoComparablePairException("Data has no comparable pairs, cannot fit model.")
+            raise NoComparablePairException(
+                "Data has no comparable pairs, cannot fit model."
+            )
 
         return w
 
@@ -562,7 +619,9 @@ class NonlinearLargeScaleOptimizer(RankSVMOptimizer):
         if self._has_time:
             pred_time = self._counter.time - self._Kw - bias
             self.regr_mask = (pred_time > 0) | self._counter.status
-            self.y_compressed = self._counter.time.compress(self.regr_mask, axis=0)
+            self.y_compressed = self._counter.time.compress(
+                self.regr_mask, axis=0
+            )
 
     def _objective_func(self, beta_bias):
         bias, beta = self._split_coefficents(beta_bias)
@@ -572,10 +631,18 @@ class NonlinearLargeScaleOptimizer(RankSVMOptimizer):
         val = 0.5 * np.dot(beta, Kw)
         if self._has_time:
             val += (
-                0.5 * self._regr_penalty * squared_norm(self.y_compressed - bias - Kw.compress(self.regr_mask, axis=0))
+                0.5
+                * self._regr_penalty
+                * squared_norm(
+                    self.y_compressed
+                    - bias
+                    - Kw.compress(self.regr_mask, axis=0)
+                )
             )
 
-        l_plus, xv_plus, l_minus, xv_minus = self._counter.calculate(beta)  # pylint: disable=unused-variable
+        l_plus, xv_plus, l_minus, xv_minus = self._counter.calculate(
+            beta
+        )  # pylint: disable=unused-variable
         val += (
             0.5
             * self._rank_penalty
@@ -592,21 +659,29 @@ class NonlinearLargeScaleOptimizer(RankSVMOptimizer):
         K = self._counter.x
         Kw = self._Kw
 
-        l_plus, xv_plus, l_minus, xv_minus = self._counter.calculate(beta)  # pylint: disable=unused-variable
-        z = numexpr.evaluate("(l_plus + l_minus) * Kw - xv_plus - xv_minus - l_minus + l_plus")
+        l_plus, xv_plus, l_minus, xv_minus = self._counter.calculate(
+            beta
+        )  # pylint: disable=unused-variable
+        z = numexpr.evaluate(
+            "(l_plus + l_minus) * Kw - xv_plus - xv_minus - l_minus + l_plus"
+        )
 
         gradient = Kw + self._rank_penalty * np.dot(K, z)
         if self._has_time:
             K_comp = K.compress(self.regr_mask, axis=0)
             K_comp_beta = np.dot(K_comp, beta)
             gradient += self._regr_penalty * (
-                np.dot(K_comp.T, K_comp_beta) + K_comp.sum(axis=0) * bias - np.dot(K_comp.T, self.y_compressed)
+                np.dot(K_comp.T, K_comp_beta)
+                + K_comp.sum(axis=0) * bias
+                - np.dot(K_comp.T, self.y_compressed)
             )
 
             # intercept
             if self._fit_intercept:
                 grad_intercept = self._regr_penalty * (
-                    K_comp_beta.sum() + K_comp.shape[0] * bias - self.y_compressed.sum()
+                    K_comp_beta.sum()
+                    + K_comp.shape[0] * bias
+                    - self.y_compressed.sum()
                 )
                 gradient = np.r_[grad_intercept, gradient]
 
@@ -618,21 +693,25 @@ class NonlinearLargeScaleOptimizer(RankSVMOptimizer):
         K = self._counter.x
         Ks = np.dot(K, s_feat)
 
-        l_plus, xv_plus, l_minus, xv_minus = self._counter.calculate(s_feat)  # pylint: disable=unused-variable
+        l_plus, xv_plus, l_minus, xv_minus = self._counter.calculate(
+            s_feat
+        )  # pylint: disable=unused-variable
         xs = numexpr.evaluate("(l_plus + l_minus) * Ks - xv_plus - xv_minus")
 
         hessian = Ks + self._rank_penalty * np.dot(K, xs)
         if self._has_time:
             K_comp = K.compress(self.regr_mask, axis=0)
-            hessian += self._regr_penalty * np.dot(K_comp.T, np.dot(K_comp, s_feat))
+            hessian += self._regr_penalty * np.dot(
+                K_comp.T, np.dot(K_comp, s_feat)
+            )
 
             # intercept
             if self._fit_intercept:
                 xsum = K_comp.sum(axis=0)
                 hessian += self._regr_penalty * xsum * s_bias
-                hessian_intercept = self._regr_penalty * K_comp.shape[0] * s_bias + self._regr_penalty * np.dot(
-                    xsum, s_feat
-                )
+                hessian_intercept = self._regr_penalty * K_comp.shape[
+                    0
+                ] * s_bias + self._regr_penalty * np.dot(xsum, s_feat)
                 hessian = np.r_[hessian_intercept, hessian]
 
         return hessian
@@ -684,9 +763,13 @@ class BaseSurvivalSVM(BaseEstimator, metaclass=ABCMeta):
         times, ranks = y
 
         if self.optimizer == "simple":
-            optimizer = SimpleOptimizer(X, status, self.alpha, self.rank_ratio, timeit=self.timeit)
+            optimizer = SimpleOptimizer(
+                X, status, self.alpha, self.rank_ratio, timeit=self.timeit
+            )
         elif self.optimizer == "PRSVM":
-            optimizer = PRSVMOptimizer(X, status, self.alpha, self.rank_ratio, timeit=self.timeit)
+            optimizer = PRSVMOptimizer(
+                X, status, self.alpha, self.rank_ratio, timeit=self.timeit
+            )
         elif self.optimizer == "direct-count":
             optimizer = LargeScaleOptimizer(
                 self.alpha,
@@ -700,7 +783,9 @@ class BaseSurvivalSVM(BaseEstimator, metaclass=ABCMeta):
                 self.alpha,
                 self.rank_ratio,
                 self.fit_intercept,
-                OrderStatisticTreeSurvivalCounter(X, ranks, status, RBTree, times),
+                OrderStatisticTreeSurvivalCounter(
+                    X, ranks, status, RBTree, times
+                ),
                 timeit=self.timeit,
             )
         elif self.optimizer == "avltree":
@@ -708,7 +793,9 @@ class BaseSurvivalSVM(BaseEstimator, metaclass=ABCMeta):
                 self.alpha,
                 self.rank_ratio,
                 self.fit_intercept,
-                OrderStatisticTreeSurvivalCounter(X, ranks, status, AVLTree, times),
+                OrderStatisticTreeSurvivalCounter(
+                    X, ranks, status, AVLTree, times
+                ),
                 timeit=self.timeit,
             )
 
@@ -752,18 +839,24 @@ class BaseSurvivalSVM(BaseEstimator, metaclass=ABCMeta):
         self._validate_params()
 
         if self.fit_intercept and self.rank_ratio == 1.0:
-            raise ValueError("fit_intercept=True is only meaningful if rank_ratio < 1.0")
+            raise ValueError(
+                "fit_intercept=True is only meaningful if rank_ratio < 1.0"
+            )
 
         if self.rank_ratio < 1.0:
             if self.optimizer in {"simple", "PRSVM"}:
-                raise ValueError(f"optimizer {self.optimizer!r} does not implement regression objective")
+                raise ValueError(
+                    f"optimizer {self.optimizer!r} does not implement regression objective"
+                )
 
             # log-transform time
             time = np.log(time)
             assert np.isfinite(time).all()
 
         random_state = check_random_state(self.random_state)
-        samples_order = BaseSurvivalSVM._argsort_and_resolve_ties(time, random_state)
+        samples_order = BaseSurvivalSVM._argsort_and_resolve_ties(
+            time, random_state
+        )
 
         opt_result = self._fit(X, time, event, samples_order)
         coef = opt_result.x
@@ -775,7 +868,9 @@ class BaseSurvivalSVM(BaseEstimator, metaclass=ABCMeta):
 
         if not opt_result.success:
             warnings.warn(
-                ("Optimization did not converge: " + opt_result.message), category=ConvergenceWarning, stacklevel=2
+                ("Optimization did not converge: " + opt_result.message),
+                category=ConvergenceWarning,
+                stacklevel=2,
             )
         self.optimizer_result_ = opt_result
 
@@ -910,7 +1005,12 @@ class FastSurvivalSVM(BaseSurvivalSVM, SurvivalAnalysisMixin):
 
     _parameter_constraints = {
         **BaseSurvivalSVM._parameter_constraints,
-        "optimizer": [StrOptions({"simple", "PRSVM", "direct-count", "rbtree", "avltree"}), None],
+        "optimizer": [
+            StrOptions(
+                {"simple", "PRSVM", "direct-count", "rbtree", "avltree"}
+            ),
+            None,
+        ],
     }
 
     def __init__(
@@ -943,7 +1043,10 @@ class FastSurvivalSVM(BaseSurvivalSVM, SurvivalAnalysisMixin):
         status = event[samples_order]
 
         optimizer = self._create_optimizer(X[samples_order], data_y, status)
-        opt_result = optimizer.run(tol=self.tol, options={"maxiter": self.max_iter, "disp": self.verbose})
+        opt_result = optimizer.run(
+            tol=self.tol,
+            options={"maxiter": self.max_iter, "disp": self.verbose},
+        )
         return opt_result
 
     def predict(self, X):
@@ -1141,8 +1244,14 @@ class FastKernelSurvivalSVM(BaseSurvivalSVM, SurvivalAnalysisMixin):
         if callable(self.kernel):
             params = self.kernel_params or {}
         else:
-            params = {"gamma": self.gamma, "degree": self.degree, "coef0": self.coef0}
-        return pairwise_kernels(X, Y, metric=self.kernel, filter_params=True, **params)
+            params = {
+                "gamma": self.gamma,
+                "degree": self.degree,
+                "coef0": self.coef0,
+            }
+        return pairwise_kernels(
+            X, Y, metric=self.kernel, filter_params=True, **params
+        )
 
     def _create_optimizer(self, kernel_mat, y, status):
         if self.optimizer is None:
@@ -1155,7 +1264,9 @@ class FastKernelSurvivalSVM(BaseSurvivalSVM, SurvivalAnalysisMixin):
                 self.alpha,
                 self.rank_ratio,
                 self.fit_intercept,
-                OrderStatisticTreeSurvivalCounter(kernel_mat, ranks, status, RBTree, times),
+                OrderStatisticTreeSurvivalCounter(
+                    kernel_mat, ranks, status, RBTree, times
+                ),
                 timeit=self.timeit,
             )
         elif self.optimizer == "avltree":
@@ -1163,7 +1274,9 @@ class FastKernelSurvivalSVM(BaseSurvivalSVM, SurvivalAnalysisMixin):
                 self.alpha,
                 self.rank_ratio,
                 self.fit_intercept,
-                OrderStatisticTreeSurvivalCounter(kernel_mat, ranks, status, AVLTree, times),
+                OrderStatisticTreeSurvivalCounter(
+                    kernel_mat, ranks, status, AVLTree, times
+                ),
                 timeit=self.timeit,
             )
 
@@ -1183,8 +1296,13 @@ class FastKernelSurvivalSVM(BaseSurvivalSVM, SurvivalAnalysisMixin):
         data_y = (time[samples_order], np.arange(len(samples_order)))
         status = event[samples_order]
 
-        optimizer = self._create_optimizer(kernel_mat[np.ix_(samples_order, samples_order)], data_y, status)
-        opt_result = optimizer.run(tol=self.tol, options={"maxiter": self.max_iter, "disp": self.verbose})
+        optimizer = self._create_optimizer(
+            kernel_mat[np.ix_(samples_order, samples_order)], data_y, status
+        )
+        opt_result = optimizer.run(
+            tol=self.tol,
+            options={"maxiter": self.max_iter, "disp": self.verbose},
+        )
 
         # reorder coefficients according to order in original training data,
         # i.e., reverse ordering according to samples_order

@@ -138,7 +138,9 @@ class NaiveSurvivalSVM(SurvivalAnalysisMixin, LinearSVC):
         )
         self.alpha = alpha
 
-    def _get_survival_pairs(self, X, y, random_state):  # pylint: disable=no-self-use
+    def _get_survival_pairs(
+        self, X, y, random_state
+    ):  # pylint: disable=no-self-use
         feature_names = _get_feature_names(X)
 
         X = self._validate_data(X, ensure_min_samples=2)
@@ -198,7 +200,9 @@ class NaiveSurvivalSVM(SurvivalAnalysisMixin, LinearSVC):
 
         x_pairs, y_pairs = self._get_survival_pairs(X, y, random_state)
         if x_pairs.shape[0] == 0:
-            raise NoComparablePairException("Data has no comparable pairs, cannot fit model.")
+            raise NoComparablePairException(
+                "Data has no comparable pairs, cannot fit model."
+            )
 
         self.C = self.alpha
         return super().fit(x_pairs, y_pairs, sample_weight=sample_weight)

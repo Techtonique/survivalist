@@ -18,7 +18,12 @@ from sklearn.base import BaseEstimator
 from sklearn.exceptions import ConvergenceWarning
 from sklearn.preprocessing import normalize as f_normalize
 from sklearn.utils._param_validation import Interval, StrOptions
-from sklearn.utils.validation import assert_all_finite, check_is_fitted, check_non_negative, column_or_1d
+from sklearn.utils.validation import (
+    assert_all_finite,
+    check_is_fitted,
+    check_non_negative,
+    column_or_1d,
+)
 
 from ..base import SurvivalAnalysisMixin
 from ..util import check_array_survival
@@ -137,7 +142,10 @@ class CoxnetSurvivalAnalysis(BaseEstimator, SurvivalAnalysisMixin):
     _parameter_constraints: dict = {
         "n_alphas": [Interval(numbers.Integral, 1, None, closed="left")],
         "alphas": ["array-like", None],
-        "alpha_min_ratio": [Interval(numbers.Real, 0, None, closed="neither"), StrOptions({"auto"})],
+        "alpha_min_ratio": [
+            Interval(numbers.Real, 0, None, closed="neither"),
+            StrOptions({"auto"}),
+        ],
         "l1_ratio": [Interval(numbers.Real, 0.0, 1.0, closed="right")],
         "penalty_factor": ["array-like", None],
         "normalize": ["boolean"],
@@ -178,7 +186,9 @@ class CoxnetSurvivalAnalysis(BaseEstimator, SurvivalAnalysisMixin):
         self._baseline_models = None
 
     def _pre_fit(self, X, y):
-        X = self._validate_data(X, ensure_min_samples=2, dtype=np.float64, copy=self.copy_X)
+        X = self._validate_data(
+            X, ensure_min_samples=2, dtype=np.float64, copy=self.copy_X
+        )
         event, time = check_array_survival(X, y)
         # center feature matrix
         X_offset = np.average(X, axis=0)
@@ -244,7 +254,12 @@ class CoxnetSurvivalAnalysis(BaseEstimator, SurvivalAnalysisMixin):
 
         alpha_min_ratio = self._check_alpha_min_ratio(n_samples, n_features)
 
-        return create_path, alphas.astype(np.float64), penalty_factor.astype(np.float64), alpha_min_ratio
+        return (
+            create_path,
+            alphas.astype(np.float64),
+            penalty_factor.astype(np.float64),
+            alpha_min_ratio,
+        )
 
     def fit(self, X, y):
         """Fit estimator.
@@ -264,7 +279,9 @@ class CoxnetSurvivalAnalysis(BaseEstimator, SurvivalAnalysisMixin):
         self
         """
         X, event_num, time, X_offset, X_scale = self._pre_fit(X, y)
-        create_path, alphas, penalty, alpha_min_ratio = self._check_params(*X.shape)
+        create_path, alphas, penalty, alpha_min_ratio = self._check_params(
+            *X.shape
+        )
 
         coef, alphas, deviance_ratio, n_iter = call_fit_coxnet(
             X,
@@ -282,7 +299,10 @@ class CoxnetSurvivalAnalysis(BaseEstimator, SurvivalAnalysisMixin):
         assert np.isfinite(coef).all()
 
         if np.all(np.absolute(coef) < np.finfo(float).eps):
-            warnings.warn("all coefficients are zero, consider decreasing alpha.", stacklevel=2)
+            warnings.warn(
+                "all coefficients are zero, consider decreasing alpha.",
+                stacklevel=2,
+            )
 
         if n_iter >= self.max_iter:
             warnings.warn(
@@ -297,7 +317,8 @@ class CoxnetSurvivalAnalysis(BaseEstimator, SurvivalAnalysisMixin):
         if self.fit_baseline_model:
             predictions = np.dot(X, coef)
             self._baseline_models = tuple(
-                BreslowEstimator().fit(predictions[:, i], event_num, time) for i in range(coef.shape[1])
+                BreslowEstimator().fit(predictions[:, i], event_num, time)
+                for i in range(coef.shape[1])
             )
         else:
             self._baseline_models = None
@@ -343,8 +364,14 @@ class CoxnetSurvivalAnalysis(BaseEstimator, SurvivalAnalysisMixin):
             a1 = self.alphas_[coef_idx + 1]
             a2 = self.alphas_[coef_idx]
             frac = (alpha - a1) / (a2 - a1)
-            coef = frac * self.coef_[:, coef_idx] + (1.0 - frac) * self.coef_[:, coef_idx + 1]
-            offset = frac * self.offset_[coef_idx] + (1.0 - frac) * self.offset_[coef_idx + 1]
+            coef = (
+                frac * self.coef_[:, coef_idx]
+                + (1.0 - frac) * self.coef_[:, coef_idx + 1]
+            )
+            offset = (
+                frac * self.offset_[coef_idx]
+                + (1.0 - frac) * self.offset_[coef_idx + 1]
+            )
 
         return coef, offset
 
@@ -373,7 +400,9 @@ class CoxnetSurvivalAnalysis(BaseEstimator, SurvivalAnalysisMixin):
     def _get_baseline_model(self, alpha):
         check_is_fitted(self, "coef_")
         if self._baseline_models is None:
-            raise ValueError("`fit` must be called with the fit_baseline_model option set to True.")
+            raise ValueError(
+                "`fit` must be called with the fit_baseline_model option set to True."
+            )
 
         if alpha is None:
             baseline_model = self._baseline_models[-1]
@@ -383,11 +412,15 @@ class CoxnetSurvivalAnalysis(BaseEstimator, SurvivalAnalysisMixin):
                 idx = np.flatnonzero(is_close)[0]
                 baseline_model = self._baseline_models[idx]
             else:
-                raise ValueError(f"alpha must be one value of alphas_: {self.alphas_}")
+                raise ValueError(
+                    f"alpha must be one value of alphas_: {self.alphas_}"
+                )
 
         return baseline_model
 
-    def predict_cumulative_hazard_function(self, X, alpha=None, return_array=False):
+    def predict_cumulative_hazard_function(
+        self, X, alpha=None, return_array=False
+    ):
         """Predict cumulative hazard function.
 
         Only available if :meth:`fit` has been called with `fit_baseline_model = True`.
@@ -460,7 +493,9 @@ class CoxnetSurvivalAnalysis(BaseEstimator, SurvivalAnalysisMixin):
         >>> plt.show()
         """
         baseline_model = self._get_baseline_model(alpha)
-        return self._predict_cumulative_hazard_function(baseline_model, self.predict(X, alpha=alpha), return_array)
+        return self._predict_cumulative_hazard_function(
+            baseline_model, self.predict(X, alpha=alpha), return_array
+        )
 
     def predict_survival_function(self, X, alpha=None, return_array=False):
         """Predict survival function.
@@ -536,7 +571,9 @@ class CoxnetSurvivalAnalysis(BaseEstimator, SurvivalAnalysisMixin):
         >>> plt.show()
         """
         baseline_model = self._get_baseline_model(alpha)
-        return self._predict_survival_function(baseline_model, self.predict(X, alpha=alpha), return_array)
+        return self._predict_survival_function(
+            baseline_model, self.predict(X, alpha=alpha), return_array
+        )
 
     @property
     def unique_times_(self):

@@ -33,12 +33,20 @@ class CoxPH(SurvivalLossFunction):
 
     # pylint: disable=no-self-use
 
-    def __call__(self, y_true, raw_prediction, sample_weight=None):  # pylint: disable=unused-argument
+    def __call__(
+        self, y_true, raw_prediction, sample_weight=None
+    ):  # pylint: disable=unused-argument
         """Compute the partial likelihood of prediction ``y_pred`` and ``y``."""
         # TODO add support for sample weights
-        return coxph_loss(y_true["event"].astype(np.uint8), y_true["time"], raw_prediction.ravel())
+        return coxph_loss(
+            y_true["event"].astype(np.uint8),
+            y_true["time"],
+            raw_prediction.ravel(),
+        )
 
-    def gradient(self, y_true, raw_prediction, sample_weight=None, **kwargs):  # pylint: disable=unused-argument
+    def gradient(
+        self, y_true, raw_prediction, sample_weight=None, **kwargs
+    ):  # pylint: disable=unused-argument
         """Negative gradient of partial likelihood
 
         Parameters
@@ -48,13 +56,26 @@ class CoxPH(SurvivalLossFunction):
         y_pred : np.ndarray, shape=(n,):
             The predictions.
         """
-        ret = coxph_negative_gradient(y_true["event"].astype(np.uint8), y_true["time"], raw_prediction.ravel())
+        ret = coxph_negative_gradient(
+            y_true["event"].astype(np.uint8),
+            y_true["time"],
+            raw_prediction.ravel(),
+        )
         if sample_weight is not None:
             ret *= sample_weight
         return ret
 
     def update_terminal_regions(
-        self, tree, X, y, residual, raw_predictions, sample_weight, sample_mask, learning_rate=0.1, k=0
+        self,
+        tree,
+        X,
+        y,
+        residual,
+        raw_predictions,
+        sample_weight,
+        sample_mask,
+        learning_rate=0.1,
+        k=0,
     ):
         """Least squares does not need to update terminal regions.
 
@@ -63,7 +84,17 @@ class CoxPH(SurvivalLossFunction):
         # update predictions
         raw_predictions[:, k] += learning_rate * tree.predict(X).ravel()
 
-    def _update_terminal_region(self, tree, terminal_regions, leaf, X, y, residual, raw_predictions, sample_weight):
+    def _update_terminal_region(
+        self,
+        tree,
+        terminal_regions,
+        leaf,
+        X,
+        y,
+        residual,
+        raw_predictions,
+        sample_weight,
+    ):
         """Least squares does not need to update terminal regions"""
 
     def _scale_raw_prediction(self, raw_predictions):
@@ -85,7 +116,9 @@ class CensoredSquaredLoss(SurvivalLossFunction):
         mask = (pred_time > 0) | y_true["event"]
         return 0.5 * squared_norm(pred_time.compress(mask, axis=0))
 
-    def gradient(self, y_true, raw_prediction, **kwargs):  # pylint: disable=unused-argument
+    def gradient(
+        self, y_true, raw_prediction, **kwargs
+    ):  # pylint: disable=unused-argument
         """Negative gradient of partial likelihood
 
         Parameters
@@ -102,7 +135,16 @@ class CensoredSquaredLoss(SurvivalLossFunction):
         return ret
 
     def update_terminal_regions(
-        self, tree, X, y, residual, raw_predictions, sample_weight, sample_mask, learning_rate=0.1, k=0
+        self,
+        tree,
+        X,
+        y,
+        residual,
+        raw_predictions,
+        sample_weight,
+        sample_mask,
+        learning_rate=0.1,
+        k=0,
     ):
         """Least squares does not need to update terminal regions.
 
@@ -111,7 +153,17 @@ class CensoredSquaredLoss(SurvivalLossFunction):
         # update predictions
         raw_predictions[:, k] += learning_rate * tree.predict(X).ravel()
 
-    def _update_terminal_region(self, tree, terminal_regions, leaf, X, y, residual, raw_predictions, sample_weight):
+    def _update_terminal_region(
+        self,
+        tree,
+        terminal_regions,
+        leaf,
+        X,
+        y,
+        residual,
+        raw_predictions,
+        sample_weight,
+    ):
         """Least squares does not need to update terminal regions"""
 
     def _scale_raw_prediction(self, raw_predictions):
@@ -126,12 +178,32 @@ class IPCWLeastSquaresError(SurvivalLossFunction):
 
     def __call__(self, y_true, raw_prediction, sample_weight=None):
         sample_weight = ipc_weights(y_true["event"], y_true["time"])
-        return 1.0 / sample_weight.sum() * np.sum(sample_weight * ((y_true["time"] - raw_prediction.ravel()) ** 2.0))
+        return (
+            1.0
+            / sample_weight.sum()
+            * np.sum(
+                sample_weight
+                * ((y_true["time"] - raw_prediction.ravel()) ** 2.0)
+            )
+        )
 
-    def gradient(self, y_true, raw_prediction, **kwargs):  # pylint: disable=unused-argument
+    def gradient(
+        self, y_true, raw_prediction, **kwargs
+    ):  # pylint: disable=unused-argument
         return y_true["time"] - raw_prediction.ravel()
 
-    def update_terminal_regions(self, tree, X, y, residual, y_pred, sample_weight, sample_mask, learning_rate=0.1, k=0):
+    def update_terminal_regions(
+        self,
+        tree,
+        X,
+        y,
+        residual,
+        y_pred,
+        sample_weight,
+        sample_mask,
+        learning_rate=0.1,
+        k=0,
+    ):
         y_pred[:, k] += learning_rate * tree.predict(X).ravel()
 
     def _update_terminal_region(
