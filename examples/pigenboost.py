@@ -20,19 +20,50 @@ estimator.fit(X_train, y_train)
 surv_funcs = estimator.predict_survival_function(X.iloc[:1])
 
 print(surv_funcs)
-
 print("surv_funcs.mean", surv_funcs.mean)
-
 print("surv_funcs.lower", surv_funcs.lower)
-
 print("surv_funcs.upper", surv_funcs.upper)
 
-# for fn in surv_funcs:
-#     plt.step(fn.x, fn(fn.x), where="post")
-#     plt.ylim(0, 1)
-#     plt.show()
+print("estimator.predict(X_test)", estimator.predict(X_test))
 
-# for fn in surv_funcs2:
-#     plt.step(fn.x, fn(fn.x), where="post")
-#     plt.ylim(0, 1)
-#     plt.show()
+
+estimator = PIComponentwiseGenGradientBoostingSurvivalAnalysis(regr = RidgeCV(), 
+                                                               loss="coxph", 
+                                                               type_pi="kde")
+
+estimator.fit(X_train, y_train)
+
+surv_funcs = estimator.predict_survival_function(X.iloc[:1])
+
+print(surv_funcs)
+print("surv_funcs.mean", surv_funcs.mean)
+print("surv_funcs.lower", surv_funcs.lower)
+print("surv_funcs.upper", surv_funcs.upper)
+
+estimator = PIComponentwiseGenGradientBoostingSurvivalAnalysis(regr = RidgeCV(), 
+                                                               loss="coxph", 
+                                                               type_pi="bootstrap")
+
+estimator.fit(X_train, y_train)
+
+surv_funcs = estimator.predict_survival_function(X.iloc[:1])
+
+print(surv_funcs)
+print("surv_funcs.mean", surv_funcs.mean)
+print("surv_funcs.lower", surv_funcs.lower)
+print("surv_funcs.upper", surv_funcs.upper)
+
+estimator = PIComponentwiseGenGradientBoostingSurvivalAnalysis(regr = RidgeCV(), 
+                                                               loss="coxph", 
+                                                               type_pi="ecdf")
+
+estimator.fit(X_train, y_train)
+
+surv_funcs = estimator.predict_survival_function(X.iloc[:1])
+
+print(surv_funcs)
+print("surv_funcs.mean", surv_funcs.mean)
+print("surv_funcs.lower", surv_funcs.lower)
+print("surv_funcs.upper", surv_funcs.upper)
+
+

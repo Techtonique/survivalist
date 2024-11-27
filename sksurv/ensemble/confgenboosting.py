@@ -4,6 +4,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from .genboosting import ComponentwiseGenGradientBoostingSurvivalAnalysis
 from .survival_loss import LOSS_FUNCTIONS
+from ..utils.simulation import simulate_replications
 
 __all__ = ["PIComponentwiseGenGradientBoostingSurvivalAnalysis"]
 
@@ -38,7 +39,16 @@ class PIComponentwiseGenGradientBoostingSurvivalAnalysis(ComponentwiseGenGradien
         Values must be in the range `(0.0, 1.0]`.
     
     level : int, optional, default: 95
-        Confidence level for the prediction intervals. The value must be in the range `(0, 100)`.
+        Confidence level for the prediction intervals. The value must be in
+        the range `(0, 100)`.
+    
+    type_pi : str, optional, default: 'scp'
+        Type of prediction intervals. The value must be one of 'scp' 
+        (Split Conformal Prediction), 'bootstrap', 'kde', 'normal', 'ecdf', 
+        'permutation', 'smooth-bootstrap'
+    
+    n_replications : int, optional, default: 250
+        Number of replications for the prediction intervals.
 
     warm_start : bool, default: False
         When set to ``True``, reuse the solution of the previous call to fit
@@ -106,6 +116,21 @@ class PIComponentwiseGenGradientBoostingSurvivalAnalysis(ComponentwiseGenGradien
     calibrated_residuals_ : array, shape = (n_calib_samples,)
         Residuals of the calibrated risk scores on the calibration set.
     
+    abs_calibrated_residuals_ : array, shape = (n_calib_samples,)
+        Absolute residuals of the calibrated risk scores on the calibration set.
+    
+    residuals_std_ : float
+        Standard deviation of calibrated residuals.
+    
+    residuals_mean_ : float
+        Mean of calibrated residuals.
+    
+    scaled_calibrated_residuals_ : array, shape = (n_calib_samples,)
+        Scaled residuals of the calibrated risk scores on the calibration set.
+    
+    residuals_sims_ : array, shape = (n_replications, n_calib_samples)
+        Simulated residuals of the calibrated risk scores on the calibration set.
+    
     alpha_ : float
         Risk level for the prediction intervals.
     
@@ -127,18 +152,40 @@ class PIComponentwiseGenGradientBoostingSurvivalAnalysis(ComponentwiseGenGradien
         n_estimators=100,
         subsample=1.0,
         level=95,
+        type_pi="scp",
+        n_replications=250,
         warm_start=False,
         dropout_rate=0,
         random_state=None,
         verbose=0,
         show_progress=True,
     ):
+        
+        assert type_pi in ('scp', 'bootstrap', 'kde', 'parametric',
+                            'ecdf', 'permutation', 'smooth-bootstrap',
+                            'normal'), \
+            f"Unknown value for 'type_pi', '{type_pi}'. Choose from 'scp', 'bootstrap', 'kde', 'parametric', 'ecdf', 'permutation', 'smooth-bootstrap', or 'normal'."
+        assert 0 < level < 100, \
+            f"Confidence level must be in the range (0, 100), got {level}."
+        assert 0 <= dropout_rate < 1, \
+            f"Dropout rate must be in the range [0, 1), got {dropout_rate}."
+        assert n_replications > 0 and np.issubdtype(type(n_replications), np.integer), \
+            f"Number of replications must be an integer and greater than zero, got {n_replications}."
+        assert 0 < learning_rate <= 1, \
+            f"Learning rate must be in the range (0, 1], got {learning_rate}."
+        assert 1 <= n_estimators, \
+            f"Number of estimators must be greater than zero, got {n_estimators}."
+        assert 0 < subsample <= 1, \
+            f"Subsample must be in the range (0, 1], got {subsample}."
+
         self.regr = regr 
         self.loss = loss
         self.n_estimators = n_estimators
         self.learning_rate = learning_rate
         self.subsample = subsample
         self.level = level
+        self.type_pi = type_pi
+        self.n_replications = n_replications
         self.alpha_ = 1 - level / 100
         self.warm_start = warm_start
         self.dropout_rate = dropout_rate
@@ -148,6 +195,11 @@ class PIComponentwiseGenGradientBoostingSurvivalAnalysis(ComponentwiseGenGradien
         self.baseline_model = None
         self.calibrated_risk_scores_ = None
         self.calibrated_residuals_ = None
+        self.abs_calibrated_residuals_ = None
+        self.scaled_calibrated_residuals_ = None
+        self.residuals_std_ = None
+        self.residuals_mean_ = None
+        self.scaled_residuals_ = None        
         self.quantiles_ = None
         super().__init__(regr=self.regr,
                         loss=self.loss,
@@ -197,8 +249,16 @@ class PIComponentwiseGenGradientBoostingSurvivalAnalysis(ComponentwiseGenGradien
         self.obj_train.fit(X_train, y_train, sample_weight=sample_weight)
         self.calibrated_risk_scores_ = self.obj_train.predict(X_calib)         
         risk_scores_calib = self.obj_train.fit(X_calib, y_calib, sample_weight=sample_weight).predict(X_calib)
-        self.calibrated_residuals_ = np.abs(self.calibrated_risk_scores_ - risk_scores_calib)
-        self.quantiles_ = np.quantile(self.calibrated_residuals_, 1 - self.alpha_)        
+        self.calibrated_residuals_ = self.calibrated_risk_scores_ - risk_scores_calib
+        if self.type_pi == 'scp':            
+            self.abs_calibrated_residuals_ = np.abs(self.calibrated_residuals_)
+            self.quantiles_ = np.quantile(self.abs_calibrated_residuals_, 1 - self.alpha_) 
+        elif self.type_pi in ('bootstrap', 'kde', 'parametric', 
+                              'ecdf', 'permutation', 'smooth-bootstrap', 
+                              'normal'):
+            self.residuals_std_ = np.std(self.calibrated_residuals_)
+            self.residuals_mean_ = np.mean(self.calibrated_residuals_)
+            self.scaled_calibrated_residuals_ = (self.calibrated_residuals_ - self.residuals_mean_) / self.residuals_std_                        
         return self
 
     def predict(self, X, **kwargs):
@@ -219,15 +279,27 @@ class PIComponentwiseGenGradientBoostingSurvivalAnalysis(ComponentwiseGenGradien
         risk_score : array, shape = (n_samples,)
             Predicted risk scores.
         """
-        assert self.quantiles_ is not None, "Model not fitted yet."
         preds = self.obj_train.predict(X, **kwargs)
-        DescribeResult = namedtuple("DescribeResult", ["mean", "lower", "upper"])
-        return DescribeResult(preds, preds - self.quantiles_, preds + self.quantiles_)
+        if self.type_pi in ('bootstrap', 'kde', 'normal',
+                            'parametric', 'ecdf', 'permutation', 
+                            'smooth-bootstrap'):
+            residuals_sims = simulate_replications(self.scaled_calibrated_residuals_, 
+                                                   method=self.type_pi, 
+                                                   num_replications=self.n_replications).iloc[:preds.shape[0], :].values
+        if self.type_pi == 'scp':                 
+            DescribeResult = namedtuple("DescribeResult", ["mean", "lower", "upper"])
+            return DescribeResult(preds, preds - self.quantiles_, preds + self.quantiles_)
+        else:
+            DescribeResult = namedtuple("DescribeResult", ["mean", "lower", "upper", "sims"])
+            predictions = preds[:, np.newaxis] + self.residuals_std_ * residuals_sims
+            return DescribeResult(np.mean(predictions, axis=1),
+                                  np.quantile(predictions, self.alpha_ / 2, axis=1),
+                                  np.quantile(predictions, 1 - self.alpha_ / 2, axis=1),
+                                  predictions)
 
     def predict_cumulative_hazard_function(self, X, return_array=False, **kwargs):
         """Predict cumulative hazard function.
         """
-        assert self.quantiles_ is not None, "Model not fitted yet."
         preds = self.predict(X, **kwargs)
         result = namedtuple("DescribeResult", 
                                     ["mean", "lower", "upper"])
@@ -245,7 +317,6 @@ class PIComponentwiseGenGradientBoostingSurvivalAnalysis(ComponentwiseGenGradien
     def predict_survival_function(self, X, return_array=False, **kwargs):
         """Predict survival function.
         """
-        assert self.quantiles_ is not None, "Model not fitted yet."
         preds = self.predict(X, **kwargs)
         result = namedtuple("DescribeResult", 
                                     ["mean", "lower", "upper"])
