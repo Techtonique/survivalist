@@ -21,7 +21,7 @@ class PISurvivalCustom(PIComponentwiseGenGradientBoostingSurvivalAnalysis):
 
     level : int, default: 95
         Confidence level for the prediction intervals.
-    
+
     type_pi: str, optional, default: 'scp'
         Type of prediction intervals. The value must be one of 'scp'
         (Split Conformal Prediction), 'bootstrap', 'kde', 'normal', 'ecdf',

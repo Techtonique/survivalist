@@ -263,7 +263,7 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(
                 )
 
             self._scale = np.resize(self._scale, total_n_estimators)
-            self._scale[self.n_estimators_ :] = 1
+            self._scale[self.n_estimators_:] = 1
 
     def _clear_state(self):
         """Clear the state of the gradient boosting model."""

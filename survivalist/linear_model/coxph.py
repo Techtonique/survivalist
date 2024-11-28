@@ -72,7 +72,7 @@ class BreslowEstimator:
         k = 0
         for i in range(1, len(n_at_risk)):
             d = n_at_risk[i - 1] - n_at_risk[i]
-            value -= risk_score[k : (k + d)].sum()
+            value -= risk_score[k: (k + d)].sum()
             k += d
             divisor[i] = value
 
@@ -221,7 +221,7 @@ class CoxPHOptimizer:
             risk_set_xx2 = np.zeros_like(risk_set_xx)
             while k < n_samples and ti == time[k]:
                 # preserve 2D shape of row vector
-                xk = x[k : k + 1]
+                xk = x[k: k + 1]
 
                 # outer product
                 xx = np.dot(xk.T, xk)
