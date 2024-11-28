@@ -8,13 +8,13 @@ Survival analysis with Machine Learning and uncertainty quantification.
 
 ## Install 
 
-- From GitHub 
+- From GitHub (dev)
 
 ```bash
 pip install git+https://github.com/Techtonique/survivalist.git
 ````
 
-- From PyPI
+- From PyPI (stable)
 
 ```bash
 pip install survivalist
