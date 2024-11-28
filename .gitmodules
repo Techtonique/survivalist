@@ -1,4 +1,0 @@
-[submodule "survivalist/linear_model/src/eigen"]
-	path = survivalist/linear_model/src/eigen
-	url = https://gitlab.com/libeigen/eigen.git
-	branch = 3.4
