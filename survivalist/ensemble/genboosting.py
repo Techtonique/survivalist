@@ -79,6 +79,10 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(
 
     Parameters
     ----------
+    regr : object, optional, default: LinearRegression()
+        The base learner to be used for fitting the residuals. The base learner
+        must have a `fit` and `predict` method. The default is `LinearRegression`.
+
     loss : {'coxph', 'squared', 'ipcwls'}, optional, default: 'coxph'
         loss function to be optimized. 'coxph' refers to partial likelihood loss
         of Cox's proportional hazards model. The loss 'squared' minimizes a
