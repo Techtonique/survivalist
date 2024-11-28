@@ -52,15 +52,15 @@ coverage: ## check code coverage quickly with the default Python
 
 docs: install ## generate docs		
 	pip install black pdoc 
-	black survivalist/* --line-length=80	
-	find survivalist/ -name "*.py" -exec autopep8 --max-line-length=80 --in-place {} +
+	black survivalist/*
+	find survivalist/ -name "*.py" -exec autopep8 --in-place {} +
 	pdoc -t docs survivalist/* --output-dir survivalist-docs
 	find . -name '__pycache__' -exec rm -fr {} +
 
 servedocs: install ## compile the docs watching for change	 	
 	pip install black pdoc 
-	black survivalist/* --line-length=80	
-	find survivalist/ -name "*.py" -exec autopep8 --max-line-length=80 --in-place {} +
+	black survivalist/*	
+	find survivalist/ -name "*.py" -exec autopep8 --in-place {} +
 	pdoc -t docs survivalist/* 
 	find . -name '__pycache__' -exec rm -fr {} +
 
