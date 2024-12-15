@@ -41,9 +41,12 @@ class _ComponentwiseBaseLearner(BaseEstimator):
         self.component = component
         self.regr = regr
 
-    def fit(self, X, y, sample_weight):
+    def fit(self, X, y, sample_weight=None):
         try:
-            self.regr.fit(X, y, sample_weight=sample_weight)
+            if sample_weight is not None:
+                self.regr.fit(X, y, sample_weight=sample_weight)
+            else:
+                self.regr.fit(X, y)
         except RuntimeError as e:
             self.regr.fit(X, y)
         except TypeError as e:            
