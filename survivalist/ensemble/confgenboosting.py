@@ -274,7 +274,7 @@ class PIComponentwiseGenGradientBoostingSurvivalAnalysis(
             risk_scores_calib = self.obj_train.fit(
                 X_calib, y_calib, sample_weight=sample_weight
             ).predict(X_calib)
-        except Exception as e:
+        except RuntimeError as e:
             self.obj_train.fit(X_train, y_train)
             self.calibrated_risk_scores_ = self.obj_train.predict(X_calib)
             risk_scores_calib = self.obj_train.fit(
