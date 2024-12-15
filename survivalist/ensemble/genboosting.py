@@ -44,9 +44,9 @@ class _ComponentwiseBaseLearner(BaseEstimator):
     def fit(self, X, y, sample_weight):
         try:
             self.regr.fit(X, y, sample_weight=sample_weight)
-        except TypeError as e:            
-            self.regr.fit(X, y)
         except RuntimeError as e:
+            self.regr.fit(X, y)
+        except TypeError as e:            
             self.regr.fit(X, y)
         return self.regr
 
