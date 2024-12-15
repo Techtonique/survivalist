@@ -370,7 +370,9 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(
             )
 
             best_learner = _fit_stage_componentwise(
-                X, residuals, subsample_weight, regr=self.regr
+                X=X, 
+                residuals=residuals, 
+                sample_weight=subsample_weight, regr=self.regr
             )
             self.estimators_[i] = best_learner
 
