@@ -266,11 +266,19 @@ class PIComponentwiseGenGradientBoostingSurvivalAnalysis(
             verbose=self.verbose,
             show_progress=self.show_progress,
         )
-        self.obj_train.fit(X_train, y_train, sample_weight=sample_weight)
-        self.calibrated_risk_scores_ = self.obj_train.predict(X_calib)
-        risk_scores_calib = self.obj_train.fit(
-            X_calib, y_calib, sample_weight=sample_weight
-        ).predict(X_calib)
+        try:
+            if sample_weight is None:
+                sample_weight = 1
+            self.obj_train.fit(X_train, y_train, sample_weight=sample_weight)
+            self.calibrated_risk_scores_ = self.obj_train.predict(X_calib)
+            risk_scores_calib = self.obj_train.fit(
+                X_calib, y_calib, sample_weight=sample_weight
+            ).predict(X_calib)
+        except Exception as e:
+            self.obj_train.fit(X_train, y_train)
+            self.calibrated_risk_scores_ = self.obj_train.predict(X_calib)
+            risk_scores_calib = self.obj_train.fit(
+                X_calib, y_calib).predict(X_calib)
         self.calibrated_residuals_ = (
             self.calibrated_risk_scores_ - risk_scores_calib
         )
