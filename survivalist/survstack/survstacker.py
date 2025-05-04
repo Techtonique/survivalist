@@ -1,4 +1,5 @@
 from sklearn.linear_model import LogisticRegression
+from sklearn.calibration import CalibratedClassifierCV
 from .transformer import SurvivalStacker
 
 class SurvStacker:
@@ -8,7 +9,8 @@ class SurvStacker:
     def __init__(
         self,
         clf=LogisticRegression(),
-        random_state=None,      
+        random_state=None,
+        **kwargs      
     ):
         """
         Parameters
@@ -19,12 +21,15 @@ class SurvStacker:
         random_state : int seed, RandomState instance, or None, default: None
             The seed of the pseudo random number generator to use when
             shuffling the data.
+
+        kwargs : additional parameters to be passed to CalibratedClassifierCV    
         """
-        self.clf = clf
+        self.clf = CalibratedClassifierCV(clf, **kwargs)
+        self.clf.set_params(random_state=random_state)
         self.random_state = random_state
         self.ss = SurvivalStacker()
 
-    def fit(self, X, y):
+    def fit(self, X, y, **kwargs):
         """
         Fit the Survival Stacker to the data.
 
@@ -35,6 +40,8 @@ class SurvStacker:
         
         y : array-like, shape (n_samples,)
             The target values (survival times).
+        
+        kwargs : additional parameters to be passed to the fitting function of the classifier (e.g., `sample_weight`)
 
         Returns
         -------
@@ -42,7 +49,7 @@ class SurvStacker:
             Returns self.
         """
         X_oo, y_oo = self.ss.fit_transform(X, y)
-        self.clf.fit(X_oo, y_oo)
+        self.clf.fit(X_oo, y_oo, **kwargs)
         return self
     
     def predict_cumulative_hazard(self, X):
