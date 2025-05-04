@@ -5,7 +5,7 @@ from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier,
 from sklearn.linear_model import LogisticRegressionCV
 from survivalist.datasets import load_whas500, load_veterans_lung_cancer, load_gbsg2
 from survivalist.survstack import SurvStacker
-
+from survivalist.nonparametric import kaplan_meier_estimator
 
 import pandas as pd
 
@@ -42,6 +42,11 @@ X = X.astype(float).to_numpy()  # Convert to numpy array
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42
 )
+
+event_time = [y[1] for y in y_test]
+event_status = [y[0] for y in y_test]
+km = kaplan_meier_estimator(event_status, event_time,
+                            conf_type="log-log")
 
 print("X_train.shape", X_train.shape)
 print("X_test.shape", X_test.shape)
@@ -99,6 +104,11 @@ X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42
 )
 
+event_time = [y[1] for y in y_test]
+event_status = [y[0] for y in y_test]
+km = kaplan_meier_estimator(event_status, event_time,
+                            conf_type="log-log")
+
 print("X_train.shape", X_train.shape)
 print("X_test.shape", X_test.shape)
 print("y_train.shape", y_train.shape)
@@ -154,6 +164,11 @@ X = X.astype(float).to_numpy()
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42
 )
+
+event_time = [y[1] for y in y_test]
+event_status = [y[0] for y in y_test]
+km = kaplan_meier_estimator(event_status, event_time,
+                            conf_type="log-log")
 
 print("X_train.shape", X_train.shape)
 print("X_test.shape", X_test.shape)

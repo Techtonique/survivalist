@@ -1,8 +1,12 @@
+import numpy as np 
+
+from ..base import SurvivalAnalysisMixin
 from sklearn.linear_model import LogisticRegression
 from sklearn.calibration import CalibratedClassifierCV
 from .transformer import SurvivalStacker
 
-class SurvStacker:
+
+class SurvStacker(SurvivalAnalysisMixin):
     """
     A class to create a Survival Stacker for any classifier.
     """
@@ -23,11 +27,17 @@ class SurvStacker:
             shuffling the data.
 
         kwargs : additional parameters to be passed to CalibratedClassifierCV    
-        """
+        """        
+        self.clf = clf
+        try: 
+            self.clf.set_params(random_state=random_state)
+        except Exception as e:
+            pass 
         self.clf = CalibratedClassifierCV(clf, **kwargs)
-        self.clf.set_params(random_state=random_state)
         self.random_state = random_state
         self.ss = SurvivalStacker()
+        self.times_ = None
+        self.unique_times_ = None
 
     def fit(self, X, y, **kwargs):
         """
@@ -47,10 +57,12 @@ class SurvStacker:
         -------
         self : object
             Returns self.
-        """
+        """        
         X_oo, y_oo = self.ss.fit_transform(X, y)
+        self.times_ = self.ss.times
+        self.unique_times_ = np.sort(np.unique(self.ss.times))
         self.clf.fit(X_oo, y_oo, **kwargs)
-        return self
+        return self        
     
     def predict_cumulative_hazard(self, X):
         """
