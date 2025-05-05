@@ -1,5 +1,6 @@
 import numpy as np 
 
+from collections import namedtuple
 from ..base import SurvivalAnalysisMixin
 from sklearn.linear_model import LogisticRegression
 from sklearn.calibration import CalibratedClassifierCV
@@ -137,10 +138,16 @@ class SurvStacker(SurvivalAnalysisMixin):
         if hasattr(X, 'to_numpy'):
             X = X.to_numpy()
         
+        #print("X shape:", X.shape)
+        
         # Get survival stacker predictions
         X_oo, y_oo = self.ss.fit_transform(X, y)
         self.times_ = self.ss.times
         self.unique_times_ = np.sort(np.unique(self.ss.times))
+        #print("X_oo shape:", X_oo.shape)
+        #print("y_oo shape:", y_oo.shape)
+        #print("self.times_ shape:", self.times_.shape)
+        #print("self.unique_times_ shape:", self.unique_times_.shape)
 
         if self.type_sim != "none":
             half_n = X_oo.shape[0] // 2
@@ -149,11 +156,15 @@ class SurvStacker(SurvivalAnalysisMixin):
                 stratify = y_oo)        
             # Fit classifier
             self.clf.fit(X_train_oo, y_train_oo, **kwargs)
+            #print("y_train_oo:", y_train_oo)
             # Calibrate classifier
-            calib_probs = self.clf.predict_proba(X_calib_oo)
-            encoder = OneHotEncoder()
+            calib_probs = self.clf.predict_proba(X_calib_oo)[:,1]
+            #print("calib_probs shape:", calib_probs.shape)
+            encoder = OneHotEncoder(sparse_output=False)
+            #print("calib response shape:", y_calib_oo.shape)
             test_probs = encoder.fit_transform(y_calib_oo.reshape(-1, 1))
-            self.calibrated_residuals_ = test_probs - calib_probs
+            #print("test_probs shape:", test_probs.shape)
+            self.calibrated_residuals_ = test_probs[:,1] - calib_probs
             self.clf.fit(X_calib_oo, y_calib_oo, **kwargs)
             # Set baseline model
             event, time = check_array_survival(X, y)
@@ -169,32 +180,43 @@ class SurvStacker(SurvivalAnalysisMixin):
 
     def _predict_survival_function_temp(self, X):
         """
-        Predict the survival function for the given input samples.
-
-        Parameters
-        ----------
-        X : array-like, shape (n_samples, n_features)
-            The input samples.
-
-        Returns
-        -------
-        array-like, shape (n_samples, n_timepoints)
-            The predicted survival function for each sample at each timepoint.
+        Predict survival function with normalized probabilities.
         """
+        #print("X shape:", X.shape)
         X_risk, _ = self.ss.transform(X)
+        #print("X_risk shape:", X_risk.shape)
         oo_test_estimates = self.clf.predict_proba(X_risk)[:, 1]
+        #print("oo_test_estimates shape:", oo_test_estimates.shape)
 
         if self.type_sim == "none":
             # If no simulation, return the test estimates
             return self.ss.predict_survival_function(oo_test_estimates)
         
-        # Apply the calibrated residuals        
-        simulations_oo_test_estimates = simulate_replications(data=self.calibrated_residuals_, num_replications=self.replications, method=self.type_sim)
+        # Apply the calibrated residuals  
+        #print("Calibrated residuals shape:", self.calibrated_residuals_.shape)
+        #print("oo_test_estimates shape:", oo_test_estimates.shape)
+        # Simulate the residuals      
+        simulations_oo_test_estimates = simulate_replications(
+            data=self.calibrated_residuals_, 
+            num_replications=self.replications, 
+            n_obs=oo_test_estimates.shape[0],
+            method=self.type_sim
+        )
+        #print("simulations_oo_test_estimates shape:", simulations_oo_test_estimates.shape)
         # Add the calibrated residuals to the test estimates
         oo_test_estimates = np.tile(oo_test_estimates, (self.replications, 1)).T + simulations_oo_test_estimates
         # clip values to be between 0 and 1
         oo_test_estimates = np.clip(oo_test_estimates, 0, 1)
-        return [self.ss.predict_survival_function(oo_test_estimates[:, i]) for i in range(self.replications)]
+        
+        # Normalize probabilities to sum to 1 for each replication
+        for i in range(self.replications):
+            probs = oo_test_estimates[:, i]
+            probs = np.maximum(probs, 0)  # Ensure probabilities are positive
+            probs = probs / np.sum(probs)  # Normalize to sum to 1
+            oo_test_estimates[:, i] = probs
+        
+        return [self.ss.predict_survival_function(oo_test_estimates[:, i]) 
+                for i in range(self.replications)]
 
 
     def predict(self, X, threshold=0.5):
@@ -255,46 +277,72 @@ class SurvStacker(SurvivalAnalysisMixin):
         ) for s in self._predict_survival_function_temp(X)]
 
 
-    def predict_survival_function(self, X, return_array=False):
+    def predict_survival_function(self, X, return_array=False, level=95):
         """
         Predict survival function.
-
-        Parameters
-        ----------
-        X : array-like, shape (n_samples, n_features)
-            The input samples.
-        return_array : bool, default=False
-            Whether to return the survival function as an array.
-
-        Returns
-        -------
-        array-like or list of StepFunction
-            Predicted survival function for each sample.
         """
-        # Convert X to numpy array if needed
         if hasattr(X, 'to_numpy'):
             X = X.to_numpy()
             
-        # Get predictions using temporary method
         surv = self._predict_survival_function_temp(X)
 
+        #print("surv: ", surv)
+
         if self.type_sim == "none":
-        
             if return_array:
                 return surv
                 
-            # Convert to StepFunction instances
             funcs = []
+            surv = np.asarray(surv)
+            if surv.ndim == 1:
+                surv = surv.reshape(1, -1)
+            
             for i in range(surv.shape[0]):
-                func = StepFunction(x=self.unique_times_, y=surv[i])
+                if len(self.unique_times_) != len(surv[i]):
+                    # Créer une grille temporelle appropriée
+                    x_old = np.linspace(0, 1, len(surv[i]))
+                    x_new = np.linspace(0, 1, len(self.unique_times_))
+                    surv_interp = np.interp(x_new, x_old, surv[i])
+                else:
+                    surv_interp = surv[i]
+                func = StepFunction(x=self.unique_times_, y=surv_interp)
                 funcs.append(func)
             return np.array(funcs)
-        
         else:
+            SurvivalCurves = namedtuple('SurvivalCurves', 
+                                        ['mean', 'lower', 'upper'])
+            # `surv` contains `replications` number of survival functions, 
+            # for each sample in the test set
+            n_obs = X.shape[0]        
+            results = {}
+            for j in range(n_obs): 
+                key = "obs" + str(j)
+                results[key] = []
+                for i in range(self.replications):
+                    results[key].append(surv[i][j])
+            # Calculate mean, lower and upper bounds
+            mean_surv = []
+            lower_surv = []
+            upper_surv = []
+            for key in results.keys():
+                mean_surv.append(np.mean(results[key], axis=0))
+                lower_surv.append(np.percentile(results[key], (100 - level) / 2, axis=0))
+                upper_surv.append(np.percentile(results[key], 100 - (100 - level) / 2, axis=0))
+            mean_surv = np.array(mean_surv)
+            lower_surv = np.array(lower_surv)
+            upper_surv = np.array(upper_surv)
+            if return_array:
+                return mean_surv, lower_surv, upper_surv
+            # Create StepFunction objects for mean, lower and upper bounds
+            mean_funcs = []
+            lower_funcs = []
+            upper_funcs = []
+            for i in range(mean_surv.shape[0]):
+                mean_func = StepFunction(x=self.unique_times_, y=mean_surv[i])
+                lower_func = StepFunction(x=self.unique_times_, y=lower_surv[i])
+                upper_func = StepFunction(x=self.unique_times_, y=upper_surv[i])
+                mean_funcs.append(mean_func)
+                lower_funcs.append(lower_func)
+                upper_funcs.append(upper_func)
+            return SurvivalCurves(mean=mean_funcs, lower=lower_funcs, upper=upper_funcs)
 
-            # Convert to StepFunction instances
-            funcs = []
-            for i in range(len(surv)):
-                func = StepFunction(x=self.unique_times_, y=surv[i])
-                funcs.append(func)
-            return np.array(funcs)
