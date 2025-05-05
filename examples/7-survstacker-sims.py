@@ -51,27 +51,18 @@ def analyze_survival_dataset(X, y, dataset_name):
         type_sim="kde",
         loss = "ipcwls"
     )
-
-    survstacker_lr = SurvStacker(
-        clf=LogisticRegressionCV(cv=5, random_state=42),
-        type_sim="kde",
-        loss = "ipcwls"
-    )
     
     # Fit models
     survstacker_rf.fit(X_train, y_train)
     survstacker_et.fit(X_train, y_train)
-    survstacker_lr.fit(X_train, y_train)
     
     # Get survival function predictions
     surv_funcs_rf = survstacker_rf.predict_survival_function(X_test[:5])
     surv_funcs_et = survstacker_et.predict_survival_function(X_test[:5])
-    surv_funcs_lr = survstacker_lr.predict_survival_function(X_test[:5])
 
     print(f"Survival functions for {dataset_name} dataset:")    
     print("surv_funcs_rf", surv_funcs_rf)
     print("surv_funcs_et", surv_funcs_et)
-    print("surv_funcs_lr", surv_funcs_lr)
 
 # Analyze WHAS500 dataset
 print("Analyzing WHAS500 dataset...")
