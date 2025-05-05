@@ -24,8 +24,8 @@ class SurvStacker(SurvivalAnalysisMixin):
     def __init__(
         self,
         clf=LogisticRegression(),
-        loss="coxph",
-        random_state=None,
+        loss="squared",
+        random_state=42,
         **kwargs      
     ):
         """
@@ -34,19 +34,26 @@ class SurvStacker(SurvivalAnalysisMixin):
         clf : classifier, default: LogisticRegression()
             The classifier to be used for stacking.
         
+        loss : {'coxph', 'squared', 'ipcwls'}, optional, default: 'coxph'
+        loss function to be optimized. 'coxph' refers to partial likelihood loss
+        of Cox's proportional hazards model. The loss 'squared' minimizes a
+        squared regression loss that ignores predictions beyond the time of censoring,
+        and 'ipcwls' refers to inverse-probability of censoring weighted least squares error.
+        
         random_state : int seed, RandomState instance, or None, default: None
             The seed of the pseudo random number generator to use when
             shuffling the data.
 
         kwargs : additional parameters to be passed to CalibratedClassifierCV    
         """        
+        self.random_state = random_state
         self.clf = clf
         try: 
-            self.clf.set_params(random_state=random_state)
+            self.clf.set_params(random_state=self.random_state)
         except Exception as e:
             pass 
-        self.clf = CalibratedClassifierCV(clf, **kwargs)
-        self.random_state = random_state
+        self.clf = CalibratedClassifierCV(clf, 
+                                          **kwargs)        
         self.ss = SurvivalStacker()
         self.times_ = None
         self.unique_times_ = None
@@ -128,42 +135,26 @@ class SurvStacker(SurvivalAnalysisMixin):
         oo_test_estimates = self.clf.predict_proba(X_risk)[:, 1]
         return self.ss.predict_survival_function(oo_test_estimates)
 
-
     def predict(self, X, threshold=0.5):
-        """
-        Predict time to event by finding when survival function crosses threshold.
-
-        Parameters
-        ----------
-        X : array-like, shape (n_samples, n_features)
-            The input samples.
-        threshold : float, default=0.5
-            Survival probability threshold for event occurrence.
-            Default is median survival time (S(t) = 0.5)
-
-        Returns
-        -------
-        array-like, shape (n_samples,)
-            Predicted times to event for each sample.
-        """
-        # Get survival function predictions
-        surv = self._predict_survival_function_temp(X)
+        surv = self._predict_survival_function_temp(X)  # shape: (n_samples, n_times)
+        crossings = surv <= threshold  # Boolean array of threshold crossings
         
-        # Find first time point where survival drops below threshold
-        times = self.unique_times_
-        predicted_times = np.zeros(len(X))
+        # For each sample, get the index of the first crossing (or -1 if none)
+        cross_indices = np.argmax(crossings, axis=1)
         
-        for i in range(len(X)):
-            # Find where survival crosses threshold
-            cross_idx = np.where(surv[i] <= threshold)[0]
-            if len(cross_idx) > 0:
-                # Take first crossing point
-                predicted_times[i] = times[cross_idx[0]]
-            else:
-                # If never crosses, use maximum observed time
-                predicted_times[i] = times[-1]
+        # Handle cases where survival never crosses the threshold:
+        # argmax returns 0 if no True found, so we need to check if the crossing is valid
+        valid_crossings = crossings[np.arange(len(crossings)), cross_indices]
         
-        return predicted_times    
+        # Map to actual times
+        predicted_times = np.where(
+            valid_crossings,
+            self.unique_times_[cross_indices],
+            self.unique_times_[-1]  # use max time if no crossing
+        )
+        
+        return predicted_times
+    
 
     def predict_cumulative_hazard_function(self, X, return_array=False):
         return self._predict_cumulative_hazard_function(

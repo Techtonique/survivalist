@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier, ExtraTreesClassifier
+from sklearn.linear_model import LogisticRegressionCV
 from survivalist.datasets import load_whas500, load_veterans_lung_cancer, load_gbsg2
 from survivalist.survstack import SurvStacker
 
@@ -41,24 +42,34 @@ def analyze_survival_dataset(X, y, dataset_name):
     
     # Initialize models
     survstacker_rf = SurvStacker(
-        clf=RandomForestClassifier(n_estimators=100, random_state=42)
+        clf=RandomForestClassifier(n_estimators=100, random_state=42),
+        loss = "ipcwls"
     )
     survstacker_et = SurvStacker(
-        clf=ExtraTreesClassifier(random_state=42)
+        clf=ExtraTreesClassifier(random_state=42),
+        loss = "ipcwls"
+    )
+
+    survstacker_lr = SurvStacker(
+        clf=LogisticRegressionCV(cv=5, random_state=42),
+        loss = "ipcwls"
     )
     
     # Fit models
     survstacker_rf.fit(X_train, y_train)
     survstacker_et.fit(X_train, y_train)
+    survstacker_lr.fit(X_train, y_train)
     
     # Get survival function predictions
-    surv_funcs_rf = survstacker_rf.predict_survival_function(X_test[:2], return_array=False)
-    surv_funcs_et = survstacker_et.predict_survival_function(X_test[:2], return_array=False)
+    surv_funcs_rf = survstacker_rf.predict_survival_function(X_test[:5])
+    surv_funcs_et = survstacker_et.predict_survival_function(X_test[:5])
+    surv_funcs_lr = survstacker_lr.predict_survival_function(X_test[:5])
     
     # Print performance scores
     print(f"\n{dataset_name} Dataset Results:")
     print(f"Random Forest C-index: {survstacker_rf.score(X_test, y_test):.3f}")
     print(f"Extra Trees C-index: {survstacker_et.score(X_test, y_test):.3f}")
+    print(f"Logistic Regression C-index: {survstacker_lr.score(X_test, y_test):.3f}")
     
     # Plot survival functions
     plt.figure(figsize=(10, 5))
@@ -88,6 +99,18 @@ def analyze_survival_dataset(X, y, dataset_name):
     plt.tight_layout()
     plt.show()
 
+    # Plot survival functions for Logistic Regression
+    plt.figure(figsize=(5, 5))
+    for i, fn in enumerate(surv_funcs_lr):
+        plt.step(fn.x, fn(fn.x), where="post", label=f"Patient {i+1}")
+    plt.title(f"{dataset_name}: Logistic Regression")
+    plt.xlabel("Time")
+    plt.ylabel("Survival Probability")
+    plt.ylim(0, 1)
+    plt.grid(True)
+    plt.legend()
+    plt.show()
+
 # Analyze WHAS500 dataset
 print("Analyzing WHAS500 dataset...")
 X, y = load_whas500()
@@ -99,9 +122,9 @@ X, y = load_veterans_lung_cancer()
 X = _encode_categorical_columns(X)
 analyze_survival_dataset(X, y, "Veterans")
 
-# Analyze GBSG2 dataset
-print("\nAnalyzing GBSG2 dataset...")
-X, y = load_gbsg2()
-X = _encode_categorical_columns(X)
-analyze_survival_dataset(X, y, "GBSG2")
+# # Analyze GBSG2 dataset
+# print("\nAnalyzing GBSG2 dataset...")
+# X, y = load_gbsg2()
+# X = _encode_categorical_columns(X)
+# analyze_survival_dataset(X, y, "GBSG2")
 

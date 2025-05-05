@@ -61,7 +61,9 @@ class BreslowEstimator:
         -------
         self
         """
-        risk_score = np.exp(linear_predictor)
+        # Stabilize risk scores (if needed)
+        max_val = np.max(linear_predictor)
+        risk_score = np.exp(linear_predictor - max_val)  # Ratios preserved
         order = np.argsort(time, kind="mergesort")
         risk_score = risk_score[order]
         uniq_times, n_events, n_at_risk, _ = _compute_counts(event, time, order)
@@ -78,9 +80,14 @@ class BreslowEstimator:
 
         assert k == n_at_risk[0] - n_at_risk[-1]
 
-        y = np.cumsum(n_events / divisor)
+        y = np.cumsum(n_events / (divisor + np.finfo(float).eps))
         self.cum_baseline_hazard_ = StepFunction(uniq_times, y)
-        self.baseline_survival_ = StepFunction(uniq_times, np.exp(-y))
+        # Apply log-sum-exp trick: log(exp(-y)) = -y
+        log_survival = -y
+        # Clip to avoid overflow in exp
+        log_survival = np.clip(log_survival, -700, 700)
+        np_exp_y = np.exp(log_survival)
+        self.baseline_survival_ = StepFunction(uniq_times, np_exp_y)
         self.unique_times_ = uniq_times
         return self
 
