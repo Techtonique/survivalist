@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier, ExtraTreesClassifier
-from sklearn.linear_model import LogisticRegressionCV
+from sklearn.linear_model import LogisticRegression
 from survivalist.datasets import load_whas500, load_veterans_lung_cancer, load_gbsg2
 from survivalist.survstack import SurvStacker
 
@@ -42,7 +42,7 @@ def analyze_survival_dataset(X, y, dataset_name):
     
     # Initialize models
     survstacker_rf = SurvStacker(
-        clf=RandomForestClassifier(n_estimators=100, random_state=42),
+        clf=RandomForestClassifier(random_state=42),
         type_sim="kde",
         loss = "ipcwls"
     )
@@ -51,20 +51,70 @@ def analyze_survival_dataset(X, y, dataset_name):
         type_sim="kde",
         loss = "ipcwls"
     )
+
+    survstacker_lr = SurvStacker(
+        clf=LogisticRegression(),
+        type_sim="kde",
+        loss = "ipcwls"
+    )
     
     # Fit models
     survstacker_rf.fit(X_train, y_train)
     survstacker_et.fit(X_train, y_train)
+    survstacker_lr.fit(X_train, y_train)
     
-    # Get survival function predictions
-    surv_funcs_rf = survstacker_rf.predict_survival_function(X_test[:3])
-    surv_funcs_et = survstacker_et.predict_survival_function(X_test[:3])
+    # Get survival function predictions with confidence intervals
+    surv_funcs_rf = survstacker_rf.predict_survival_function(X_test[:3], level=80)
+    surv_funcs_et = survstacker_et.predict_survival_function(X_test[:3], level=80)
+    surv_funcs_lr = survstacker_lr.predict_survival_function(X_test[:3], level=80)
 
     print(f"Survival functions for {dataset_name} dataset:")    
-    print("surv_funcs_rf", surv_funcs_rf)
-    print("len(surv_funcs_rf)", len(surv_funcs_rf))
-    print("surv_funcs_et", surv_funcs_et)
-    print("len(surv_funcs_et)", len(surv_funcs_et))
+    
+    # Plotting
+    fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(15, 5))
+    colors = ['blue', 'red', 'green']
+    
+    # Plot RF predictions
+    ax1.set_title(f'Random Forest - {dataset_name}')
+    for i, (mean, lower, upper) in enumerate(zip(
+        surv_funcs_rf.mean, surv_funcs_rf.lower, surv_funcs_rf.upper)):
+        times = mean.x
+        ax1.step(times, mean.y, where="post", label=f'Patient {i+1}', color=colors[i])
+        ax1.fill_between(times, lower.y, upper.y, alpha=0.2, color=colors[i], step="post")
+    ax1.grid(True)
+    ax1.set_xlabel('Time')
+    ax1.set_ylabel('Survival Probability')
+    ax1.legend()
+    
+    # Plot ET predictions
+    ax2.set_title(f'Extra Trees - {dataset_name}')
+    for i, (mean, lower, upper) in enumerate(zip(
+        surv_funcs_et.mean, surv_funcs_et.lower, surv_funcs_et.upper)):
+        times = mean.x
+        ax2.step(times, mean.y, where="post", label=f'Patient {i+1}', color=colors[i])
+        ax2.fill_between(times, lower.y, upper.y, alpha=0.2, color=colors[i], step="post")
+    ax2.grid(True)
+    ax2.set_xlabel('Time')
+    ax2.set_ylabel('Survival Probability')
+    ax2.legend()
+
+    # Plot LR predictions
+    ax3.set_title(f'Logistic Regression - {dataset_name}')
+    for i, (mean, lower, upper) in enumerate(zip(
+        surv_funcs_lr.mean, surv_funcs_lr.lower, surv_funcs_lr.upper)):
+        times = mean.x
+        ax3.step(times, mean.y, where="post", label=f'Patient {i+1}', color=colors[i])
+        ax3.fill_between(times, lower.y, upper.y, alpha=0.2, color=colors[i], step="post")
+    ax3.grid(True)
+    ax3.set_xlabel('Time')
+    ax3.set_ylabel('Survival Probability')
+    ax3.legend()
+    
+    plt.tight_layout()
+    plt.savefig(f'survival_curves_{dataset_name}.png')
+    plt.close()
+
+# Import necessary libraries
 
 # Analyze WHAS500 dataset
 print("Analyzing WHAS500 dataset...")

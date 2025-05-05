@@ -138,16 +138,16 @@ class SurvStacker(SurvivalAnalysisMixin):
         if hasattr(X, 'to_numpy'):
             X = X.to_numpy()
         
-        print("X shape:", X.shape)
+        #print("X shape:", X.shape)
         
         # Get survival stacker predictions
         X_oo, y_oo = self.ss.fit_transform(X, y)
         self.times_ = self.ss.times
         self.unique_times_ = np.sort(np.unique(self.ss.times))
-        print("X_oo shape:", X_oo.shape)
-        print("y_oo shape:", y_oo.shape)
-        print("self.times_ shape:", self.times_.shape)
-        print("self.unique_times_ shape:", self.unique_times_.shape)
+        #print("X_oo shape:", X_oo.shape)
+        #print("y_oo shape:", y_oo.shape)
+        #print("self.times_ shape:", self.times_.shape)
+        #print("self.unique_times_ shape:", self.unique_times_.shape)
 
         if self.type_sim != "none":
             half_n = X_oo.shape[0] // 2
@@ -156,14 +156,14 @@ class SurvStacker(SurvivalAnalysisMixin):
                 stratify = y_oo)        
             # Fit classifier
             self.clf.fit(X_train_oo, y_train_oo, **kwargs)
-            print("y_train_oo:", y_train_oo)
+            #print("y_train_oo:", y_train_oo)
             # Calibrate classifier
             calib_probs = self.clf.predict_proba(X_calib_oo)[:,1]
-            print("calib_probs shape:", calib_probs.shape)
+            #print("calib_probs shape:", calib_probs.shape)
             encoder = OneHotEncoder(sparse_output=False)
-            print("calib response shape:", y_calib_oo.shape)
+            #print("calib response shape:", y_calib_oo.shape)
             test_probs = encoder.fit_transform(y_calib_oo.reshape(-1, 1))
-            print("test_probs shape:", test_probs.shape)
+            #print("test_probs shape:", test_probs.shape)
             self.calibrated_residuals_ = test_probs[:,1] - calib_probs
             self.clf.fit(X_calib_oo, y_calib_oo, **kwargs)
             # Set baseline model
@@ -192,25 +192,25 @@ class SurvStacker(SurvivalAnalysisMixin):
         array-like, shape (n_samples, n_timepoints)
             The predicted survival function for each sample at each timepoint.
         """
-        print("X shape:", X.shape)
+        #print("X shape:", X.shape)
         X_risk, _ = self.ss.transform(X)
-        print("X_risk shape:", X_risk.shape)
+        #print("X_risk shape:", X_risk.shape)
         oo_test_estimates = self.clf.predict_proba(X_risk)[:, 1]
-        print("oo_test_estimates shape:", oo_test_estimates.shape)
+        #print("oo_test_estimates shape:", oo_test_estimates.shape)
 
         if self.type_sim == "none":
             # If no simulation, return the test estimates
             return self.ss.predict_survival_function(oo_test_estimates)
         
         # Apply the calibrated residuals  
-        print("Calibrated residuals shape:", self.calibrated_residuals_.shape)
-        print("oo_test_estimates shape:", oo_test_estimates.shape)
+        #print("Calibrated residuals shape:", self.calibrated_residuals_.shape)
+        #print("oo_test_estimates shape:", oo_test_estimates.shape)
         # Simulate the residuals      
         simulations_oo_test_estimates = simulate_replications(data=self.calibrated_residuals_, 
                                                               num_replications=self.replications, 
                                                               n_obs=oo_test_estimates.shape[0],
                                                               method=self.type_sim)
-        print("simulations_oo_test_estimates shape:", simulations_oo_test_estimates.shape)
+        #print("simulations_oo_test_estimates shape:", simulations_oo_test_estimates.shape)
         # Add the calibrated residuals to the test estimates
         oo_test_estimates = np.tile(oo_test_estimates, (self.replications, 1)).T + simulations_oo_test_estimates
         # clip values to be between 0 and 1
@@ -285,7 +285,7 @@ class SurvStacker(SurvivalAnalysisMixin):
             
         surv = self._predict_survival_function_temp(X)
 
-        print("surv: ", surv)
+        #print("surv: ", surv)
 
         if self.type_sim == "none":
             if return_array:
