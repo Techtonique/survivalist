@@ -75,6 +75,17 @@ class SurvStacker(SurvivalAnalysisMixin):
         self._baseline_model = None
         self.loss = loss 
         self._loss = LOSS_FUNCTIONS[self.loss]()
+        self.type_sim = type_sim
+        if self.type_sim not in ["none", "kde", "bootstrap", "normal", "ecdf", "permutation", "smooth_bootstrap"]:
+            raise ValueError(
+                f"Invalid type_sim value: {self.type_sim}. "
+                "Choose from 'none', 'kde', 'bootstrap', 'normal', 'ecdf', 'permutation', or 'smooth_bootstrap'."
+            )
+        if self.loss not in ["coxph", "squared", "ipcwls"]:
+            raise ValueError(
+                f"Invalid loss value: {self.loss}. "
+                "Choose from 'coxph', 'squared', or 'ipcwls'."
+            )
         self.replications = replications 
         self.times_ = None
         self.unique_times_ = None
@@ -140,7 +151,7 @@ class SurvStacker(SurvivalAnalysisMixin):
             self.clf.fit(X_train_oo, y_train_oo, **kwargs)
             # Calibrate classifier
             calib_probs = self.clf.predict_proba(X_calib_oo)
-            encoder = OneHotEncoder(sparse=False)
+            encoder = OneHotEncoder()
             test_probs = encoder.fit_transform(y_calib_oo.reshape(-1, 1))
             self.calibrated_residuals_ = test_probs - calib_probs
             self.clf.fit(X_calib_oo, y_calib_oo, **kwargs)
