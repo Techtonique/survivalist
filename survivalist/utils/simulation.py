@@ -84,7 +84,8 @@ def simulate_distribution(data, method="bootstrap", num_samples=1000, **kwargs):
 
 
 def simulate_replications(
-    data, method="bootstrap", num_replications=10, **kwargs
+    data, method="bootstrap", num_replications=10, 
+    n_obs=None, **kwargs
 ):
     """
     Create multiple replications of the input's distribution using a specified simulation method.
@@ -100,6 +101,7 @@ def simulate_replications(
                       - 'smooth_bootstrap': Smoothed bootstrap with added noise.
         num_samples (int): Number of samples in each replication.
         num_replications (int): Number of replications to generate.
+        n_obs (int): Number of observations to generate for each replication.
         kwargs: Additional parameters for specific methods.
 
     Returns:
@@ -122,4 +124,11 @@ def simulate_replications(
         f"Replication_{i+1}" for i in range(num_replications)
     ]
 
-    return replications_df
+    # If n_obs is specified, sample n_obs from each replication
+    if n_obs is not None:
+        replications_df = replications_df.sample(
+            n=n_obs, replace=True, random_state=42
+        ).reset_index(drop=True)
+        return replications_df.values
+
+    return replications_df.values

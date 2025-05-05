@@ -74,7 +74,7 @@ dist: clean ## builds source and wheel package
 	ls -l dist
 
 install: clean ## install the package to the active Python's site-packages
-	python3 -m pip install -e . --verbose --no-cache-dir --upgrade
+	uv pip install -e . --verbose --no-cache-dir --upgrade
 
 build-site: docs ## export mkdocs website to a folder		
 	cp -rf survivalist-docs/* ../../Pro_Website/Techtonique.github.io/survivalist
