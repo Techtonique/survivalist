@@ -57,12 +57,14 @@ def analyze_survival_dataset(X, y, dataset_name):
     survstacker_et.fit(X_train, y_train)
     
     # Get survival function predictions
-    surv_funcs_rf = survstacker_rf.predict_survival_function(X_test[:5])
-    surv_funcs_et = survstacker_et.predict_survival_function(X_test[:5])
+    surv_funcs_rf = survstacker_rf.predict_survival_function(X_test[:3])
+    surv_funcs_et = survstacker_et.predict_survival_function(X_test[:3])
 
     print(f"Survival functions for {dataset_name} dataset:")    
     print("surv_funcs_rf", surv_funcs_rf)
+    print("len(surv_funcs_rf)", len(surv_funcs_rf))
     print("surv_funcs_et", surv_funcs_et)
+    print("len(surv_funcs_et)", len(surv_funcs_et))
 
 # Analyze WHAS500 dataset
 print("Analyzing WHAS500 dataset...")

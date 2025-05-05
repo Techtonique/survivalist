@@ -285,6 +285,8 @@ class SurvStacker(SurvivalAnalysisMixin):
             
         surv = self._predict_survival_function_temp(X)
 
+        print("surv: ", surv)
+
         if self.type_sim == "none":
             if return_array:
                 return surv
@@ -306,26 +308,40 @@ class SurvStacker(SurvivalAnalysisMixin):
                 funcs.append(func)
             return np.array(funcs)
         else:
-            SurvivalCurves = namedtuple('SurvivalCurves', ['mean', 'lower', 'upper'])
-        # Calculer les courbes moyennes et les intervalles
-        alpha = 1 - level/100
-        curves = []        
-        for i in range(len(surv[0])):  # Pour chaque échantillon
-            # Extraire toutes les courbes pour cet échantillon
-            sample_curves = np.array([s[i] for s in surv])
-            
-            # Calculer moyenne et quantiles
-            mean_curve = np.mean(sample_curves, axis=0)
-            lower_curve = np.quantile(sample_curves, alpha/2, axis=0)
-            upper_curve = np.quantile(sample_curves, 1-alpha/2, axis=0)
-            
-            # Créer les StepFunctions
-            mean_func = StepFunction(x=self.unique_times_, y=mean_curve)
-            lower_func = StepFunction(x=self.unique_times_, y=lower_curve)
-            upper_func = StepFunction(x=self.unique_times_, y=upper_curve)
-            
-            curves.append(SurvivalCurves(mean=mean_func, 
-                                       lower=lower_func,
-                                       upper=upper_func))
-            
-        return np.array(curves)
+            SurvivalCurves = namedtuple('SurvivalCurves', 
+                                        ['mean', 'lower', 'upper'])
+            # `surv` contains `replications` number of survival functions, 
+            # for each sample in the test set
+            n_obs = X.shape[0]        
+            results = {}
+            for j in range(n_obs): 
+                key = "obs" + str(j)
+                results[key] = []
+                for i in range(self.replications):
+                    results[key].append(surv[i][j])
+            # Calculate mean, lower and upper bounds
+            mean_surv = []
+            lower_surv = []
+            upper_surv = []
+            for key in results.keys():
+                mean_surv.append(np.mean(results[key], axis=0))
+                lower_surv.append(np.percentile(results[key], (100 - level) / 2, axis=0))
+                upper_surv.append(np.percentile(results[key], 100 - (100 - level) / 2, axis=0))
+            mean_surv = np.array(mean_surv)
+            lower_surv = np.array(lower_surv)
+            upper_surv = np.array(upper_surv)
+            if return_array:
+                return mean_surv, lower_surv, upper_surv
+            # Create StepFunction objects for mean, lower and upper bounds
+            mean_funcs = []
+            lower_funcs = []
+            upper_funcs = []
+            for i in range(mean_surv.shape[0]):
+                mean_func = StepFunction(x=self.unique_times_, y=mean_surv[i])
+                lower_func = StepFunction(x=self.unique_times_, y=lower_surv[i])
+                upper_func = StepFunction(x=self.unique_times_, y=upper_surv[i])
+                mean_funcs.append(mean_func)
+                lower_funcs.append(lower_func)
+                upper_funcs.append(upper_func)
+            return SurvivalCurves(mean=mean_funcs, lower=lower_funcs, upper=upper_funcs)
+                     
