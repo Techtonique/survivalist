@@ -180,17 +180,7 @@ class SurvStacker(SurvivalAnalysisMixin):
 
     def _predict_survival_function_temp(self, X):
         """
-        Predict the survival function for the given input samples.
-
-        Parameters
-        ----------
-        X : array-like, shape (n_samples, n_features)
-            The input samples.
-
-        Returns
-        -------
-        array-like, shape (n_samples, n_timepoints)
-            The predicted survival function for each sample at each timepoint.
+        Predict survival function with normalized probabilities.
         """
         #print("X shape:", X.shape)
         X_risk, _ = self.ss.transform(X)
@@ -206,16 +196,27 @@ class SurvStacker(SurvivalAnalysisMixin):
         #print("Calibrated residuals shape:", self.calibrated_residuals_.shape)
         #print("oo_test_estimates shape:", oo_test_estimates.shape)
         # Simulate the residuals      
-        simulations_oo_test_estimates = simulate_replications(data=self.calibrated_residuals_, 
-                                                              num_replications=self.replications, 
-                                                              n_obs=oo_test_estimates.shape[0],
-                                                              method=self.type_sim)
+        simulations_oo_test_estimates = simulate_replications(
+            data=self.calibrated_residuals_, 
+            num_replications=self.replications, 
+            n_obs=oo_test_estimates.shape[0],
+            method=self.type_sim
+        )
         #print("simulations_oo_test_estimates shape:", simulations_oo_test_estimates.shape)
         # Add the calibrated residuals to the test estimates
         oo_test_estimates = np.tile(oo_test_estimates, (self.replications, 1)).T + simulations_oo_test_estimates
         # clip values to be between 0 and 1
         oo_test_estimates = np.clip(oo_test_estimates, 0, 1)
-        return [self.ss.predict_survival_function(oo_test_estimates[:, i]) for i in range(self.replications)]
+        
+        # Normalize probabilities to sum to 1 for each replication
+        for i in range(self.replications):
+            probs = oo_test_estimates[:, i]
+            probs = np.maximum(probs, 0)  # Ensure probabilities are positive
+            probs = probs / np.sum(probs)  # Normalize to sum to 1
+            oo_test_estimates[:, i] = probs
+        
+        return [self.ss.predict_survival_function(oo_test_estimates[:, i]) 
+                for i in range(self.replications)]
 
 
     def predict(self, X, threshold=0.5):
@@ -344,4 +345,4 @@ class SurvStacker(SurvivalAnalysisMixin):
                 lower_funcs.append(lower_func)
                 upper_funcs.append(upper_func)
             return SurvivalCurves(mean=mean_funcs, lower=lower_funcs, upper=upper_funcs)
-                     
+
