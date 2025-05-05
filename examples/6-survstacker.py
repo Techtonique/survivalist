@@ -1,11 +1,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier, ExtraTreesClassifier
-from sklearn.linear_model import LogisticRegressionCV
+from sklearn.ensemble import RandomForestClassifier, ExtraTreesClassifier
 from survivalist.datasets import load_whas500, load_veterans_lung_cancer, load_gbsg2
 from survivalist.survstack import SurvStacker
-from survivalist.nonparametric import kaplan_meier_estimator
 
 import pandas as pd
 
@@ -33,185 +31,77 @@ def _encode_categorical_columns(df, categorical_columns=None):
 
     return df_encoded
 
-# Load and prepare the WHAS500 dataset
+def analyze_survival_dataset(X, y, dataset_name):
+    """Analyze a survival dataset using Random Forest and Extra Trees models"""
+    # Data preparation
+    X = X.astype(float)
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42
+    )
+    
+    # Initialize models
+    survstacker_rf = SurvStacker(
+        clf=RandomForestClassifier(n_estimators=100, random_state=42)
+    )
+    survstacker_et = SurvStacker(
+        clf=ExtraTreesClassifier(random_state=42)
+    )
+    
+    # Fit models
+    survstacker_rf.fit(X_train, y_train)
+    survstacker_et.fit(X_train, y_train)
+    
+    # Get survival function predictions
+    surv_funcs_rf = survstacker_rf.predict_survival_function(X_test[:2], return_array=False)
+    surv_funcs_et = survstacker_et.predict_survival_function(X_test[:2], return_array=False)
+    
+    # Print performance scores
+    print(f"\n{dataset_name} Dataset Results:")
+    print(f"Random Forest C-index: {survstacker_rf.score(X_test, y_test):.3f}")
+    print(f"Extra Trees C-index: {survstacker_et.score(X_test, y_test):.3f}")
+    
+    # Plot survival functions
+    plt.figure(figsize=(10, 5))
+    
+    # Plot RF predictions
+    plt.subplot(1, 2, 1)
+    for i, fn in enumerate(surv_funcs_rf):
+        plt.step(fn.x, fn(fn.x), where="post", label=f"Patient {i+1}")
+    plt.title(f"{dataset_name}: Random Forest")
+    plt.xlabel("Time")
+    plt.ylabel("Survival Probability")
+    plt.ylim(0, 1)
+    plt.grid(True)
+    plt.legend()
+    
+    # Plot ET predictions
+    plt.subplot(1, 2, 2)
+    for i, fn in enumerate(surv_funcs_et):
+        plt.step(fn.x, fn(fn.x), where="post", label=f"Patient {i+1}")
+    plt.title(f"{dataset_name}: Extra Trees")
+    plt.xlabel("Time")
+    plt.ylabel("Survival Probability")
+    plt.ylim(0, 1)
+    plt.grid(True)
+    plt.legend()
+    
+    plt.tight_layout()
+    plt.show()
+
+# Analyze WHAS500 dataset
+print("Analyzing WHAS500 dataset...")
 X, y = load_whas500()
-print("X.head()", X.head())
-X = X.astype(float).to_numpy()  # Convert to numpy array
+analyze_survival_dataset(X, y, "WHAS500")
 
-# Split the data into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42
-)
-
-event_time = [y[1] for y in y_test]
-event_status = [y[0] for y in y_test]
-km = kaplan_meier_estimator(event_status, event_time,
-                            conf_type="log-log")
-
-print("X_train.shape", X_train.shape)
-print("X_test.shape", X_test.shape)
-print("y_train.shape", y_train.shape)
-print("y_test.shape", y_test.shape)
-
-# Define time points for evaluation
-times = np.linspace(0, 2000, 100)
-
-# Initialize models with specified time points
-survstacker_rf = SurvStacker(
-    clf=RandomForestClassifier(n_estimators=100, random_state=42))
-survstacker_et = SurvStacker(
-    clf=ExtraTreesClassifier(random_state=42))
-#coxph = CoxPHSurvivalAnalysis()
-
-# Fit models
-survstacker_rf.fit(X_train, y_train)
-survstacker_et.fit(X_train, y_train)
-#coxph.fit(X_train, y_train)
-
-# Get predictions for first two test samples
-X_samples = X_test[:2]
-
-# Get survival functions
-surv_rf = survstacker_rf.predict_survival_function(X_samples)
-surv_et = survstacker_et.predict_survival_function(X_samples)
-
-# Print diagnostics
-print("Time points shape:", times.shape)
-print("Survival function shape:", surv_rf.shape)
-print("First few survival probabilities:", surv_rf[:, :20])
-print("Monotonic decreasing check:", np.all(np.diff(surv_rf[0]) <= 0))
-print("Monotonic decreasing check:", np.all(np.diff(surv_et[0]) <= 0))
-
-# Plot survival functions
-#plt.figure(figsize=(10, 6))
-plt.plot(surv_rf[0, :], label='Random Forest')
-plt.plot(surv_et[0, :], label='Logistic Regression')
-plt.title('Survival Function Estimates')
-plt.xlabel('Time')
-plt.ylabel('Survival Probability')
-plt.legend()
-plt.grid()
-plt.show()
-
-
+# Analyze Veterans Lung Cancer dataset
+print("\nAnalyzing Veterans Lung Cancer dataset...")
 X, y = load_veterans_lung_cancer()
-print("\n X.head()", X.head())
-X = _encode_categorical_columns(X) # Convert categorical columns to one-hot encoding
-X = X.astype(float).to_numpy()
+X = _encode_categorical_columns(X)
+analyze_survival_dataset(X, y, "Veterans")
 
-# Split the data into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42
-)
-
-event_time = [y[1] for y in y_test]
-event_status = [y[0] for y in y_test]
-km = kaplan_meier_estimator(event_status, event_time,
-                            conf_type="log-log")
-
-print("X_train.shape", X_train.shape)
-print("X_test.shape", X_test.shape)
-print("y_train.shape", y_train.shape)
-print("y_test.shape", y_test.shape)
-
-# Define time points for evaluation
-times = np.linspace(0, 2000, 100)
-
-# Initialize models with specified time points
-survstacker_rf = SurvStacker(
-    clf=RandomForestClassifier(n_estimators=100, random_state=42))
-survstacker_et = SurvStacker(
-    clf=ExtraTreesClassifier(random_state=42))
-#coxph = CoxPHSurvivalAnalysis()
-
-# Fit models
-survstacker_rf.fit(X_train, y_train)
-survstacker_et.fit(X_train, y_train)
-#coxph.fit(X_train, y_train)
-
-# Get predictions for first two test samples
-X_samples = X_test[:2]
-
-# Get survival functions
-surv_rf = survstacker_rf.predict_survival_function(X_samples)
-surv_et = survstacker_et.predict_survival_function(X_samples)
-
-# Print diagnostics
-print("Time points shape:", times.shape)
-print("Survival function shape:", surv_rf.shape)
-print("First few survival probabilities:", surv_rf[:, :20])
-print("Monotonic decreasing check:", np.all(np.diff(surv_rf[0]) <= 0))
-print("Monotonic decreasing check:", np.all(np.diff(surv_et[0]) <= 0))
-
-# Plot survival functions
-#plt.figure(figsize=(10, 6))
-plt.plot(surv_rf[0, :], label='Random Forest')
-plt.plot(surv_et[0, :], label='Logistic Regression')
-plt.title('Survival Function Estimates')
-plt.xlabel('Time')
-plt.ylabel('Survival Probability')
-plt.legend()
-plt.grid()
-plt.show()
-
-
+# Analyze GBSG2 dataset
+print("\nAnalyzing GBSG2 dataset...")
 X, y = load_gbsg2()
-print("\n X.head()", X.head())
-X = _encode_categorical_columns(X) # Convert categorical columns to one-hot encoding
-X = X.astype(float).to_numpy()
-
-# Split the data into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=42
-)
-
-event_time = [y[1] for y in y_test]
-event_status = [y[0] for y in y_test]
-km = kaplan_meier_estimator(event_status, event_time,
-                            conf_type="log-log")
-
-print("X_train.shape", X_train.shape)
-print("X_test.shape", X_test.shape)
-print("y_train.shape", y_train.shape)
-print("y_test.shape", y_test.shape)
-
-# Define time points for evaluation
-times = np.linspace(0, 2000, 100)
-
-# Initialize models with specified time points
-survstacker_rf = SurvStacker(
-    clf=RandomForestClassifier(n_estimators=100, random_state=42))
-survstacker_et = SurvStacker(
-    clf=ExtraTreesClassifier(random_state=42))
-#coxph = CoxPHSurvivalAnalysis()
-
-# Fit models
-survstacker_rf.fit(X_train, y_train)
-survstacker_et.fit(X_train, y_train)
-#coxph.fit(X_train, y_train)
-
-# Get predictions for first two test samples
-X_samples = X_test[:2]
-
-# Get survival functions
-surv_rf = survstacker_rf.predict_survival_function(X_samples)
-surv_et = survstacker_et.predict_survival_function(X_samples)
-
-# Print diagnostics
-print("Time points shape:", times.shape)
-print("Survival function shape:", surv_rf.shape)
-print("First few survival probabilities:", surv_rf[:, :20])
-print("Monotonic decreasing check:", np.all(np.diff(surv_rf[0]) <= 0))
-print("Monotonic decreasing check:", np.all(np.diff(surv_et[0]) <= 0))
-
-# Plot survival functions
-#plt.figure(figsize=(10, 6))
-plt.plot(surv_rf[0, :], label='Random Forest')
-plt.plot(surv_et[0, :], label='Logistic Regression')
-plt.title('Survival Function Estimates')
-plt.xlabel('Time')
-plt.ylabel('Survival Probability')
-plt.legend()
-plt.grid()
-plt.show()
+X = _encode_categorical_columns(X)
+analyze_survival_dataset(X, y, "GBSG2")
 
