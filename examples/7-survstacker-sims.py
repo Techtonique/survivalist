@@ -127,9 +127,9 @@ X, y = load_veterans_lung_cancer()
 X = _encode_categorical_columns(X)
 analyze_survival_dataset(X, y, "Veterans")
 
-# # Analyze GBSG2 dataset
-# print("\nAnalyzing GBSG2 dataset...")
-# X, y = load_gbsg2()
-# X = _encode_categorical_columns(X)
-# analyze_survival_dataset(X, y, "GBSG2")
+# Analyze GBSG2 dataset
+print("\nAnalyzing GBSG2 dataset...")
+X, y = load_gbsg2()
+X = _encode_categorical_columns(X)
+analyze_survival_dataset(X, y, "GBSG2")
 

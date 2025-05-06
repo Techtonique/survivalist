@@ -1,8 +1,6 @@
 import numpy as np 
 
 from collections import namedtuple
-from ..base import SurvivalAnalysisMixin
-from sklearn.linear_model import LogisticRegression
 from sklearn.calibration import CalibratedClassifierCV
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
@@ -71,7 +69,7 @@ class SurvStacker(SurvivalAnalysisMixin):
             self.clf.set_params(random_state=self.random_state)
         except Exception as e:
             pass 
-        self.clf = CalibratedClassifierCV(clf, **kwargs)        
+        self.clf = CalibratedClassifierCV(clf, cv=3, **kwargs)        
         self.ss = SurvivalStacker()        
         self._baseline_model = None
         self.loss = loss 
