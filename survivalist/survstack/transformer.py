@@ -37,8 +37,7 @@ class SurvivalStacker:
             self.times = ssf.digitize_times(event_times, time_step)
         return self
 
-    def transform(self, X: np.ndarray, y: np.ndarray | None = None) \
-            -> tuple[np.ndarray, np.ndarray | None]:
+    def transform(self, X: np.ndarray, y: np.ndarray | None = None) -> tuple[np.ndarray, np.ndarray | None]:
         """Convert the input survival dataset to a stacked survival dataset
 
         :param X: survival input samples
@@ -55,9 +54,9 @@ class SurvivalStacker:
             X_stacked, y_stacked = ssf.stack_timepoints(X, y, self.times)
         return X_stacked, y_stacked
 
-    def fit_transform(self, X: np.ndarray, y: np.ndarray,
-                      time_step: float | None = None) \
-            -> tuple[np.ndarray, np.ndarray | None]:
+    def fit_transform(
+        self, X: np.ndarray, y: np.ndarray, time_step: float | None = None
+    ) -> tuple[np.ndarray, np.ndarray | None]:
         """Fit to data, then transform it.
 
         :param X: survival input samples
@@ -80,7 +79,7 @@ class SurvivalStacker:
         :return: a cumulative risk matrix for the fitted time-points
         """
         return ssf.cumulative_hazard_function(X, self.times)
-    
+
     def predict_survival_function(self, X: np.ndarray) -> np.ndarray:
         """Calculate the survival function from the stacked survival estimates.
 

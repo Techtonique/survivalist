@@ -64,9 +64,9 @@ def analyze_survival_dataset(X, y, dataset_name):
     survstacker_lr.fit(X_train, y_train)
     
     # Get survival function predictions with confidence intervals
-    surv_funcs_rf = survstacker_rf.predict_survival_function(X_test[:3], level=80)
-    surv_funcs_et = survstacker_et.predict_survival_function(X_test[:3], level=80)
-    surv_funcs_lr = survstacker_lr.predict_survival_function(X_test[:3], level=80)
+    surv_funcs_rf = survstacker_rf.predict_survival_function(X_test[:3], level=95)
+    surv_funcs_et = survstacker_et.predict_survival_function(X_test[:3], level=95)
+    surv_funcs_lr = survstacker_lr.predict_survival_function(X_test[:3], level=95)
 
     print(f"Survival functions for {dataset_name} dataset:")    
     
@@ -84,6 +84,7 @@ def analyze_survival_dataset(X, y, dataset_name):
     ax1.grid(True)
     ax1.set_xlabel('Time')
     ax1.set_ylabel('Survival Probability')
+    ax1.set_ylim(0, 1)  # Set y-axis limits
     ax1.legend()
     
     # Plot ET predictions
@@ -96,6 +97,7 @@ def analyze_survival_dataset(X, y, dataset_name):
     ax2.grid(True)
     ax2.set_xlabel('Time')
     ax2.set_ylabel('Survival Probability')
+    ax2.set_ylim(0, 1)  # Set y-axis limits
     ax2.legend()
 
     # Plot LR predictions
@@ -108,6 +110,7 @@ def analyze_survival_dataset(X, y, dataset_name):
     ax3.grid(True)
     ax3.set_xlabel('Time')
     ax3.set_ylabel('Survival Probability')
+    ax3.set_ylim(0, 1)  # Set y-axis limits
     ax3.legend()
     
     plt.tight_layout()

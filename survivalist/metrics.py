@@ -39,8 +39,7 @@ def _check_estimate_1d(estimate, test_time):
     estimate = check_array(estimate, ensure_2d=False, input_name="estimate")
     if estimate.ndim != 1:
         raise ValueError(
-            f"Expected 1D array, got {estimate.ndim}D array instead:\narray={estimate}.\n"
-        )
+            f"Expected 1D array, got {estimate.ndim}D array instead:\narray={estimate}.\n")
     check_consistent_length(test_time, estimate)
     return estimate
 
@@ -48,11 +47,9 @@ def _check_estimate_1d(estimate, test_time):
 def _check_inputs(event_indicator, event_time, estimate):
     check_consistent_length(event_indicator, event_time, estimate)
     event_indicator = check_array(
-        event_indicator, ensure_2d=False, input_name="event_indicator"
-    )
+        event_indicator, ensure_2d=False, input_name="event_indicator")
     event_time = check_array(
-        event_time, ensure_2d=False, input_name="event_time"
-    )
+        event_time, ensure_2d=False, input_name="event_time")
     estimate = _check_estimate_1d(estimate, event_time)
 
     if not np.issubdtype(event_indicator.dtype, np.bool_):
@@ -70,9 +67,8 @@ def _check_inputs(event_indicator, event_time, estimate):
 
 
 def _check_times(test_time, times):
-    times = check_array(
-        np.atleast_1d(times), ensure_2d=False, input_name="times"
-    )
+    times = check_array(np.atleast_1d(
+        times), ensure_2d=False, input_name="times")
     times = np.unique(times)
 
     if times.max() >= test_time.max() or times.min() < test_time.min():
@@ -96,8 +92,7 @@ def _check_estimate_2d(estimate, test_time, time_points, estimator):
 
     if estimate.ndim == 2 and estimate.shape[1] != time_points.shape[0]:
         raise ValueError(
-            f"expected estimate with {time_points.shape[0]} columns, but got {estimate.shape[1]}"
-        )
+            f"expected estimate with {time_points.shape[0]} columns, but got {estimate.shape[1]}")
 
     return estimate, time_points
 
@@ -128,9 +123,7 @@ def _iter_comparable(event_indicator, event_time, order):
         i = end
 
 
-def _estimate_concordance_index(
-    event_indicator, event_time, estimate, weights, tied_tol=1e-8
-):
+def _estimate_concordance_index(event_indicator, event_time, estimate, weights, tied_tol=1e-8):
     order = np.argsort(event_time)
 
     tied_time = None
@@ -140,18 +133,14 @@ def _estimate_concordance_index(
     tied_risk = 0
     numerator = 0.0
     denominator = 0.0
-    for ind, mask, tied_time in _iter_comparable(
-        event_indicator, event_time, order
-    ):
+    for ind, mask, tied_time in _iter_comparable(event_indicator, event_time, order):
         est_i = estimate[order[ind]]
         event_i = event_indicator[order[ind]]
         w_i = weights[order[ind]]
 
         est = estimate[order[mask]]
 
-        assert (
-            event_i
-        ), f"got censored sample at index {order[ind]}, but expected uncensored"
+        assert event_i, f"got censored sample at index {order[ind]}, but expected uncensored"
 
         ties = np.absolute(est - est_i) <= tied_tol
         n_ties = ties.sum()
@@ -168,16 +157,13 @@ def _estimate_concordance_index(
 
     if tied_time is None:
         raise NoComparablePairException(
-            "Data has no comparable pairs, cannot estimate concordance index."
-        )
+            "Data has no comparable pairs, cannot estimate concordance index.")
 
     cindex = numerator / denominator
     return cindex, concordant, discordant, tied_risk, tied_time
 
 
-def concordance_index_censored(
-    event_indicator, event_time, estimate, tied_tol=1e-8
-):
+def concordance_index_censored(event_indicator, event_time, estimate, tied_tol=1e-8):
     """Concordance index for right-censored data
 
     The concordance index is defined as the proportion of all comparable pairs
@@ -243,19 +229,14 @@ def concordance_index_censored(
            Statistics in Medicine, 15(4), 361-87, 1996.
     """
     event_indicator, event_time, estimate = _check_inputs(
-        event_indicator, event_time, estimate
-    )
+        event_indicator, event_time, estimate)
 
     w = np.ones_like(estimate)
 
-    return _estimate_concordance_index(
-        event_indicator, event_time, estimate, w, tied_tol
-    )
+    return _estimate_concordance_index(event_indicator, event_time, estimate, w, tied_tol)
 
 
-def concordance_index_ipcw(
-    survival_train, survival_test, estimate, tau=None, tied_tol=1e-8
-):
+def concordance_index_ipcw(survival_train, survival_test, estimate, tau=None, tied_tol=1e-8):
     """Concordance index for right-censored data based on inverse probability of censoring weights.
 
     This is an alternative to the estimator in :func:`concordance_index_censored`
@@ -363,14 +344,10 @@ def concordance_index_ipcw(
 
     w = np.square(ipcw)
 
-    return _estimate_concordance_index(
-        test_event, test_time, estimate, w, tied_tol
-    )
+    return _estimate_concordance_index(test_event, test_time, estimate, w, tied_tol)
 
 
-def cumulative_dynamic_auc(
-    survival_train, survival_test, estimate, times, tied_tol=1e-8
-):
+def cumulative_dynamic_auc(survival_train, survival_test, estimate, times, tied_tol=1e-8):
     """Estimator of cumulative/dynamic AUC for right-censored time-to-event data.
 
     The receiver operating characteristic (ROC) curve and the area under the
@@ -486,15 +463,13 @@ def cumulative_dynamic_auc(
     """
     test_event, test_time = check_y_survival(survival_test)
     estimate, times = _check_estimate_2d(
-        estimate, test_time, times, estimator="cumulative_dynamic_auc"
-    )
+        estimate, test_time, times, estimator="cumulative_dynamic_auc")
 
     n_samples = estimate.shape[0]
     n_times = times.shape[0]
     if estimate.ndim == 1:
         estimate = np.broadcast_to(
-            estimate[:, np.newaxis], (n_samples, n_times)
-        )
+            estimate[:, np.newaxis], (n_samples, n_times))
 
     # fit and transform IPCW
     cens = CensoringDistributionEstimator()
@@ -504,8 +479,7 @@ def cumulative_dynamic_auc(
     # expand arrays to (n_samples, n_times) shape
     test_time = np.broadcast_to(test_time[:, np.newaxis], (n_samples, n_times))
     test_event = np.broadcast_to(
-        test_event[:, np.newaxis], (n_samples, n_times)
-    )
+        test_event[:, np.newaxis], (n_samples, n_times))
     times_2d = np.broadcast_to(times, (n_samples, n_times))
     ipcw = np.broadcast_to(ipcw[:, np.newaxis], (n_samples, n_times))
 
@@ -522,8 +496,7 @@ def cumulative_dynamic_auc(
 
     # prepend row of infinity values
     estimate_diff = np.concatenate(
-        (np.broadcast_to(np.inf, (1, n_times)), estimate)
-    )
+        (np.broadcast_to(np.inf, (1, n_times)), estimate))
     is_tied = np.absolute(np.diff(estimate_diff, axis=0)) <= tied_tol
 
     cumsum_tp = np.cumsum(is_case * ipcw, axis=0)
@@ -532,9 +505,8 @@ def cumulative_dynamic_auc(
     false_pos = cumsum_fp / n_controls
 
     scores = np.empty(n_times, dtype=float)
-    it = np.nditer(
-        (true_pos, false_pos, is_tied), order="F", flags=["external_loop"]
-    )
+    it = np.nditer((true_pos, false_pos, is_tied),
+                   order="F", flags=["external_loop"])
     with it:
         for i, (tp, fp, mask) in enumerate(it):
             idx = np.flatnonzero(mask) - 1
@@ -658,8 +630,7 @@ def brier_score(survival_train, survival_test, estimate, times):
     """
     test_event, test_time = check_y_survival(survival_test)
     estimate, times = _check_estimate_2d(
-        estimate, test_time, times, estimator="brier_score"
-    )
+        estimate, test_time, times, estimator="brier_score")
     if estimate.ndim == 1 and times.shape[0] == 1:
         estimate = estimate.reshape(-1, 1)
 
@@ -786,8 +757,7 @@ def integrated_brier_score(survival_train, survival_test, estimate, times):
     """
     # Computing the brier scores
     times, brier_scores = brier_score(
-        survival_train, survival_test, estimate, times
-    )
+        survival_train, survival_test, estimate, times)
 
     if times.shape[0] < 2:
         raise ValueError("At least two time points must be given")
@@ -822,8 +792,7 @@ class _ScoreOverrideMixin:
     ):
         if not hasattr(estimator, predict_func):
             raise AttributeError(
-                f"{estimator!r} object has no attribute {predict_func!r}"
-            )
+                f"{estimator!r} object has no attribute {predict_func!r}")
 
         self.estimator = estimator
         self._predict_func = predict_func

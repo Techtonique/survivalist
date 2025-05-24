@@ -32,8 +32,7 @@ def _to_pandas(data, meta):
                     raw.append(b.decode())
 
             data_dict[name] = pd.Categorical(
-                raw, categories=attr_format, ordered=False
-            )
+                raw, categories=attr_format, ordered=False)
         else:
             arr = data[name]
             p = pd.Series(arr, dtype=arr.dtype)

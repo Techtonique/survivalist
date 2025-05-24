@@ -33,9 +33,7 @@ class CoxPH(SurvivalLossFunction):
 
     # pylint: disable=no-self-use
 
-    def __call__(
-        self, y_true, raw_prediction, sample_weight=None
-    ):  # pylint: disable=unused-argument
+    def __call__(self, y_true, raw_prediction, sample_weight=None):  # pylint: disable=unused-argument
         """Compute the partial likelihood of prediction ``y_pred`` and ``y``."""
         # TODO add support for sample weights
         return coxph_loss(
@@ -44,9 +42,7 @@ class CoxPH(SurvivalLossFunction):
             raw_prediction.ravel(),
         )
 
-    def gradient(
-        self, y_true, raw_prediction, sample_weight=None, **kwargs
-    ):  # pylint: disable=unused-argument
+    def gradient(self, y_true, raw_prediction, sample_weight=None, **kwargs):  # pylint: disable=unused-argument
         """Negative gradient of partial likelihood
 
         Parameters
@@ -116,9 +112,7 @@ class CensoredSquaredLoss(SurvivalLossFunction):
         mask = (pred_time > 0) | y_true["event"]
         return 0.5 * squared_norm(pred_time.compress(mask, axis=0))
 
-    def gradient(
-        self, y_true, raw_prediction, **kwargs
-    ):  # pylint: disable=unused-argument
+    def gradient(self, y_true, raw_prediction, **kwargs):  # pylint: disable=unused-argument
         """Negative gradient of partial likelihood
 
         Parameters
@@ -178,18 +172,9 @@ class IPCWLeastSquaresError(SurvivalLossFunction):
 
     def __call__(self, y_true, raw_prediction, sample_weight=None):
         sample_weight = ipc_weights(y_true["event"], y_true["time"])
-        return (
-            1.0
-            / sample_weight.sum()
-            * np.sum(
-                sample_weight
-                * ((y_true["time"] - raw_prediction.ravel()) ** 2.0)
-            )
-        )
+        return 1.0 / sample_weight.sum() * np.sum(sample_weight * ((y_true["time"] - raw_prediction.ravel()) ** 2.0))
 
-    def gradient(
-        self, y_true, raw_prediction, **kwargs
-    ):  # pylint: disable=unused-argument
+    def gradient(self, y_true, raw_prediction, **kwargs):  # pylint: disable=unused-argument
         return y_true["time"] - raw_prediction.ravel()
 
     def update_terminal_regions(

@@ -9,9 +9,7 @@ from ..utils.simulation import simulate_replications
 __all__ = ["PIComponentwiseGenGradientBoostingSurvivalAnalysis"]
 
 
-class PIComponentwiseGenGradientBoostingSurvivalAnalysis(
-    ComponentwiseGenGradientBoostingSurvivalAnalysis
-):
+class PIComponentwiseGenGradientBoostingSurvivalAnalysis(ComponentwiseGenGradientBoostingSurvivalAnalysis):
     """Generic Gradient boosting with any base learner with prediction intervals.
 
     Parameters
@@ -174,24 +172,14 @@ class PIComponentwiseGenGradientBoostingSurvivalAnalysis(
             "smooth-bootstrap",
             "normal",
         ), f"Unknown value for 'type_pi', '{type_pi}'. Choose from 'scp', 'bootstrap', 'kde', 'parametric', 'ecdf', 'permutation', 'smooth-bootstrap', or 'normal'."
-        assert (
-            0 < level < 100
-        ), f"Confidence level must be in the range (0, 100), got {level}."
-        assert (
-            0 <= dropout_rate < 1
-        ), f"Dropout rate must be in the range [0, 1), got {dropout_rate}."
+        assert 0 < level < 100, f"Confidence level must be in the range (0, 100), got {level}."
+        assert 0 <= dropout_rate < 1, f"Dropout rate must be in the range [0, 1), got {dropout_rate}."
         assert n_replications > 0 and np.issubdtype(
             type(n_replications), np.integer
         ), f"Number of replications must be an integer and greater than zero, got {n_replications}."
-        assert (
-            0 < learning_rate <= 1
-        ), f"Learning rate must be in the range (0, 1], got {learning_rate}."
-        assert (
-            1 <= n_estimators
-        ), f"Number of estimators must be greater than zero, got {n_estimators}."
-        assert (
-            0 < subsample <= 1
-        ), f"Subsample must be in the range (0, 1], got {subsample}."
+        assert 0 < learning_rate <= 1, f"Learning rate must be in the range (0, 1], got {learning_rate}."
+        assert 1 <= n_estimators, f"Number of estimators must be greater than zero, got {n_estimators}."
+        assert 0 < subsample <= 1, f"Subsample must be in the range (0, 1], got {subsample}."
 
         self.regr = regr
         self.loss = loss
@@ -251,8 +239,7 @@ class PIComponentwiseGenGradientBoostingSurvivalAnalysis(
         """
         self.loss_obj = LOSS_FUNCTIONS[self.loss]()
         X_train, X_calib, y_train, y_calib = train_test_split(
-            X, y, test_size=0.5, random_state=self.random_state
-        )
+            X, y, test_size=0.5, random_state=self.random_state)
         self.X_train_ = X_train
         self.obj_train = ComponentwiseGenGradientBoostingSurvivalAnalysis(
             regr=self.regr,
@@ -272,21 +259,17 @@ class PIComponentwiseGenGradientBoostingSurvivalAnalysis(
             self.obj_train.fit(X_train, y_train, sample_weight=sample_weight)
             self.calibrated_risk_scores_ = self.obj_train.predict(X_calib)
             risk_scores_calib = self.obj_train.fit(
-                X_calib, y_calib, sample_weight=sample_weight
-            ).predict(X_calib)
+                X_calib, y_calib, sample_weight=sample_weight).predict(X_calib)
         except RuntimeError as e:
             self.obj_train.fit(X_train, y_train)
             self.calibrated_risk_scores_ = self.obj_train.predict(X_calib)
             risk_scores_calib = self.obj_train.fit(
                 X_calib, y_calib).predict(X_calib)
-        self.calibrated_residuals_ = (
-            self.calibrated_risk_scores_ - risk_scores_calib
-        )
+        self.calibrated_residuals_ = self.calibrated_risk_scores_ - risk_scores_calib
         if self.type_pi == "scp":
             self.abs_calibrated_residuals_ = np.abs(self.calibrated_residuals_)
             self.quantiles_ = np.quantile(
-                self.abs_calibrated_residuals_, 1 - self.alpha_
-            )
+                self.abs_calibrated_residuals_, 1 - self.alpha_)
         elif self.type_pi in (
             "bootstrap",
             "kde",
@@ -336,24 +319,17 @@ class PIComponentwiseGenGradientBoostingSurvivalAnalysis(
                     self.scaled_calibrated_residuals_,
                     method=self.type_pi,
                     num_replications=self.n_replications,
-                )
-                .iloc[: preds.shape[0], :]
-                .values
+                )[: preds.shape[0], :]
             )
         if self.type_pi == "scp":
             DescribeResult = namedtuple(
-                "DescribeResult", ["mean", "lower", "upper"]
-            )
-            return DescribeResult(
-                preds, preds - self.quantiles_, preds + self.quantiles_
-            )
+                "DescribeResult", ["mean", "lower", "upper"])
+            return DescribeResult(preds, preds - self.quantiles_, preds + self.quantiles_)
         else:
             DescribeResult = namedtuple(
-                "DescribeResult", ["mean", "lower", "upper", "sims"]
-            )
-            predictions = (
-                preds[:, np.newaxis] + self.residuals_std_ * residuals_sims
-            )
+                "DescribeResult", ["mean", "lower", "upper", "sims"])
+            predictions = preds[:, np.newaxis] + \
+                self.residuals_std_ * residuals_sims
             return DescribeResult(
                 np.mean(predictions, axis=1),
                 np.quantile(predictions, self.alpha_ / 2, axis=1),
@@ -361,15 +337,12 @@ class PIComponentwiseGenGradientBoostingSurvivalAnalysis(
                 predictions,
             )
 
-    def predict_cumulative_hazard_function(
-        self, X, return_array=False, **kwargs
-    ):
+    def predict_cumulative_hazard_function(self, X, return_array=False, **kwargs):
         """Predict cumulative hazard function."""
         preds = self.predict(X, **kwargs)
         result = namedtuple("DescribeResult", ["mean", "lower", "upper"])
         result.mean = self.obj_train.predict_cumulative_hazard_function(
-            preds.mean, return_array=return_array, **kwargs
-        )
+            preds.mean, return_array=return_array, **kwargs)
         result.lower = self.obj_train.predict_cumulative_hazard_function(
             preds.lower, return_array=return_array, **kwargs
         )

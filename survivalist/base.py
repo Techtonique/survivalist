@@ -14,9 +14,7 @@ import numpy as np
 
 
 class SurvivalAnalysisMixin:
-    def _predict_function(
-        self, func_name, baseline_model, prediction, return_array, **kwargs
-    ):
+    def _predict_function(self, func_name, baseline_model, prediction, return_array, **kwargs):
         fns = getattr(baseline_model, func_name)(prediction)
 
         if not return_array:
@@ -28,9 +26,7 @@ class SurvivalAnalysisMixin:
             arr[i, :] = fn(times)
         return arr
 
-    def _predict_survival_function(
-        self, baseline_model, prediction, return_array, **kwargs
-    ):
+    def _predict_survival_function(self, baseline_model, prediction, return_array, **kwargs):
         """Return survival functions.
 
         Parameters
@@ -58,9 +54,7 @@ class SurvivalAnalysisMixin:
             **kwargs,
         )
 
-    def _predict_cumulative_hazard_function(
-        self, baseline_model, prediction, return_array, **kwargs
-    ):
+    def _predict_cumulative_hazard_function(self, baseline_model, prediction, return_array, **kwargs):
         """Return cumulative hazard functions.
 
         Parameters
@@ -126,8 +120,7 @@ class SurvivalAnalysisMixin:
         print("y[name_time].shape", y[name_time].shape)
         print("risk_score", risk_score)
         result = concordance_index_censored(
-            y[name_event], y[name_time], risk_score
-        )
+            y[name_event], y[name_time], risk_score)
         return result[0]
 
     def _more_tags(self):

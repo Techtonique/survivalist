@@ -98,9 +98,7 @@ class Stacking(MetaEstimatorMixin, SurvivalAnalysisMixin, _BaseComposition):
             raise ValueError(f"Names provided are not unique: {names}")
 
         for t in estimators:
-            if not hasattr(t, "fit") or not (
-                hasattr(t, "predict") or hasattr(t, "predict_proba")
-            ):
+            if not hasattr(t, "fit") or not (hasattr(t, "predict") or hasattr(t, "predict_proba")):
                 raise TypeError(
                     "All base estimators should implement "
                     "fit and predict/predict_proba"
@@ -327,9 +325,7 @@ class Stacking(MetaEstimatorMixin, SurvivalAnalysisMixin, _BaseComposition):
             of :class:`survivalist.functions.StepFunction` instances will be returned.
         """
         Xt = self._predict_estimators(X)
-        return self.final_estimator_.predict_cumulative_hazard_function(
-            Xt, return_array
-        )
+        return self.final_estimator_.predict_cumulative_hazard_function(Xt, return_array)
 
     @available_if(_meta_estimator_has("predict_survival_function"))
     def predict_survival_function(self, X, return_array=False):

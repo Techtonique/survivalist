@@ -86,8 +86,7 @@ def _encode_categorical_columns(df, categorical_columns=None):
     # Automatically identify categorical columns if not provided
     if categorical_columns is None:
         categorical_columns = df.select_dtypes(
-            include=["object", "category"]
-        ).columns.tolist()
+            include=["object", "category"]).columns.tolist()
 
     # Apply one-hot encoding to the identified categorical columns
     df_encoded = pd.get_dummies(df, columns=categorical_columns)
@@ -137,13 +136,11 @@ def get_x_y(data_frame, attr_labels, pos_label=None, survival=True):
     if survival:
         if len(attr_labels) != 2:
             raise ValueError(
-                f"expected sequence of length two for attr_labels, but got {len(attr_labels)}"
-            )
+                f"expected sequence of length two for attr_labels, but got {len(attr_labels)}")
         if pos_label is None:
-            raise ValueError("pos_label needs to be specified if survival=True")
-        return _get_x_y_survival(
-            data_frame, attr_labels[0], attr_labels[1], pos_label
-        )
+            raise ValueError(
+                "pos_label needs to be specified if survival=True")
+        return _get_x_y_survival(data_frame, attr_labels[0], attr_labels[1], pos_label)
 
     return _get_x_y_other(data_frame, attr_labels)
 
@@ -221,8 +218,7 @@ def load_arff_files_standardized(
 
     if path_testing is not None:
         x_test, y_test = _load_arff_testing(
-            path_testing, attr_labels, pos_label, survival
-        )
+            path_testing, attr_labels, pos_label, survival)
 
         if len(x_train.columns.symmetric_difference(x_test.columns)) > 0:
             warnings.warn(
@@ -233,8 +229,7 @@ def load_arff_files_standardized(
             cols = x_train.columns.intersection(x_test.columns)
             if len(cols) == 0:
                 raise ValueError(
-                    "columns of training and test data do not intersect"
-                )
+                    "columns of training and test data do not intersect")
 
             x_train = x_train.loc[:, cols]
             x_test = x_test.loc[:, cols]
@@ -314,7 +309,8 @@ def load_whas500(*, return_X_y=True, as_frame=False):
         John Wiley & Sons, Inc. (2008)
     """
     fn = _get_data_path("whas500.arff")
-    X, y = get_x_y(loadarff(fn), attr_labels=["fstat", "lenfol"], pos_label="1")
+    X, y = get_x_y(loadarff(fn), attr_labels=[
+                   "fstat", "lenfol"], pos_label="1")
     if as_frame:
         return_X_y = False
     if return_X_y:
@@ -664,9 +660,8 @@ def load_flchain(*, return_X_y=True, as_frame=False):
            the general population, Mayo Clinic Proceedings 87:512-523. (2012)
     """
     fn = _get_data_path("flchain.arff")
-    X, y = get_x_y(
-        loadarff(fn), attr_labels=["death", "futime"], pos_label="dead"
-    )
+    X, y = get_x_y(loadarff(fn), attr_labels=[
+                   "death", "futime"], pos_label="dead")
     if as_frame:
         return_X_y = False
     if return_X_y:

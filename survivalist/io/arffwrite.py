@@ -70,9 +70,7 @@ def _write_header(data, fp, relation_name, index):
         name = attribute_names[column]
         fp.write(f"@attribute {name}\t")
 
-        if isinstance(series.dtype, CategoricalDtype) or is_object_dtype(
-            series
-        ):
+        if isinstance(series.dtype, CategoricalDtype) or is_object_dtype(series):
             _write_attribute_categorical(series, fp)
         elif np.issubdtype(series.dtype, np.floating):
             fp.write("real")
@@ -99,11 +97,8 @@ def _check_str_value(x):
     """If string has a space, wrap it in double quotes and remove/escape illegal characters"""
     if isinstance(x, str):
         # remove commas, and single quotation marks since loadarff cannot deal with it
-        x = (
-            x.replace(",", ".")
-            .replace(chr(0x2018), "'")
-            .replace(chr(0x2019), "'")
-        )
+        x = x.replace(",", ".").replace(
+            chr(0x2018), "'").replace(chr(0x2019), "'")
 
         # put string in double quotes
         if " " in x:
@@ -125,9 +120,8 @@ def _write_attribute_categorical(series, fp):
         string_values = _check_str_array(categories)
     else:
         categories = series.dropna().unique()
-        string_values = sorted(
-            _check_str_array(categories), key=lambda x: x.strip('"')
-        )
+        string_values = sorted(_check_str_array(
+            categories), key=lambda x: x.strip('"'))
 
     values = ",".join(string_values)
     fp.write("{")

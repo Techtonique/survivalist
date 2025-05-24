@@ -36,8 +36,7 @@ def assert_cindex_almost_equal(event_indicator, event_time, estimate, expected):
 def assert_survival_function_properties(surv_fns):
     if not np.isfinite(surv_fns).all():
         raise AssertionError(
-            "survival function contains values that are not finite"
-        )
+            "survival function contains values that are not finite")
     if np.any(surv_fns < 0.0):
         raise AssertionError("survival function contains negative values")
     if np.any(surv_fns > 1.0):
@@ -46,22 +45,19 @@ def assert_survival_function_properties(surv_fns):
     d = np.apply_along_axis(np.diff, 1, surv_fns)
     if np.any(d > 0):
         raise AssertionError(
-            "survival functions are not monotonically decreasing"
-        )
+            "survival functions are not monotonically decreasing")
 
     # survival function at first time point
     num_closer_to_zero = np.sum(1.0 - surv_fns[:, 0] >= surv_fns[:, 0])
     if num_closer_to_zero / surv_fns.shape[0] > 0.5:
         raise AssertionError(
-            f"most ({num_closer_to_zero}) probabilities at first time point are closer to 0 than 1"
-        )
+            f"most ({num_closer_to_zero}) probabilities at first time point are closer to 0 than 1")
 
     # survival function at last time point
     num_closer_to_one = np.sum(1.0 - surv_fns[:, -1] < surv_fns[:, -1])
     if num_closer_to_one / surv_fns.shape[0] > 0.5:
         raise AssertionError(
-            f"most ({num_closer_to_one}) probabilities at last time point are closer to 1 than 0"
-        )
+            f"most ({num_closer_to_one}) probabilities at last time point are closer to 1 than 0")
 
 
 def assert_chf_properties(chf):
@@ -78,8 +74,7 @@ def assert_chf_properties(chf):
     num_closer_to_one = np.sum(1.0 - chf[:, 0] < chf[:, 0])
     if num_closer_to_one / chf.shape[0] > 0.5:
         raise AssertionError(
-            f"most ({num_closer_to_one}) hazard rates at first time point are closer to 1 than 0"
-        )
+            f"most ({num_closer_to_one}) hazard rates at first time point are closer to 1 than 0")
 
 
 def _is_survival_estimator(x):
@@ -96,9 +91,7 @@ def _is_survival_estimator(x):
 def all_survival_estimators():
     root = str(Path(survivalist.__file__).parent)
     all_classes = []
-    for _importer, modname, _ispkg in pkgutil.walk_packages(
-        path=[root], prefix="survivalist."
-    ):
+    for _importer, modname, _ispkg in pkgutil.walk_packages(path=[root], prefix="survivalist."):
         # meta-estimators require base estimators
         if modname.startswith("survivalist.meta"):
             continue

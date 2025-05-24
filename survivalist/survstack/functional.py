@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def digitize_times(values: np.ndarray, time_step: float = 1.) -> np.ndarray:
+def digitize_times(values: np.ndarray, time_step: float = 1.0) -> np.ndarray:
     """Generate unique time bin values that cover the input times
     and are rounded to the next time_step multiple
 
@@ -9,16 +9,15 @@ def digitize_times(values: np.ndarray, time_step: float = 1.) -> np.ndarray:
     :param time_step: a step value for which the final bins will be based
     :return: an array of unique time bins that cover the input values
     """
-    full_range = np.arange(_floor_base(np.min(values) - time_step, time_step),
-                           np.max(values) + time_step,
-                           step=time_step)
+    full_range = np.arange(
+        _floor_base(np.min(values) - time_step, time_step), np.max(values) + time_step, step=time_step
+    )
     times = full_range[np.digitize(values, full_range, right=True)]
     times = np.unique(times)
     return times
 
 
-def stack_timepoints(X: np.ndarray, y: np.ndarray, times: np.ndarray) -> \
-        tuple[np.ndarray, np.ndarray]:
+def stack_timepoints(X: np.ndarray, y: np.ndarray, times: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     """Generate a survival stacked dataset and the accompanying binary outcome
     for a survival dataset for all given timepoints.
 
@@ -30,15 +29,14 @@ def stack_timepoints(X: np.ndarray, y: np.ndarray, times: np.ndarray) -> \
     outcome
     """
     num_times = times.shape[0]
-    stacked_events = list(zip(*[_stack_timepoint(X, y, times, t)
-                                for t in np.arange(num_times)]))
+    stacked_events = list(
+        zip(*[_stack_timepoint(X, y, times, t) for t in np.arange(num_times)]))
     X_stacked = np.vstack(stacked_events[0])
     y_stacked = np.concatenate(stacked_events[1])
     return X_stacked, y_stacked
 
 
-def _stack_timepoint(X: np.ndarray, y: np.ndarray, times: np.ndarray,
-                     i: int) -> tuple[np.ndarray, np.ndarray]:
+def _stack_timepoint(X: np.ndarray, y: np.ndarray, times: np.ndarray, i: int) -> tuple[np.ndarray, np.ndarray]:
     """Generate the predictor matrix and response vector for a survival dataset
     at a specific time-point `times[i]`.
 
@@ -55,10 +53,8 @@ def _stack_timepoint(X: np.ndarray, y: np.ndarray, times: np.ndarray,
     y_i = y[y_bins >= i]
     X_risk = np.zeros((X_i.shape[0], times.shape[0]))
     X_risk[:, i] = 1
-    y_outcome = (
-            (np.digitize(y_i[time_field], times, right=True) == i) &
-            (y_i[event_field])
-    ).astype(int)
+    y_outcome = ((np.digitize(y_i[time_field], times, right=True) == i) & (
+        y_i[event_field])).astype(int)
     X_new = np.hstack((X_i, X_risk))
     return X_new, y_outcome
 
@@ -77,8 +73,7 @@ def stack_eval(X: np.ndarray, times: np.ndarray) -> np.ndarray:
     return X_new
 
 
-def survival_function(estimates: np.ndarray,
-                      times: np.ndarray) -> np.ndarray:
+def survival_function(estimates: np.ndarray, times: np.ndarray) -> np.ndarray:
     """Calculate the survival function from the stacked survival estimates.
 
     :param estimates: estimates as returned from a model trained on
@@ -90,18 +85,17 @@ def survival_function(estimates: np.ndarray,
     """
     # Reshape estimates to (n_samples, n_timepoints)
     est_matrix = estimates.reshape(-1, times.shape[0])
-    
+
     # For each sample, compute survival function across timepoints
     surv = np.zeros_like(est_matrix)
     for i in range(est_matrix.shape[0]):
         # Calculate cumulative product for monotonic decrease
-        surv[i,:] = np.cumprod(1 - est_matrix[i,:])
-    
+        surv[i, :] = np.cumprod(1 - est_matrix[i, :])
+
     return surv
 
 
-def cumulative_hazard_function(estimates: np.ndarray,
-                               times: np.ndarray) -> np.ndarray:
+def cumulative_hazard_function(estimates: np.ndarray, times: np.ndarray) -> np.ndarray:
     """Calculate the cumulative hazard function from the stacked survival
     estimates.
 

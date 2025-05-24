@@ -66,7 +66,8 @@ class BreslowEstimator:
         risk_score = np.exp(linear_predictor - max_val)  # Ratios preserved
         order = np.argsort(time, kind="mergesort")
         risk_score = risk_score[order]
-        uniq_times, n_events, n_at_risk, _ = _compute_counts(event, time, order)
+        uniq_times, n_events, n_at_risk, _ = _compute_counts(
+            event, time, order)
 
         divisor = np.empty(n_at_risk.shape, dtype=float)
         value = np.sum(risk_score)
@@ -190,9 +191,8 @@ class CoxPHOptimizer:
             if n_events > 0:
                 if breslow:
                     risk_set += risk_set2
-                    loss -= (
-                        numerator - n_events * np.log(risk_set)
-                    ) / n_samples
+                    loss -= (numerator - n_events *
+                             np.log(risk_set)) / n_samples
                 else:
                     numerator /= n_events
                     for _ in range(n_events):
@@ -292,8 +292,7 @@ class VerboseReporter:
     def end_max_iter(self, i):
         if self.verbose > 0:
             print(
-                f"iter {i + 1:>6d}: reached maximum number of iterations. Stopping."
-            )
+                f"iter {i + 1:>6d}: reached maximum number of iterations. Stopping.")
 
     def end_converged(self, i):
         if self.verbose > 0:
@@ -308,8 +307,7 @@ class VerboseReporter:
     def step_halving(self, i, loss):
         if self.verbose > 1:
             print(
-                f"iter {i:>6d}: loss increased, performing step-halving. loss = {loss:.10f}"
-            )
+                f"iter {i:>6d}: loss increased, performing step-halving. loss = {loss:.10f}")
 
 
 class CoxPHSurvivalAnalysis(BaseEstimator, SurvivalAnalysisMixin):
@@ -393,9 +391,7 @@ class CoxPHSurvivalAnalysis(BaseEstimator, SurvivalAnalysisMixin):
         "verbose": ["verbose"],
     }
 
-    def __init__(
-        self, alpha=0, *, ties="breslow", n_iter=100, tol=1e-9, verbose=0
-    ):
+    def __init__(self, alpha=0, *, ties="breslow", n_iter=100, tol=1e-9, verbose=0):
         self.alpha = alpha
         self.ties = ties
         self.n_iter = n_iter
@@ -455,8 +451,7 @@ class CoxPHSurvivalAnalysis(BaseEstimator, SurvivalAnalysisMixin):
             raise ValueError(f"alpha must be positive, but was {self.alpha!r}")
         if alphas.shape[0] != X.shape[1]:
             raise ValueError(
-                f"Length alphas ({alphas.shape[0]}) must match number of features ({X.shape[1]})."
-            )
+                f"Length alphas ({alphas.shape[0]}) must match number of features ({X.shape[1]}).")
 
         optimizer = CoxPHOptimizer(X, event, time, alphas, self.ties)
 
@@ -469,9 +464,7 @@ class CoxPHSurvivalAnalysis(BaseEstimator, SurvivalAnalysisMixin):
             if i >= self.n_iter:
                 verbose_reporter.end_max_iter(i)
                 warnings.warn(
-                    (
-                        "Optimization did not converge: Maximum number of iterations has been exceeded."
-                    ),
+                    ("Optimization did not converge: Maximum number of iterations has been exceeded."),
                     stacklevel=2,
                     category=ConvergenceWarning,
                 )
@@ -488,8 +481,7 @@ class CoxPHSurvivalAnalysis(BaseEstimator, SurvivalAnalysisMixin):
 
             if not np.all(np.isfinite(delta)):
                 raise ValueError(
-                    "search direction contains NaN or infinite values"
-                )
+                    "search direction contains NaN or infinite values")
 
             w_new = w - delta
             loss_new = optimizer.nlog_likelihood(w_new)
@@ -593,9 +585,7 @@ class CoxPHSurvivalAnalysis(BaseEstimator, SurvivalAnalysisMixin):
         >>> plt.ylim(0, 1)
         >>> plt.show()
         """
-        return self._predict_cumulative_hazard_function(
-            self._baseline_model, self.predict(X), return_array
-        )
+        return self._predict_cumulative_hazard_function(self._baseline_model, self.predict(X), return_array)
 
     def predict_survival_function(self, X, return_array=False):
         """Predict survival function.
@@ -655,6 +645,4 @@ class CoxPHSurvivalAnalysis(BaseEstimator, SurvivalAnalysisMixin):
         >>> plt.ylim(0, 1)
         >>> plt.show()
         """
-        return self._predict_survival_function(
-            self._baseline_model, self.predict(X), return_array
-        )
+        return self._predict_survival_function(self._baseline_model, self.predict(X), return_array)
