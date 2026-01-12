@@ -137,5 +137,5 @@ if __name__ == "__main__":
     setup(
         ext_modules=get_extensions(),
         cmdclass={"clean": clean},
-        version="0.3.0"
+        version="0.3.1"
     )

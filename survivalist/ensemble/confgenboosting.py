@@ -161,7 +161,6 @@ class PIComponentwiseGenGradientBoostingSurvivalAnalysis(ComponentwiseGenGradien
         verbose=0,
         show_progress=True,
     ):
-
         assert type_pi in (
             "scp",
             "bootstrap",
@@ -314,13 +313,11 @@ class PIComponentwiseGenGradientBoostingSurvivalAnalysis(ComponentwiseGenGradien
             "permutation",
             "smooth-bootstrap",
         ):
-            residuals_sims = (
-                simulate_replications(
-                    self.scaled_calibrated_residuals_,
-                    method=self.type_pi,
-                    num_replications=self.n_replications,
-                )[: preds.shape[0], :]
-            )
+            residuals_sims = simulate_replications(
+                self.scaled_calibrated_residuals_,
+                method=self.type_pi,
+                num_replications=self.n_replications,
+            )[: preds.shape[0], :]
         if self.type_pi == "scp":
             DescribeResult = namedtuple(
                 "DescribeResult", ["mean", "lower", "upper"])

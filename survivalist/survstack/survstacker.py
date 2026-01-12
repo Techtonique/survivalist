@@ -204,7 +204,6 @@ class SurvStacker(SurvivalAnalysisMixin):
         return [self.ss.predict_survival_function(oo_test_estimates[:, i]) for i in range(self.replications)]
 
     def predict(self, X, threshold=0.5):
-
         surv = self._predict_survival_function_temp(X)
 
         if self.type_sim == "none":
