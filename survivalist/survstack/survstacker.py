@@ -194,13 +194,6 @@ class SurvStacker(SurvivalAnalysisMixin):
         # clip values to be between 0 and 1
         oo_test_estimates = np.clip(oo_test_estimates, 0, 1)
 
-        # Normalize probabilities to sum to 1 for each replication
-        for i in range(self.replications):
-            probs = oo_test_estimates[:, i]
-            probs = np.maximum(probs, 0)  # Ensure probabilities are positive
-            probs = probs / np.sum(probs)  # Normalize to sum to 1
-            oo_test_estimates[:, i] = probs
-
         return [self.ss.predict_survival_function(oo_test_estimates[:, i]) for i in range(self.replications)]
 
     def predict(self, X, threshold=0.5):
@@ -250,7 +243,7 @@ class SurvStacker(SurvivalAnalysisMixin):
         array-like or list of StepFunction
             Predicted cumulative hazard function for each sample.
         """
-        if self.type_sims == "none":
+        if self.type_sim == "none":
             # Convert X to numpy array if needed
             return self._predict_cumulative_hazard_function(self._get_baseline_model(), self.predict(X), return_array)
         return [
