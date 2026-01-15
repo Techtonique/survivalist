@@ -9,7 +9,6 @@ Dependencies:
     pip install numpy pandas scikit-learn lifelines scikit-survival matplotlib seaborn
 """
 
-from sklearn.ensemble import RandomForestRegressor
 from sklearn.base import BaseEstimator
 from scipy.special import logsumexp
 from scipy.optimize import minimize
@@ -126,7 +125,7 @@ class CoxMLWrapper(BaseEstimator):
             n_failed = np.sum(failed)
 
             loglik += np.sum(risk_scores[failed])
-            loglik -= n_failed * logsumexp(risk_scores[at_risk])
+            loglik -= n_failed * logsumexp(risk_scores[at_risk] + 1e-12)
 
         return -loglik
 
