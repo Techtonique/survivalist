@@ -53,7 +53,7 @@ start = time()
 estimator.fit(X_train, y_train)
 print("Time to fit PIRandomForestRegressor: ", time() - start)
 
-surv_funcs = estimator.predict_survival_function(X_test.iloc[:1])
+surv_funcs = estimator.predict_survival_function(X_test.iloc[:2])
 
 print("km", km)
 print("surv_funcs.mean", surv_funcs.mean)
@@ -78,7 +78,7 @@ start = time()
 estimator.fit(X_train, y_train)
 print("Time to fit PIRandomForestRegressor: ", time() - start)
 
-surv_funcs = estimator.predict_survival_function(X_test.iloc[:1])
+surv_funcs = estimator.predict_survival_function(X_test.iloc[:2])
 
 print("km", km)
 print("surv_funcs.mean", surv_funcs.mean)
@@ -102,7 +102,7 @@ start = time()
 estimator.fit(X_train, y_train)
 print("Time to fit PIRandomForestRegressor: ", time() - start)
 
-surv_funcs = estimator.predict_survival_function(X_test.iloc[:1])
+surv_funcs = estimator.predict_survival_function(X_test.iloc[:2])
 
 print("surv_funcs.mean", surv_funcs.mean)
 print("surv_funcs.lower", surv_funcs.lower)
