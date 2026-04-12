@@ -58,8 +58,8 @@ estimator2.fit(X_train, y_train)
 print("Time to fit GaussianProcessRegressor: ", time() - start)
 
 
-surv_funcs = estimator.predict_survival_function(X_test.iloc[0:1,:], return_std=True)
-surv_funcs2 = estimator2.predict_survival_function(X_test.iloc[0:1,:], return_std=True)
+surv_funcs = estimator.predict_survival_function(X_test.iloc[0:2,:], return_std=True)
+surv_funcs2 = estimator2.predict_survival_function(X_test.iloc[0:2,:], return_std=True)
 
 print("\n\n BayesianRidge survival func (mean)", surv_funcs.mean)
 print("\n\n BayesianRidge survival func (lower)", surv_funcs.lower)

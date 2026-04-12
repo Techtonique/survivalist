@@ -17,7 +17,7 @@ estimator = PIComponentwiseGenGradientBoostingSurvivalAnalysis(regr = RidgeCV(),
 
 estimator.fit(X_train, y_train)
 
-surv_funcs = estimator.predict_survival_function(X.iloc[:1])
+surv_funcs = estimator.predict_survival_function(X.iloc[:2])
 
 print(surv_funcs)
 print("surv_funcs.mean", surv_funcs.mean)
@@ -33,7 +33,7 @@ estimator = PIComponentwiseGenGradientBoostingSurvivalAnalysis(regr = RidgeCV(),
 
 estimator.fit(X_train, y_train)
 
-surv_funcs = estimator.predict_survival_function(X.iloc[:1])
+surv_funcs = estimator.predict_survival_function(X.iloc[:2])
 
 print(surv_funcs)
 print("surv_funcs.mean", surv_funcs.mean)
@@ -46,7 +46,7 @@ estimator = PIComponentwiseGenGradientBoostingSurvivalAnalysis(regr = RidgeCV(),
 
 estimator.fit(X_train, y_train)
 
-surv_funcs = estimator.predict_survival_function(X.iloc[:1])
+surv_funcs = estimator.predict_survival_function(X.iloc[:2])
 
 print(surv_funcs)
 print("surv_funcs.mean", surv_funcs.mean)
@@ -59,7 +59,7 @@ estimator = PIComponentwiseGenGradientBoostingSurvivalAnalysis(regr = RidgeCV(),
 
 estimator.fit(X_train, y_train)
 
-surv_funcs = estimator.predict_survival_function(X.iloc[:1])
+surv_funcs = estimator.predict_survival_function(X.iloc[:2])
 
 print(surv_funcs)
 print("surv_funcs.mean", surv_funcs.mean)
