@@ -11,6 +11,7 @@ from sklearn.utils import check_random_state
 from sklearn.utils._param_validation import Interval, StrOptions
 from sklearn.utils.extmath import squared_norm
 from sklearn.utils.validation import _check_sample_weight, check_is_fitted
+from sklearn.utils.validation import check_array, check_X_y
 from tqdm import tqdm
 
 from ..base import SurvivalAnalysisMixin
@@ -412,7 +413,7 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
         if not self.warm_start:
             self._clear_state()
 
-        X = self._validate_data(X, ensure_min_samples=2)
+        X, y = check_X_y(X, y, ensure_min_samples=2)
         event, time = check_array_survival(X, y)
 
         sample_weight = _check_sample_weight(sample_weight, X)
@@ -522,8 +523,8 @@ class ComponentwiseGenGradientBoostingSurvivalAnalysis(BaseEnsemble, SurvivalAna
         risk_score : array, shape = (n_samples,)
             Predicted risk scores.
         """
-        check_is_fitted(self, "estimators_")
-        X = self._validate_data(X, reset=False)
+        check_is_fitted(self, "estimators_")        
+        X = check_array(X, ensure_min_samples=2)
         return self._predict(X, **kwargs)
 
     def get_baseline_model(self):
